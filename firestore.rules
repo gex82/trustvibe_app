@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return signedIn() && userRole() == 'admin';
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function projectDoc(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId));
+    }
+
+    function isProjectParty(projectId) {
+      return signedIn() && (
+        projectDoc(projectId).data.customerId == request.auth.uid ||
+        projectDoc(projectId).data.contractorId == request.auth.uid
+      );
+    }
+
+    match /users/{uid} {
+      allow read, write: if isSelf(uid) || isAdmin();
+    }
+
+    match /customerProfiles/{uid} {
+      allow read: if signedIn();
+      allow write: if isSelf(uid) || isAdmin();
+    }
+
+    match /contractorProfiles/{uid} {
+      allow read: if signedIn();
+      allow write: if isSelf(uid) || isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+
+      match /quotes/{quoteId} {
+        allow read: if signedIn();
+        allow create: if signedIn();
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    match /agreements/{agreementId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    match /ledgers/{projectId}/events/{eventId} {
+      allow read: if isProjectParty(projectId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /messages/{projectId}/items/{messageId} {
+      allow read, write: if isProjectParty(projectId) || isAdmin();
+    }
+
+    match /cases/{caseId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /config/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /audit/{collection=**}/{docId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

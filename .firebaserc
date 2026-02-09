@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "trustvibe-dev",
+    "staging": "trustvibe-staging",
+    "production": "trustvibe-prod"
+  }
+}

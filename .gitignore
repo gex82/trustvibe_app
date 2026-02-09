@@ -1,0 +1,10 @@
+node_modules
+.expo
+.expo-shared
+dist
+coverage
+.firebase
+functions/lib
+apps/admin/.next
+apps/mobile/.expo
+.env*

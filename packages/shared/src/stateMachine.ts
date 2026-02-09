@@ -1,0 +1,36 @@
+import type { EscrowState } from './types';
+
+const TRANSITIONS: Record<EscrowState, EscrowState[]> = {
+  DRAFT: ['OPEN_FOR_QUOTES', 'CANCELLED'],
+  OPEN_FOR_QUOTES: ['CONTRACTOR_SELECTED', 'CANCELLED'],
+  CONTRACTOR_SELECTED: ['AGREEMENT_ACCEPTED', 'CANCELLED'],
+  AGREEMENT_ACCEPTED: ['FUNDED_HELD', 'CANCELLED'],
+  FUNDED_HELD: ['IN_PROGRESS', 'CANCELLED'],
+  IN_PROGRESS: ['COMPLETION_REQUESTED', 'ISSUE_RAISED_HOLD'],
+  COMPLETION_REQUESTED: ['APPROVED_FOR_RELEASE', 'ISSUE_RAISED_HOLD', 'RELEASED_PAID'],
+  APPROVED_FOR_RELEASE: ['RELEASED_PAID'],
+  RELEASED_PAID: ['CLOSED'],
+  ISSUE_RAISED_HOLD: ['RESOLUTION_PENDING_EXTERNAL', 'RESOLUTION_SUBMITTED', 'EXECUTED_RELEASE_PARTIAL', 'EXECUTED_REFUND_PARTIAL', 'EXECUTED_REFUND_FULL'],
+  RESOLUTION_PENDING_EXTERNAL: ['RESOLUTION_SUBMITTED'],
+  RESOLUTION_SUBMITTED: ['EXECUTED_RELEASE_FULL', 'EXECUTED_RELEASE_PARTIAL', 'EXECUTED_REFUND_PARTIAL', 'EXECUTED_REFUND_FULL'],
+  EXECUTED_RELEASE_FULL: ['CLOSED'],
+  EXECUTED_RELEASE_PARTIAL: ['CLOSED'],
+  EXECUTED_REFUND_PARTIAL: ['CLOSED'],
+  EXECUTED_REFUND_FULL: ['CLOSED'],
+  CLOSED: [],
+  CANCELLED: [],
+};
+
+export function canTransition(from: EscrowState, to: EscrowState): boolean {
+  return TRANSITIONS[from].includes(to);
+}
+
+export function assertTransition(from: EscrowState, to: EscrowState): void {
+  if (!canTransition(from, to)) {
+    throw new Error(`Invalid transition from ${from} to ${to}`);
+  }
+}
+
+export function nextStates(from: EscrowState): EscrowState[] {
+  return [...TRANSITIONS[from]];
+}
