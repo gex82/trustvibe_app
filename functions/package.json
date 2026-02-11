@@ -7,10 +7,10 @@
     "build": "tsc -p tsconfig.json",
     "lint": "echo functions lint placeholder",
     "serve": "firebase emulators:start --only functions,firestore,auth,storage",
-    "seed": "ts-node ../scripts/seed.ts",
-    "scenario:happy": "ts-node ../scripts/scenarios/happy_path_release.ts",
-    "scenario:joint": "ts-node ../scripts/scenarios/issue_then_joint_release_partial.ts",
-    "scenario:external": "ts-node ../scripts/scenarios/issue_then_external_resolution_refund_full.ts"
+    "seed": "node -r ts-node/register ../scripts/seed.ts",
+    "scenario:happy": "node -r ts-node/register ../scripts/scenarios/happy_path_release.ts",
+    "scenario:joint": "node -r ts-node/register ../scripts/scenarios/issue_then_joint_release_partial.ts",
+    "scenario:external": "node -r ts-node/register ../scripts/scenarios/issue_then_external_resolution_refund_full.ts"
   },
   "engines": {
     "node": "20"

@@ -203,6 +203,79 @@ export interface Review {
   createdAt: string;
 }
 
+export interface MessageItem {
+  id: string;
+  projectId: string;
+  senderId: string;
+  body: string;
+  attachments: string[];
+  createdAt: string;
+}
+
+export interface Milestone {
+  id: string;
+  projectId: string;
+  title: string;
+  amountCents: number;
+  acceptanceCriteria: string;
+  dueDate?: string;
+  status: 'PENDING' | 'RELEASED';
+  releasedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChangeOrder {
+  id: string;
+  projectId: string;
+  proposedByUserId: string;
+  scopeSummary: string;
+  amountDeltaCents: number;
+  timelineDeltaDays: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  acceptedByUserId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BookingRequest {
+  id: string;
+  projectId: string;
+  customerId: string;
+  contractorId: string;
+  startAt: string;
+  endAt: string;
+  note?: string;
+  status: 'PENDING' | 'CONFIRMED' | 'DECLINED';
+  respondedByUserId?: string;
+  respondedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecommendationItem {
+  id: string;
+  type: 'contractor' | 'project';
+  score: number;
+  reason: string;
+  contractorId?: string;
+  projectId?: string;
+}
+
+export interface Promotion {
+  code: string;
+  type: 'referral' | 'coupon' | 'featured';
+  percentOffBps?: number;
+  amountOffCents?: number;
+  featuredContractorId?: string;
+  active: boolean;
+  startsAt?: string;
+  endsAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy: string;
+}
+
 export interface PlatformFeeConfig {
   percentBps: number;
   fixedFeeCents: number;

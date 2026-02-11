@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@trustvibe/shared": ["../packages/shared/dist/index"],
+      "@trustvibe/shared/*": ["../packages/shared/dist/*"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

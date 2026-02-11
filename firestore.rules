@@ -28,6 +28,13 @@ service cloud.firestore {
       );
     }
 
+    function canReadProject(project) {
+      return isAdmin() ||
+        project.customerId == request.auth.uid ||
+        project.contractorId == request.auth.uid ||
+        project.escrowState == 'OPEN_FOR_QUOTES';
+    }
+
     match /users/{uid} {
       allow read, write: if isSelf(uid) || isAdmin();
     }
@@ -43,21 +50,22 @@ service cloud.firestore {
     }
 
     match /projects/{projectId} {
-      allow read: if signedIn();
-      allow create: if signedIn();
-      allow update, delete: if isAdmin();
+      allow read: if signedIn() && canReadProject(resource.data);
+      allow create, update, delete: if isAdmin();
 
       match /quotes/{quoteId} {
-        allow read: if signedIn();
-        allow create: if signedIn();
-        allow update, delete: if isAdmin();
+        allow read: if signedIn() && (
+          isAdmin() ||
+          isProjectParty(projectId) ||
+          projectDoc(projectId).data.escrowState == 'OPEN_FOR_QUOTES'
+        );
+        allow create, update, delete: if isAdmin();
       }
     }
 
     match /agreements/{agreementId} {
       allow read: if signedIn();
-      allow create: if signedIn();
-      allow update, delete: if false;
+      allow create, update, delete: if isAdmin();
     }
 
     match /ledgers/{projectId}/events/{eventId} {
@@ -76,8 +84,7 @@ service cloud.firestore {
 
     match /reviews/{reviewId} {
       allow read: if signedIn();
-      allow create: if signedIn();
-      allow update, delete: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     match /config/{docId} {

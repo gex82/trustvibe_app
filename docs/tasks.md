@@ -1,284 +1,80 @@
-# TrustVibe - Task Breakdown
-
-> **Project:** TrustVibe MVP + Phase 2  
-> **Last Updated:** 2026-02-08  
-> **Legend:** `[ ]` = Todo, `[/]` = In Progress, `[x]` = Done
-
----
-
-## Sprint 1: Repository Scaffold & Shared Types
-
-### 1.1 Monorepo Setup
-- [ ] Initialize root `package.json` with npm workspaces
-- [ ] Configure workspace paths for apps and packages
-- [ ] Add Turborepo or Nx config (optional)
-- [ ] Set up ESLint + Prettier
-- [ ] Create root README.md
-
-### 1.2 Mobile App Shell (apps/mobile)
-- [ ] Initialize Expo with TypeScript
-- [ ] Configure app.json and eas.json
-- [ ] Install: react-navigation, react-query, zustand, react-hook-form, zod, i18next
-- [ ] Create folder structure (components, screens, navigation, hooks, services, store, theme)
-- [ ] Set up navigation shell (Auth + Main stacks)
-- [ ] Create design system: colors, typography, spacing, base components
-
-### 1.3 Admin Console Shell (apps/admin)
-- [ ] Initialize Next.js with TypeScript
-- [ ] Install Firebase Admin SDK
-- [ ] Set up page structure
-- [ ] Create admin layout
-
-### 1.4 Functions Shell (functions/)
-- [ ] Initialize Cloud Functions with TypeScript
-- [ ] Create folder structure for all domains
-- [ ] Configure ESLint
-
-### 1.5 Shared Package (packages/shared)
-- [ ] Create types: User, Project, Quote, Agreement, Escrow, Message, Review, Case
-- [ ] Create Zod schemas for all types
-- [ ] Create constants: enums, municipalities, categories
-- [ ] Set up i18n: en.json and es.json skeletons
-
-### 1.6 Firebase Configuration
-- [ ] Create firebase.json with emulators
-- [ ] Create firestore.rules baseline
-- [ ] Create storage.rules baseline
-- [ ] Test emulator startup
-
----
-
-## Sprint 2: Authentication & Profiles
-
-### 2.1 Firebase Auth
-- [ ] Enable email/password in Firebase console
-- [ ] Set up auth emulator
-- [ ] Create auth service wrapper
-
-### 2.2 Mobile Auth Screens
-- [ ] RoleSelectScreen
-- [ ] LoginScreen with validation
-- [ ] RegisterScreen with role assignment
-- [ ] ForgotPasswordScreen
-- [ ] Auth state listener + navigation guard
-
-### 2.3 Profile Setup
-- [ ] Create users Firestore collection
-- [ ] ProfileSetupScreen: name, phone, municipality, photo
-- [ ] updateProfile Cloud Function
-- [ ] Photo upload to Storage
-
-### 2.4 Contractor Profile
-- [ ] contractorProfiles collection
-- [ ] ContractorProfileSetupScreen: skills, service area, portfolio, credentials
-- [ ] upsertContractorProfile Cloud Function
-- [ ] ContractorProfileViewScreen
-
-### 2.5 Settings Screen
-- [ ] Language toggle (ES/EN)
-- [ ] Notification preferences
-- [ ] Logout, profile edit
-
-### 2.6 RBAC & Security
-- [ ] Define role enum
-- [ ] Create Firestore security rules
-- [ ] Create Cloud Functions role middleware
-
----
-
-## Sprint 3-4: Projects & Quotes
-
-### 3.1 Project Creation (Customer)
-- [ ] projects Firestore collection
-- [ ] CreateProjectScreen (multi-step wizard)
-- [ ] createProject Cloud Function
-- [ ] publishProject Cloud Function
-
-### 3.2 Customer Project List
-- [ ] CustomerProjectsScreen
-- [ ] listCustomerProjects Cloud Function
-
-### 3.3 Project Detail
-- [ ] ProjectDetailScreen with status, quotes, escrow, messages, CTA
-- [ ] getProject Cloud Function
+# TrustVibe Task Board
 
-### 3.4 Browse Projects (Contractor)
-- [ ] BrowseProjectsScreen with filters
-- [ ] listOpenProjects Cloud Function
-
-### 3.5 Quote Submission
-- [ ] quotes subcollection
-- [ ] SubmitQuoteScreen
-- [ ] submitQuote Cloud Function
+Last updated: 2026-02-11
+Legend: `[ ]` todo, `[/]` in progress, `[x]` scaffolded/implemented
 
-### 3.6 Quotes Comparison
-- [ ] QuotesListScreen
-- [ ] QuoteDetailScreen
-- [ ] listQuotes Cloud Function
-
-### 3.7 Contractor Selection
-- [ ] selectContractor Cloud Function
-- [ ] Selection UI in ProjectDetail
-
-### 3.8 Search & Discovery
-- [ ] SearchContractorsScreen
-- [ ] searchContractors Cloud Function
-
----
+## 1) Foundation
 
-## Sprint 5: Agreement Capture
-
-- [ ] agreements collection (immutable)
-- [ ] generateAgreement Cloud Function
-- [ ] AgreementReviewScreen
-- [ ] acceptAgreement Cloud Function (dual acceptance)
-- [ ] Firestore rules for immutability
+- [x] Monorepo scaffold (`apps/mobile`, `apps/admin`, `functions`, `packages/shared`, `scripts`, `data/demo`)
+- [x] Root Firebase config (`firebase.json`, `.firebaserc`, rules)
+- [x] Shared types, zod schemas, state machine, fee + hold policy modules
+- [x] Shared EN/ES i18n JSON resources
 
----
+## 2) Auth + RBAC
 
-## Sprint 6: Ledger & Payment Infrastructure
+- [x] Auth wiring in mobile/admin clients
+- [x] Role-gated callable handlers
+- [x] Firestore rules baseline (least privilege foundation)
+- [x] Custom claims automation (`adminSetUserRole` updates custom claims + user profile)
 
-### 6.1 Payment Provider
-- [ ] PaymentProvider interface
-- [ ] MockPaymentProvider (fully working)
-- [ ] StripeConnectProvider (stub)
+## 3) Marketplace Core
 
-### 6.2 Ledger Module
-- [ ] ledgers/{projectId}/events structure
-- [ ] LedgerEvent schema
-- [ ] Ledger utility functions: recordHold, recordRelease, recordRefund, recordFee
+- [x] `createProject`, `listProjects`, `getProject`
+- [x] `submitQuote`, `listQuotes`, `selectContractor`
+- [x] Agreement snapshot generation on contractor selection
+- [x] Dual agreement acceptance (`acceptAgreement`)
 
-### 6.3 Configuration
-- [ ] /config/platformFees document
-- [ ] /config/holdPolicy document
-- [ ] getFeeConfig and getHoldPolicy functions
-
----
-
-## Sprint 7: Fund Hold & Completion Flow
-
-- [ ] FundEscrowScreen with totals, fees, terms
-- [ ] fundHold Cloud Function
-- [ ] EscrowStatusBadge component
-- [ ] startWork Cloud Function
-- [ ] RequestCompletionScreen
-- [ ] requestCompletion Cloud Function
-- [ ] CompletionReviewScreen
-- [ ] approveRelease Cloud Function
-- [ ] checkAutoRelease scheduled function
+## 4) Hold + Ledger (MVP)
 
----
+- [x] PaymentProvider abstraction
+- [x] Mock payment provider implementation
+- [x] StripeConnect provider stub (Phase 2)
+- [x] `fundHold`, `requestCompletion`, `approveRelease`
+- [x] Ledger event writing for money actions
+- [x] Audit logs for admin/money actions
 
-## Sprint 8: Issue Hold & Joint Release
+## 5) Issue + Resolution (MVP)
 
-- [ ] RaiseIssueScreen
-- [ ] raiseIssueHold Cloud Function
-- [ ] cases collection
-- [ ] ProposeJointReleaseScreen
-- [ ] proposeJointRelease Cloud Function
-- [ ] ReviewJointReleaseScreen
-- [ ] signJointRelease Cloud Function (execute if both sign)
-- [ ] sendIssueReminders scheduled function
+- [x] `raiseIssueHold`
+- [x] `proposeJointRelease`, `signJointRelease`
+- [x] `uploadResolutionDocument`
+- [x] `adminExecuteOutcome`
+- [x] Scheduled jobs for auto-release + admin-attention thresholds
 
----
+## 6) Messaging + Reviews
 
-## Sprint 9: External Resolution
+- [x] Messaging UI/API (`listMessages`, `sendMessage`) with project-scoped access
+- [x] `submitReview`, `flagReview`, `adminModerateReview`
 
-- [ ] UploadResolutionScreen
-- [ ] uploadResolutionDocument Cloud Function
-- [ ] Admin CaseDetailPage
-- [ ] adminExecuteOutcome Cloud Function
-- [ ] audit/adminActions collection
+## 7) Admin Console
 
----
+- [x] Next.js admin shell + navigation
+- [x] Users/projects/cases/reviews/config pages baseline
+- [x] Full auth guard + server-verified admin claims (`getAdminSession` gate + client guard)
 
-## Sprint 10: Messaging & Notifications
+## 8) Data + Scenarios
 
-### 10.1 Messaging
-- [ ] messages/{projectId}/items structure
-- [ ] MessagesScreen
-- [ ] sendMessage Cloud Function
+- [x] Deterministic demo JSON datasets (`/data/demo`)
+- [x] Seed script (`/scripts/seed.ts`)
+- [x] Scenario scripts for required flows
 
-### 10.2 Notifications
-- [ ] FCM + APNs configuration
-- [ ] NotificationProvider interface
-- [ ] MockNotificationProvider
-- [ ] SendGridProvider stub
-- [ ] registerPushToken Cloud Function
-- [ ] Notification triggers for all events
-- [ ] EN/ES notification templates
+## 9) Testing
 
----
+- [x] Unit tests (state transitions, fees, hold policy)
+- [x] Integration tests against emulator handlers for 5 flows (MVP + messaging + Phase 2)
+- [x] CI pipeline (`.github/workflows/ci.yml`)
 
-## Sprint 11: Reviews & Moderation
+## 10) Documentation
 
-- [ ] reviews collection
-- [ ] SubmitReviewScreen
-- [ ] submitReview Cloud Function
-- [ ] Reviews display on contractor profile
-- [ ] flagReview Cloud Function
-- [ ] Admin ReviewModerationPage
-- [ ] adminModerateReview Cloud Function
+- [x] `docs/architecture.md`
+- [x] `docs/escrow_hold_state_machine.md`
+- [x] `docs/api.md`
+- [x] `docs/windows_runbook.md`
+- [x] `docs/translation_glossary.md`
+- [x] `docs/manual_qa_checklist.md`
 
----
+## 11) Phase 2 Flags
 
-## Sprint 12: Synthetic Data & Scenarios
-
-- [ ] data/demo/*.json files (municipalities, users, contractors, projects, quotes, messages, reviews, cases)
-- [ ] scripts/seed.ts
-- [ ] scripts/scenarios/happy_path_release.ts
-- [ ] scripts/scenarios/issue_then_joint_release_partial.ts
-- [ ] scripts/scenarios/issue_then_external_resolution_refund_full.ts
-
----
-
-## Sprint 13: Admin Console
-
-- [ ] Admin auth with custom claims
-- [ ] UsersPage: list, search, filter, actions
-- [ ] ProjectsPage: list, filter, detail
-- [ ] CasesPage: list, priority, detail, execute
-- [ ] ConfigPage: fees, hold policy
-- [ ] AuditLogPage
-
----
-
-## Sprint 14: Phase 2 Feature Flags
-
-- [ ] Feature flag system (/config/featureFlags)
-- [ ] useFeatureFlag hook
-- [ ] Stripe Connect activation flag
-- [ ] Milestone payments stub
-- [ ] Change orders stub
-- [ ] Credential verification stub
-- [ ] Scheduling stub
-- [ ] Recommendations stub
-- [ ] Referrals/growth stub
-
----
-
-## Documentation Tasks
-
-- [ ] docs/architecture.md
-- [ ] docs/escrow_hold_state_machine.md
-- [ ] docs/api.md
-- [ ] docs/windows_runbook.md
-- [ ] docs/translation_glossary.md
-- [ ] docs/manual_qa_checklist.md
-
----
-
-## Testing Tasks
-
-- [ ] Unit tests: escrow states, fee calculations, deadlines
-- [ ] Integration tests against emulators
-- [ ] Jest configuration
-- [ ] CI/CD pipeline
-
----
-
-## Deployment Tasks
-
-- [ ] Firebase projects (dev, prod)
-- [ ] EAS configuration
-- [ ] TestFlight submission
+- [x] Feature flag document and shared default flags
+- [x] Stripe toggle path scaffold
+- [x] Milestones/change orders/scheduling/recommendations/growth callable implementations behind flags

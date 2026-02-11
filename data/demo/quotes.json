@@ -1,0 +1,802 @@
+[
+    {
+        "id":  "quote-001",
+        "projectId":  "project-001",
+        "contractorId":  "contractor-004",
+        "priceCents":  50850,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 1 for ",
+        "scopeNotesEs":  "Propuesta de alcance 1 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-002",
+        "projectId":  "project-002",
+        "contractorId":  "contractor-005",
+        "priceCents":  51700,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 2 for ",
+        "scopeNotesEs":  "Propuesta de alcance 2 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-003",
+        "projectId":  "project-003",
+        "contractorId":  "contractor-006",
+        "priceCents":  52550,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 3 for ",
+        "scopeNotesEs":  "Propuesta de alcance 3 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-004",
+        "projectId":  "project-004",
+        "contractorId":  "contractor-007",
+        "priceCents":  53400,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 4 for ",
+        "scopeNotesEs":  "Propuesta de alcance 4 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-005",
+        "projectId":  "project-005",
+        "contractorId":  "contractor-008",
+        "priceCents":  54250,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 5 for ",
+        "scopeNotesEs":  "Propuesta de alcance 5 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-006",
+        "projectId":  "project-006",
+        "contractorId":  "contractor-009",
+        "priceCents":  55100,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 6 for ",
+        "scopeNotesEs":  "Propuesta de alcance 6 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-007",
+        "projectId":  "project-007",
+        "contractorId":  "contractor-010",
+        "priceCents":  55950,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 7 for ",
+        "scopeNotesEs":  "Propuesta de alcance 7 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-008",
+        "projectId":  "project-008",
+        "contractorId":  "contractor-011",
+        "priceCents":  56800,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 8 for ",
+        "scopeNotesEs":  "Propuesta de alcance 8 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-009",
+        "projectId":  "project-009",
+        "contractorId":  "contractor-012",
+        "priceCents":  57650,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 9 for ",
+        "scopeNotesEs":  "Propuesta de alcance 9 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-010",
+        "projectId":  "project-010",
+        "contractorId":  "contractor-013",
+        "priceCents":  58500,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 10 for ",
+        "scopeNotesEs":  "Propuesta de alcance 10 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-011",
+        "projectId":  "project-011",
+        "contractorId":  "contractor-014",
+        "priceCents":  59350,
+        "timelineDays":  13,
+        "scopeNotesEn":  "Scope proposal 11 for ",
+        "scopeNotesEs":  "Propuesta de alcance 11 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-012",
+        "projectId":  "project-012",
+        "contractorId":  "contractor-015",
+        "priceCents":  60200,
+        "timelineDays":  14,
+        "scopeNotesEn":  "Scope proposal 12 for ",
+        "scopeNotesEs":  "Propuesta de alcance 12 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-013",
+        "projectId":  "project-013",
+        "contractorId":  "contractor-016",
+        "priceCents":  61050,
+        "timelineDays":  15,
+        "scopeNotesEn":  "Scope proposal 13 for ",
+        "scopeNotesEs":  "Propuesta de alcance 13 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-014",
+        "projectId":  "project-014",
+        "contractorId":  "contractor-017",
+        "priceCents":  61900,
+        "timelineDays":  2,
+        "scopeNotesEn":  "Scope proposal 14 for ",
+        "scopeNotesEs":  "Propuesta de alcance 14 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-015",
+        "projectId":  "project-015",
+        "contractorId":  "contractor-018",
+        "priceCents":  62750,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 15 for ",
+        "scopeNotesEs":  "Propuesta de alcance 15 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-016",
+        "projectId":  "project-016",
+        "contractorId":  "contractor-019",
+        "priceCents":  63600,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 16 for ",
+        "scopeNotesEs":  "Propuesta de alcance 16 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-017",
+        "projectId":  "project-017",
+        "contractorId":  "contractor-020",
+        "priceCents":  64450,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 17 for ",
+        "scopeNotesEs":  "Propuesta de alcance 17 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-018",
+        "projectId":  "project-018",
+        "contractorId":  "contractor-001",
+        "priceCents":  65300,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 18 for ",
+        "scopeNotesEs":  "Propuesta de alcance 18 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-019",
+        "projectId":  "project-019",
+        "contractorId":  "contractor-002",
+        "priceCents":  66150,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 19 for ",
+        "scopeNotesEs":  "Propuesta de alcance 19 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-020",
+        "projectId":  "project-020",
+        "contractorId":  "contractor-003",
+        "priceCents":  67000,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 20 for ",
+        "scopeNotesEs":  "Propuesta de alcance 20 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-021",
+        "projectId":  "project-021",
+        "contractorId":  "contractor-004",
+        "priceCents":  67850,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 21 for ",
+        "scopeNotesEs":  "Propuesta de alcance 21 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-022",
+        "projectId":  "project-022",
+        "contractorId":  "contractor-005",
+        "priceCents":  68700,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 22 for ",
+        "scopeNotesEs":  "Propuesta de alcance 22 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-023",
+        "projectId":  "project-023",
+        "contractorId":  "contractor-006",
+        "priceCents":  69550,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 23 for ",
+        "scopeNotesEs":  "Propuesta de alcance 23 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-024",
+        "projectId":  "project-024",
+        "contractorId":  "contractor-007",
+        "priceCents":  70400,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 24 for ",
+        "scopeNotesEs":  "Propuesta de alcance 24 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-025",
+        "projectId":  "project-025",
+        "contractorId":  "contractor-008",
+        "priceCents":  71250,
+        "timelineDays":  13,
+        "scopeNotesEn":  "Scope proposal 25 for ",
+        "scopeNotesEs":  "Propuesta de alcance 25 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-026",
+        "projectId":  "project-026",
+        "contractorId":  "contractor-009",
+        "priceCents":  72100,
+        "timelineDays":  14,
+        "scopeNotesEn":  "Scope proposal 26 for ",
+        "scopeNotesEs":  "Propuesta de alcance 26 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-027",
+        "projectId":  "project-027",
+        "contractorId":  "contractor-010",
+        "priceCents":  72950,
+        "timelineDays":  15,
+        "scopeNotesEn":  "Scope proposal 27 for ",
+        "scopeNotesEs":  "Propuesta de alcance 27 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-028",
+        "projectId":  "project-028",
+        "contractorId":  "contractor-011",
+        "priceCents":  73800,
+        "timelineDays":  2,
+        "scopeNotesEn":  "Scope proposal 28 for ",
+        "scopeNotesEs":  "Propuesta de alcance 28 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-029",
+        "projectId":  "project-029",
+        "contractorId":  "contractor-012",
+        "priceCents":  74650,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 29 for ",
+        "scopeNotesEs":  "Propuesta de alcance 29 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-030",
+        "projectId":  "project-030",
+        "contractorId":  "contractor-013",
+        "priceCents":  75500,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 30 for ",
+        "scopeNotesEs":  "Propuesta de alcance 30 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-031",
+        "projectId":  "project-031",
+        "contractorId":  "contractor-014",
+        "priceCents":  76350,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 31 for ",
+        "scopeNotesEs":  "Propuesta de alcance 31 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-032",
+        "projectId":  "project-032",
+        "contractorId":  "contractor-015",
+        "priceCents":  77200,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 32 for ",
+        "scopeNotesEs":  "Propuesta de alcance 32 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-033",
+        "projectId":  "project-033",
+        "contractorId":  "contractor-016",
+        "priceCents":  78050,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 33 for ",
+        "scopeNotesEs":  "Propuesta de alcance 33 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-034",
+        "projectId":  "project-034",
+        "contractorId":  "contractor-017",
+        "priceCents":  78900,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 34 for ",
+        "scopeNotesEs":  "Propuesta de alcance 34 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-035",
+        "projectId":  "project-035",
+        "contractorId":  "contractor-018",
+        "priceCents":  79750,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 35 for ",
+        "scopeNotesEs":  "Propuesta de alcance 35 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-036",
+        "projectId":  "project-036",
+        "contractorId":  "contractor-019",
+        "priceCents":  80600,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 36 for ",
+        "scopeNotesEs":  "Propuesta de alcance 36 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-037",
+        "projectId":  "project-037",
+        "contractorId":  "contractor-020",
+        "priceCents":  81450,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 37 for ",
+        "scopeNotesEs":  "Propuesta de alcance 37 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-038",
+        "projectId":  "project-038",
+        "contractorId":  "contractor-001",
+        "priceCents":  82300,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 38 for ",
+        "scopeNotesEs":  "Propuesta de alcance 38 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-039",
+        "projectId":  "project-039",
+        "contractorId":  "contractor-002",
+        "priceCents":  83150,
+        "timelineDays":  13,
+        "scopeNotesEn":  "Scope proposal 39 for ",
+        "scopeNotesEs":  "Propuesta de alcance 39 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-040",
+        "projectId":  "project-040",
+        "contractorId":  "contractor-003",
+        "priceCents":  84000,
+        "timelineDays":  14,
+        "scopeNotesEn":  "Scope proposal 40 for ",
+        "scopeNotesEs":  "Propuesta de alcance 40 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-041",
+        "projectId":  "project-041",
+        "contractorId":  "contractor-004",
+        "priceCents":  84850,
+        "timelineDays":  15,
+        "scopeNotesEn":  "Scope proposal 41 for ",
+        "scopeNotesEs":  "Propuesta de alcance 41 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-042",
+        "projectId":  "project-042",
+        "contractorId":  "contractor-005",
+        "priceCents":  85700,
+        "timelineDays":  2,
+        "scopeNotesEn":  "Scope proposal 42 for ",
+        "scopeNotesEs":  "Propuesta de alcance 42 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-043",
+        "projectId":  "project-043",
+        "contractorId":  "contractor-006",
+        "priceCents":  86550,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 43 for ",
+        "scopeNotesEs":  "Propuesta de alcance 43 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-044",
+        "projectId":  "project-044",
+        "contractorId":  "contractor-007",
+        "priceCents":  87400,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 44 for ",
+        "scopeNotesEs":  "Propuesta de alcance 44 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-045",
+        "projectId":  "project-045",
+        "contractorId":  "contractor-008",
+        "priceCents":  88250,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 45 for ",
+        "scopeNotesEs":  "Propuesta de alcance 45 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-046",
+        "projectId":  "project-046",
+        "contractorId":  "contractor-009",
+        "priceCents":  89100,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 46 for ",
+        "scopeNotesEs":  "Propuesta de alcance 46 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-047",
+        "projectId":  "project-047",
+        "contractorId":  "contractor-010",
+        "priceCents":  89950,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 47 for ",
+        "scopeNotesEs":  "Propuesta de alcance 47 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-048",
+        "projectId":  "project-048",
+        "contractorId":  "contractor-011",
+        "priceCents":  90800,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 48 for ",
+        "scopeNotesEs":  "Propuesta de alcance 48 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-049",
+        "projectId":  "project-049",
+        "contractorId":  "contractor-012",
+        "priceCents":  91650,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 49 for ",
+        "scopeNotesEs":  "Propuesta de alcance 49 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-050",
+        "projectId":  "project-050",
+        "contractorId":  "contractor-013",
+        "priceCents":  92500,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 50 for ",
+        "scopeNotesEs":  "Propuesta de alcance 50 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-051",
+        "projectId":  "project-001",
+        "contractorId":  "contractor-014",
+        "priceCents":  93350,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 51 for ",
+        "scopeNotesEs":  "Propuesta de alcance 51 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-052",
+        "projectId":  "project-002",
+        "contractorId":  "contractor-015",
+        "priceCents":  94200,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 52 for ",
+        "scopeNotesEs":  "Propuesta de alcance 52 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-053",
+        "projectId":  "project-003",
+        "contractorId":  "contractor-016",
+        "priceCents":  95050,
+        "timelineDays":  13,
+        "scopeNotesEn":  "Scope proposal 53 for ",
+        "scopeNotesEs":  "Propuesta de alcance 53 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-054",
+        "projectId":  "project-004",
+        "contractorId":  "contractor-017",
+        "priceCents":  95900,
+        "timelineDays":  14,
+        "scopeNotesEn":  "Scope proposal 54 for ",
+        "scopeNotesEs":  "Propuesta de alcance 54 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-055",
+        "projectId":  "project-005",
+        "contractorId":  "contractor-018",
+        "priceCents":  96750,
+        "timelineDays":  15,
+        "scopeNotesEn":  "Scope proposal 55 for ",
+        "scopeNotesEs":  "Propuesta de alcance 55 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-056",
+        "projectId":  "project-006",
+        "contractorId":  "contractor-019",
+        "priceCents":  97600,
+        "timelineDays":  2,
+        "scopeNotesEn":  "Scope proposal 56 for ",
+        "scopeNotesEs":  "Propuesta de alcance 56 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-057",
+        "projectId":  "project-007",
+        "contractorId":  "contractor-020",
+        "priceCents":  98450,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 57 for ",
+        "scopeNotesEs":  "Propuesta de alcance 57 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-058",
+        "projectId":  "project-008",
+        "contractorId":  "contractor-001",
+        "priceCents":  99300,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 58 for ",
+        "scopeNotesEs":  "Propuesta de alcance 58 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-059",
+        "projectId":  "project-009",
+        "contractorId":  "contractor-002",
+        "priceCents":  100150,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 59 for ",
+        "scopeNotesEs":  "Propuesta de alcance 59 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-060",
+        "projectId":  "project-010",
+        "contractorId":  "contractor-003",
+        "priceCents":  101000,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 60 for ",
+        "scopeNotesEs":  "Propuesta de alcance 60 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-061",
+        "projectId":  "project-011",
+        "contractorId":  "contractor-004",
+        "priceCents":  101850,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 61 for ",
+        "scopeNotesEs":  "Propuesta de alcance 61 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-062",
+        "projectId":  "project-012",
+        "contractorId":  "contractor-005",
+        "priceCents":  102700,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 62 for ",
+        "scopeNotesEs":  "Propuesta de alcance 62 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-063",
+        "projectId":  "project-013",
+        "contractorId":  "contractor-006",
+        "priceCents":  103550,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 63 for ",
+        "scopeNotesEs":  "Propuesta de alcance 63 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-064",
+        "projectId":  "project-014",
+        "contractorId":  "contractor-007",
+        "priceCents":  104400,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 64 for ",
+        "scopeNotesEs":  "Propuesta de alcance 64 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-065",
+        "projectId":  "project-015",
+        "contractorId":  "contractor-008",
+        "priceCents":  105250,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 65 for ",
+        "scopeNotesEs":  "Propuesta de alcance 65 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-066",
+        "projectId":  "project-016",
+        "contractorId":  "contractor-009",
+        "priceCents":  106100,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 66 for ",
+        "scopeNotesEs":  "Propuesta de alcance 66 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-067",
+        "projectId":  "project-017",
+        "contractorId":  "contractor-010",
+        "priceCents":  106950,
+        "timelineDays":  13,
+        "scopeNotesEn":  "Scope proposal 67 for ",
+        "scopeNotesEs":  "Propuesta de alcance 67 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-068",
+        "projectId":  "project-018",
+        "contractorId":  "contractor-011",
+        "priceCents":  107800,
+        "timelineDays":  14,
+        "scopeNotesEn":  "Scope proposal 68 for ",
+        "scopeNotesEs":  "Propuesta de alcance 68 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-069",
+        "projectId":  "project-019",
+        "contractorId":  "contractor-012",
+        "priceCents":  108650,
+        "timelineDays":  15,
+        "scopeNotesEn":  "Scope proposal 69 for ",
+        "scopeNotesEs":  "Propuesta de alcance 69 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-070",
+        "projectId":  "project-020",
+        "contractorId":  "contractor-013",
+        "priceCents":  109500,
+        "timelineDays":  2,
+        "scopeNotesEn":  "Scope proposal 70 for ",
+        "scopeNotesEs":  "Propuesta de alcance 70 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-071",
+        "projectId":  "project-021",
+        "contractorId":  "contractor-014",
+        "priceCents":  110350,
+        "timelineDays":  3,
+        "scopeNotesEn":  "Scope proposal 71 for ",
+        "scopeNotesEs":  "Propuesta de alcance 71 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-072",
+        "projectId":  "project-022",
+        "contractorId":  "contractor-015",
+        "priceCents":  111200,
+        "timelineDays":  4,
+        "scopeNotesEn":  "Scope proposal 72 for ",
+        "scopeNotesEs":  "Propuesta de alcance 72 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-073",
+        "projectId":  "project-023",
+        "contractorId":  "contractor-016",
+        "priceCents":  112050,
+        "timelineDays":  5,
+        "scopeNotesEn":  "Scope proposal 73 for ",
+        "scopeNotesEs":  "Propuesta de alcance 73 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-074",
+        "projectId":  "project-024",
+        "contractorId":  "contractor-017",
+        "priceCents":  112900,
+        "timelineDays":  6,
+        "scopeNotesEn":  "Scope proposal 74 for ",
+        "scopeNotesEs":  "Propuesta de alcance 74 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-075",
+        "projectId":  "project-025",
+        "contractorId":  "contractor-018",
+        "priceCents":  113750,
+        "timelineDays":  7,
+        "scopeNotesEn":  "Scope proposal 75 for ",
+        "scopeNotesEs":  "Propuesta de alcance 75 para ",
+        "status":  "SELECTED"
+    },
+    {
+        "id":  "quote-076",
+        "projectId":  "project-026",
+        "contractorId":  "contractor-019",
+        "priceCents":  114600,
+        "timelineDays":  8,
+        "scopeNotesEn":  "Scope proposal 76 for ",
+        "scopeNotesEs":  "Propuesta de alcance 76 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-077",
+        "projectId":  "project-027",
+        "contractorId":  "contractor-020",
+        "priceCents":  115450,
+        "timelineDays":  9,
+        "scopeNotesEn":  "Scope proposal 77 for ",
+        "scopeNotesEs":  "Propuesta de alcance 77 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-078",
+        "projectId":  "project-028",
+        "contractorId":  "contractor-001",
+        "priceCents":  116300,
+        "timelineDays":  10,
+        "scopeNotesEn":  "Scope proposal 78 for ",
+        "scopeNotesEs":  "Propuesta de alcance 78 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-079",
+        "projectId":  "project-029",
+        "contractorId":  "contractor-002",
+        "priceCents":  117150,
+        "timelineDays":  11,
+        "scopeNotesEn":  "Scope proposal 79 for ",
+        "scopeNotesEs":  "Propuesta de alcance 79 para ",
+        "status":  "SUBMITTED"
+    },
+    {
+        "id":  "quote-080",
+        "projectId":  "project-030",
+        "contractorId":  "contractor-003",
+        "priceCents":  118000,
+        "timelineDays":  12,
+        "scopeNotesEn":  "Scope proposal 80 for ",
+        "scopeNotesEs":  "Propuesta de alcance 80 para ",
+        "status":  "SELECTED"
+    }
+]

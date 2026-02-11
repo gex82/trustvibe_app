@@ -1,0 +1,162 @@
+[
+    {
+        "id":  "customer-001",
+        "name":  "Customer 1",
+        "email":  "customer1@trustvibe.test",
+        "phone":  "+19392000001",
+        "role":  "customer",
+        "municipality":  "Bayamon"
+    },
+    {
+        "id":  "customer-002",
+        "name":  "Customer 2",
+        "email":  "customer2@trustvibe.test",
+        "phone":  "+19392000002",
+        "role":  "customer",
+        "municipality":  "Cabo Rojo"
+    },
+    {
+        "id":  "customer-003",
+        "name":  "Customer 3",
+        "email":  "customer3@trustvibe.test",
+        "phone":  "+19392000003",
+        "role":  "customer",
+        "municipality":  "Caguas"
+    },
+    {
+        "id":  "customer-004",
+        "name":  "Customer 4",
+        "email":  "customer4@trustvibe.test",
+        "phone":  "+19392000004",
+        "role":  "customer",
+        "municipality":  "Camuy"
+    },
+    {
+        "id":  "customer-005",
+        "name":  "Customer 5",
+        "email":  "customer5@trustvibe.test",
+        "phone":  "+19392000005",
+        "role":  "customer",
+        "municipality":  "Canovanas"
+    },
+    {
+        "id":  "customer-006",
+        "name":  "Customer 6",
+        "email":  "customer6@trustvibe.test",
+        "phone":  "+19392000006",
+        "role":  "customer",
+        "municipality":  "Carolina"
+    },
+    {
+        "id":  "customer-007",
+        "name":  "Customer 7",
+        "email":  "customer7@trustvibe.test",
+        "phone":  "+19392000007",
+        "role":  "customer",
+        "municipality":  "Catano"
+    },
+    {
+        "id":  "customer-008",
+        "name":  "Customer 8",
+        "email":  "customer8@trustvibe.test",
+        "phone":  "+19392000008",
+        "role":  "customer",
+        "municipality":  "Cayey"
+    },
+    {
+        "id":  "customer-009",
+        "name":  "Customer 9",
+        "email":  "customer9@trustvibe.test",
+        "phone":  "+19392000009",
+        "role":  "customer",
+        "municipality":  "Ceiba"
+    },
+    {
+        "id":  "customer-010",
+        "name":  "Customer 10",
+        "email":  "customer10@trustvibe.test",
+        "phone":  "+19392000010",
+        "role":  "customer",
+        "municipality":  "Ciales"
+    },
+    {
+        "id":  "customer-011",
+        "name":  "Customer 11",
+        "email":  "customer11@trustvibe.test",
+        "phone":  "+19392000011",
+        "role":  "customer",
+        "municipality":  "Cidra"
+    },
+    {
+        "id":  "customer-012",
+        "name":  "Customer 12",
+        "email":  "customer12@trustvibe.test",
+        "phone":  "+19392000012",
+        "role":  "customer",
+        "municipality":  "Coamo"
+    },
+    {
+        "id":  "customer-013",
+        "name":  "Customer 13",
+        "email":  "customer13@trustvibe.test",
+        "phone":  "+19392000013",
+        "role":  "customer",
+        "municipality":  "Comerio"
+    },
+    {
+        "id":  "customer-014",
+        "name":  "Customer 14",
+        "email":  "customer14@trustvibe.test",
+        "phone":  "+19392000014",
+        "role":  "customer",
+        "municipality":  "Corozal"
+    },
+    {
+        "id":  "customer-015",
+        "name":  "Customer 15",
+        "email":  "customer15@trustvibe.test",
+        "phone":  "+19392000015",
+        "role":  "customer",
+        "municipality":  "Culebra"
+    },
+    {
+        "id":  "customer-016",
+        "name":  "Customer 16",
+        "email":  "customer16@trustvibe.test",
+        "phone":  "+19392000016",
+        "role":  "customer",
+        "municipality":  "Dorado"
+    },
+    {
+        "id":  "customer-017",
+        "name":  "Customer 17",
+        "email":  "customer17@trustvibe.test",
+        "phone":  "+19392000017",
+        "role":  "customer",
+        "municipality":  "Fajardo"
+    },
+    {
+        "id":  "customer-018",
+        "name":  "Customer 18",
+        "email":  "customer18@trustvibe.test",
+        "phone":  "+19392000018",
+        "role":  "customer",
+        "municipality":  "Florida"
+    },
+    {
+        "id":  "customer-019",
+        "name":  "Customer 19",
+        "email":  "customer19@trustvibe.test",
+        "phone":  "+19392000019",
+        "role":  "customer",
+        "municipality":  "Guanica"
+    },
+    {
+        "id":  "customer-020",
+        "name":  "Customer 20",
+        "email":  "customer20@trustvibe.test",
+        "phone":  "+19392000020",
+        "role":  "customer",
+        "municipality":  "Guayama"
+    }
+]

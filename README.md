@@ -22,7 +22,8 @@ Bilingual (EN/ES) iOS-first marketplace for Puerto Rico with escrow-style hold f
 
 ## Status
 
-This scaffold implements MVP core backend flow with mock payments and Phase 2 feature-flag stubs.
+This repo implements MVP core backend flow with mock payments, plus Phase 2 callable features behind flags
+(milestones, change orders, scheduling, recommendations, growth tooling).
 
 See docs:
 - `docs/architecture.md`

@@ -1,0 +1,47 @@
+[
+    {
+        "id":  "case-001",
+        "projectId":  "project-016",
+        "type":  "ISSUE_HOLD",
+        "status":  "WAITING_JOINT_RELEASE",
+        "resolutionDocumentUrl":  null,
+        "summaryEn":  "Issue case 1 pending neutral execution.",
+        "summaryEs":  "Caso de inconveniente 1 pendiente de ejecucion neutral."
+    },
+    {
+        "id":  "case-002",
+        "projectId":  "project-017",
+        "type":  "ISSUE_HOLD",
+        "status":  "WAITING_JOINT_RELEASE",
+        "resolutionDocumentUrl":  null,
+        "summaryEn":  "Issue case 2 pending neutral execution.",
+        "summaryEs":  "Caso de inconveniente 2 pendiente de ejecucion neutral."
+    },
+    {
+        "id":  "case-003",
+        "projectId":  "project-018",
+        "type":  "ISSUE_HOLD",
+        "status":  "RESOLUTION_SUBMITTED",
+        "resolutionDocumentUrl":  "https://example.com/resolution-3.pdf",
+        "summaryEn":  "Issue case 3 pending neutral execution.",
+        "summaryEs":  "Caso de inconveniente 3 pendiente de ejecucion neutral."
+    },
+    {
+        "id":  "case-004",
+        "projectId":  "project-019",
+        "type":  "ISSUE_HOLD",
+        "status":  "RESOLUTION_SUBMITTED",
+        "resolutionDocumentUrl":  "https://example.com/resolution-4.pdf",
+        "summaryEn":  "Issue case 4 pending neutral execution.",
+        "summaryEs":  "Caso de inconveniente 4 pendiente de ejecucion neutral."
+    },
+    {
+        "id":  "case-005",
+        "projectId":  "project-020",
+        "type":  "ISSUE_HOLD",
+        "status":  "RESOLUTION_SUBMITTED",
+        "resolutionDocumentUrl":  "https://example.com/resolution-5.pdf",
+        "summaryEn":  "Issue case 5 pending neutral execution.",
+        "summaryEs":  "Caso de inconveniente 5 pendiente de ejecucion neutral."
+    }
+]

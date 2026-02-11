@@ -179,3 +179,93 @@ export const listQuotesInputSchema = z.object({
 export const getProjectInputSchema = z.object({
   projectId: z.string().min(1),
 });
+
+export const listMessagesInputSchema = z.object({
+  projectId: z.string().min(1),
+  limit: z.number().int().min(1).max(200).default(100),
+});
+
+export const sendMessageInputSchema = z.object({
+  projectId: z.string().min(1),
+  body: z.string().min(1).max(4000),
+  attachments: z.array(z.string().url()).max(5).default([]),
+});
+
+export const createMilestonesInputSchema = z.object({
+  projectId: z.string().min(1),
+  milestones: z
+    .array(
+      z.object({
+        title: z.string().min(2).max(120),
+        amountCents: z.number().int().positive(),
+        acceptanceCriteria: z.string().min(3).max(1200),
+        dueDate: z.string().optional(),
+      })
+    )
+    .min(1)
+    .max(20),
+});
+
+export const approveMilestoneInputSchema = z.object({
+  projectId: z.string().min(1),
+  milestoneId: z.string().min(1),
+});
+
+export const proposeChangeOrderInputSchema = z.object({
+  projectId: z.string().min(1),
+  scopeSummary: z.string().min(5).max(2000),
+  amountDeltaCents: z.number().int().min(-10000000).max(10000000),
+  timelineDeltaDays: z.number().int().min(-365).max(365),
+});
+
+export const acceptChangeOrderInputSchema = z.object({
+  projectId: z.string().min(1),
+  changeOrderId: z.string().min(1),
+  accept: z.boolean(),
+});
+
+export const createBookingRequestInputSchema = z.object({
+  projectId: z.string().min(1),
+  startAt: z.string().min(1),
+  endAt: z.string().min(1),
+  note: z.string().max(1000).optional(),
+});
+
+export const respondBookingRequestInputSchema = z.object({
+  projectId: z.string().min(1),
+  bookingRequestId: z.string().min(1),
+  response: z.enum(['confirm', 'decline']),
+});
+
+export const getRecommendationsInputSchema = z.object({
+  target: z.enum(['customer', 'contractor']).optional(),
+  municipality: z.string().optional(),
+  category: projectCategorySchema.optional(),
+  limit: z.number().int().min(1).max(50).default(10),
+});
+
+export const applyReferralCodeInputSchema = z.object({
+  code: z.string().min(3).max(40),
+  projectId: z.string().min(1).optional(),
+});
+
+export const adminSetPromotionInputSchema = z.object({
+  code: z.string().min(3).max(40),
+  type: z.enum(['referral', 'coupon', 'featured']),
+  percentOffBps: z.number().int().min(0).max(5000).optional(),
+  amountOffCents: z.number().int().min(0).max(200000).optional(),
+  featuredContractorId: z.string().min(1).optional(),
+  active: z.boolean(),
+  startsAt: z.string().optional(),
+  endsAt: z.string().optional(),
+});
+
+export const listFeaturedListingsInputSchema = z.object({
+  limit: z.number().int().min(1).max(50).default(20),
+});
+
+export const adminSetUserRoleInputSchema = z.object({
+  userId: z.string().min(1),
+  role: roleSchema,
+  disabled: z.boolean().optional(),
+});
