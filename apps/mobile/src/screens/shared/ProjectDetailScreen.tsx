@@ -5,14 +5,25 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import {
   acceptAgreement,
+  applyEstimateDepositToJob,
   approveRelease,
+  captureEstimateDeposit,
+  createBookingRequest,
+  createConnectedPaymentAccount,
+  createEstimateDeposit,
+  createHighTicketCase,
   fundHold,
   getProject,
+  getPaymentOnboardingLink,
+  getReliabilityScore,
+  markEstimateAttendance,
   proposeJointRelease,
   raiseIssueHold,
+  refundEstimateDeposit,
   requestCompletion,
   selectContractor,
   signJointRelease,
+  submitCredentialForVerification,
   uploadResolutionDocument,
 } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -54,6 +65,11 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
       <Text style={styles.text}>{project.description}</Text>
       <Text style={styles.text}>{`${t('common.status')}: ${project.escrowState}`}</Text>
       <Text style={styles.text}>{`${t('profile.municipality')}: ${project.municipality}`}</Text>
+      {project.estimateDepositId ? <Text style={styles.text}>{`${t('phase2.estimateDepositId')}: ${project.estimateDepositId}`}</Text> : null}
+      {typeof project.estimateDepositCreditCents === 'number' ? (
+        <Text style={styles.text}>{`${t('phase2.estimateCreditApplied')}: $${(project.estimateDepositCreditCents / 100).toFixed(2)}`}</Text>
+      ) : null}
+      {project.highTicket ? <Text style={styles.text}>{t('phase2.highTicketEligible')}</Text> : null}
 
       <View style={styles.section}>
         <PrimaryButton label={t('quote.compare')} variant="secondary" onPress={() => navigation.navigate('QuotesCompare', { projectId })} />
@@ -184,6 +200,163 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                 }
               }}
             />
+          </>
+        ) : null}
+
+        {role === 'customer' && project.contractorId ? (
+          <>
+            <PrimaryButton
+              label={t('phase2.createEstimateDeposit')}
+              variant="secondary"
+              onPress={async () => {
+                try {
+                  await createEstimateDeposit({ projectId });
+                  await refresh();
+                } catch (error) {
+                  Alert.alert(t('common.error'), String(error));
+                }
+              }}
+            />
+            {project.estimateDepositId ? (
+              <PrimaryButton
+                label={t('phase2.captureEstimateDeposit')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    await captureEstimateDeposit({ depositId: project.estimateDepositId });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
+            {project.estimateDepositId ? (
+              <PrimaryButton
+                label={t('phase2.applyDepositToJob')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    await applyEstimateDepositToJob({ projectId, depositId: project.estimateDepositId });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
+            {project.estimateDepositId ? (
+              <PrimaryButton
+                label={t('phase2.createBookingRequest')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    const start = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+                    await createBookingRequest({
+                      projectId,
+                      startAt: start.toISOString(),
+                      endAt: end.toISOString(),
+                      estimateDepositId: project.estimateDepositId,
+                      note: t('phase2.estimateAppointmentNote'),
+                    });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
+            {project.estimateDepositId ? (
+              <PrimaryButton
+                label={t('phase2.refundEstimateDeposit')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    await refundEstimateDeposit({ depositId: project.estimateDepositId, reason: t('phase2.manualRefundReason') });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
+            {project.highTicket ? (
+              <PrimaryButton
+                label={t('phase2.createConciergeCase')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    await createHighTicketCase({
+                      projectId,
+                      intakeNotes: t('phase2.highTicketIntakeDefault'),
+                    });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
+          </>
+        ) : null}
+
+        {role === 'contractor' ? (
+          <>
+            <PrimaryButton
+              label={t('phase2.startPayoutOnboarding')}
+              variant="secondary"
+              onPress={async () => {
+                try {
+                  await createConnectedPaymentAccount({});
+                  const onboarding = await getPaymentOnboardingLink({});
+                  Alert.alert(t('phase2.onboardingLinkTitle'), onboarding.onboardingUrl);
+                } catch (error) {
+                  Alert.alert(t('common.error'), String(error));
+                }
+              }}
+            />
+            <PrimaryButton
+              label={t('phase2.submitDacoCredential')}
+              variant="secondary"
+              onPress={async () => {
+                try {
+                  await submitCredentialForVerification({
+                    credentialType: 'daco_registration',
+                    identifier: 'DACO-PR-1001',
+                  });
+                  Alert.alert(t('phase2.credentialTitle'), t('phase2.credentialSubmitted'));
+                } catch (error) {
+                  Alert.alert(t('common.error'), String(error));
+                }
+              }}
+            />
+            <PrimaryButton
+              label={t('phase2.viewReliabilityScore')}
+              variant="secondary"
+              onPress={async () => {
+                try {
+                  const result = await getReliabilityScore({});
+                  Alert.alert(t('phase2.reliabilityTitle'), JSON.stringify(result.score, null, 2));
+                } catch (error) {
+                  Alert.alert(t('common.error'), String(error));
+                }
+              }}
+            />
+            {project.estimateDepositId ? (
+              <PrimaryButton
+                label={t('phase2.markEstimateAttended')}
+                variant="secondary"
+                onPress={async () => {
+                  try {
+                    await markEstimateAttendance({ depositId: project.estimateDepositId, attendance: 'contractor_present' });
+                    await refresh();
+                  } catch (error) {
+                    Alert.alert(t('common.error'), String(error));
+                  }
+                }}
+              />
+            ) : null}
           </>
         ) : null}
       </View>

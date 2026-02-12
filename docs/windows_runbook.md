@@ -1,6 +1,6 @@
 # Windows Runbook
 
-Last updated: 2026-02-11
+Last updated: 2026-02-11 (productionization pass)
 
 ## 1. Prerequisites
 
@@ -26,6 +26,20 @@ npm install
 ```
 
 ## 3. Environment Variables
+
+Functions/runtime (PowerShell env or `.env` loaded by your process manager):
+
+```env
+GCLOUD_PROJECT=trustvibe-dev
+PAYMENT_PROVIDER=mock # mock | stripe | ath_movil
+STRIPE_SIMULATE=true  # true for local prototyping
+STRIPE_SECRET_KEY=sk_test_xxx # required when PAYMENT_PROVIDER=stripe and simulation=false
+```
+
+Notes:
+
+- Local prototype default should remain `PAYMENT_PROVIDER=mock` or `STRIPE_SIMULATE=true`.
+- Staging/prod should use Stripe-first configuration.
 
 Mobile (`apps/mobile/.env`):
 
@@ -87,8 +101,15 @@ npm run seed
 npm run dev -w @trustvibe/mobile
 ```
 
+- This default runs Expo in `--offline` mode for demo reliability.
 - Scan QR with Expo Go / dev client.
 - Ensure iPhone is on same LAN as Windows host.
+
+If you want online dependency checks instead:
+
+```powershell
+npm run dev:online -w @trustvibe/mobile
+```
 
 ## 7. Run Admin Console
 
@@ -110,6 +131,7 @@ Integration tests (with emulator running):
 
 ```powershell
 $env:FIRESTORE_EMULATOR_HOST='127.0.0.1:8080'
+$env:FIREBASE_AUTH_EMULATOR_HOST='127.0.0.1:9099'
 $env:GCLOUD_PROJECT='trustvibe-dev'
 npm run test:integration
 ```
@@ -122,13 +144,19 @@ $env:GCLOUD_PROJECT='trustvibe-dev'
 npm run scenario:happy
 npm run scenario:joint
 npm run scenario:external
+npm run scenario:deposit-no-show
+npm run scenario:milestone-partial
+npm run scenario:verified-credential
+npm run scenario:high-ticket
 ```
 
-Phase 2 demo:
+Productionization demo:
 
 1. Sign in to admin console.
-2. Open Config and enable Phase 2 feature flags.
-3. Use mobile screens for milestones/change orders/scheduling/recommendations/referrals.
+2. Open Config and enable desired flags (`estimateDepositsEnabled`, `credentialVerificationEnabled`, `reliabilityScoringEnabled`, `subscriptionsEnabled`, `highTicketConciergeEnabled`).
+3. Seed deposit policies / fee tiers / subscription plans in Config JSON editors.
+4. Use mobile project detail actions to demo deposits, booking request creation, credential submission, reliability view, and concierge intake.
+5. Use admin pages (`/deposits`, `/reliability`, `/subscriptions`, `/concierge`) for operations views.
 
 ## 9. EAS Build + TestFlight
 
@@ -148,4 +176,4 @@ eas submit -p ios --profile production
 
 ## 10. Disclaimer
 
-MVP payment flow is mock only. Do not process live funds without compliance/legal readiness.
+Live payment operations require compliance/legal readiness. Keep local demos in mock or Stripe simulation mode.

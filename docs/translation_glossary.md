@@ -1,6 +1,6 @@
 # Translation Glossary
 
-Last updated: 2026-02-09
+Last updated: 2026-02-11
 
 ## Canonical Terms
 
@@ -18,6 +18,15 @@ Use these exact terms consistently in UI, notifications, and templates.
 - Joint release instruction
   - English: `Joint release instruction`
   - Spanish: `Instruccion de liberacion conjunta`
+- Estimate deposit
+  - English: `Estimate deposit`
+  - Spanish: `Deposito de estimado`
+- Reliability score
+  - English: `Reliability score`
+  - Spanish: `Puntuacion de confiabilidad`
+- High-ticket concierge
+  - English: `High-ticket concierge`
+  - Spanish: `Concierge de alto valor`
 
 ## Tone Guidelines
 

@@ -38,6 +38,27 @@ import {
   submitReviewHandler,
   uploadResolutionDocumentHandler,
 } from './http/handlers';
+import {
+  applyEstimateDepositToJobHandler,
+  assignConciergeManagerHandler,
+  cancelSubscriptionHandler,
+  captureEstimateDepositHandler,
+  createConnectedPaymentAccountHandler,
+  createEstimateDepositHandler,
+  createHighTicketCaseHandler,
+  createSubscriptionHandler,
+  getPaymentOnboardingLinkHandler,
+  getReliabilityScoreHandler,
+  listInvoicesHandler,
+  markEstimateAttendanceHandler,
+  recordBookingAttendanceHandler,
+  recomputeReliabilityScoresHandler,
+  refundEstimateDepositHandler,
+  submitConciergeBidHandler,
+  submitCredentialForVerificationHandler,
+  updateSubscriptionHandler,
+  verifyCredentialHandler,
+} from './http/productionHandlers';
 
 const callOptions = {
   region: 'us-central1' as const,
@@ -82,10 +103,28 @@ export const proposeChangeOrder = onCall(callOptions, proposeChangeOrderHandler)
 export const acceptChangeOrder = onCall(callOptions, acceptChangeOrderHandler);
 export const createBookingRequest = onCall(callOptions, createBookingRequestHandler);
 export const respondBookingRequest = onCall(callOptions, respondBookingRequestHandler);
+export const recordBookingAttendance = onCall(callOptions, recordBookingAttendanceHandler);
 export const getRecommendations = onCall(callOptions, getRecommendationsHandler);
 export const adminSetPromotion = onCall(callOptions, adminSetPromotionHandler);
 export const applyReferralCode = onCall(callOptions, applyReferralCodeHandler);
 export const listFeaturedListings = onCall(callOptions, listFeaturedListingsHandler);
+export const createEstimateDeposit = onCall(callOptions, createEstimateDepositHandler);
+export const captureEstimateDeposit = onCall(callOptions, captureEstimateDepositHandler);
+export const markEstimateAttendance = onCall(callOptions, markEstimateAttendanceHandler);
+export const refundEstimateDeposit = onCall(callOptions, refundEstimateDepositHandler);
+export const applyEstimateDepositToJob = onCall(callOptions, applyEstimateDepositToJobHandler);
+export const createConnectedPaymentAccount = onCall(callOptions, createConnectedPaymentAccountHandler);
+export const getPaymentOnboardingLink = onCall(callOptions, getPaymentOnboardingLinkHandler);
+export const getReliabilityScore = onCall(callOptions, getReliabilityScoreHandler);
+export const submitCredentialForVerification = onCall(callOptions, submitCredentialForVerificationHandler);
+export const verifyCredential = onCall(callOptions, verifyCredentialHandler);
+export const createSubscription = onCall(callOptions, createSubscriptionHandler);
+export const updateSubscription = onCall(callOptions, updateSubscriptionHandler);
+export const cancelSubscription = onCall(callOptions, cancelSubscriptionHandler);
+export const listInvoices = onCall(callOptions, listInvoicesHandler);
+export const createHighTicketCase = onCall(callOptions, createHighTicketCaseHandler);
+export const submitConciergeBid = onCall(callOptions, submitConciergeBidHandler);
+export const assignConciergeManager = onCall(callOptions, assignConciergeManagerHandler);
 
 export const checkAutoRelease = onSchedule(
   { schedule: 'every 24 hours', region: 'us-central1', timeZone: 'America/Puerto_Rico' },
@@ -98,5 +137,12 @@ export const sendIssueReminders = onSchedule(
   { schedule: 'every 24 hours', region: 'us-central1', timeZone: 'America/Puerto_Rico' },
   async () => {
     await sendIssueRemindersHandler();
+  }
+);
+
+export const recomputeReliabilityScores = onSchedule(
+  { schedule: 'every 24 hours', region: 'us-central1', timeZone: 'America/Puerto_Rico' },
+  async () => {
+    await recomputeReliabilityScoresHandler();
   }
 );

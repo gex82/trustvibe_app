@@ -87,6 +87,80 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /estimateDeposits/{depositId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.customerId == request.auth.uid ||
+        resource.data.contractorId == request.auth.uid
+      );
+      allow write: if isAdmin();
+    }
+
+    match /paymentAccounts/{userId} {
+      allow read: if isSelf(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /reliabilityScores/{contractorId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+      match /history/{itemId} {
+        allow read: if signedIn();
+        allow write: if isAdmin();
+      }
+    }
+
+    match /credentialVerifications/{verificationId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.contractorId == request.auth.uid
+      );
+      allow write: if isAdmin();
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.accountId == request.auth.uid
+      );
+      allow write: if isAdmin();
+    }
+
+    match /billingInvoices/{invoiceId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.accountId == request.auth.uid
+      );
+      allow write: if isAdmin();
+    }
+
+    match /highTicketCases/{caseId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.customerId == request.auth.uid ||
+        resource.data.contractorId == request.auth.uid ||
+        resource.data.conciergeManagerId == request.auth.uid
+      );
+      allow write: if isAdmin();
+      match /bids/{bidId} {
+        allow read: if signedIn() && (
+          isAdmin() ||
+          get(/databases/$(database)/documents/highTicketCases/$(caseId)).data.customerId == request.auth.uid ||
+          get(/databases/$(database)/documents/highTicketCases/$(caseId)).data.contractorId == request.auth.uid ||
+          get(/databases/$(database)/documents/highTicketCases/$(caseId)).data.conciergeManagerId == request.auth.uid
+        );
+        allow write: if isAdmin();
+      }
+    }
+
+    match /referralCredits/{creditId} {
+      allow read: if signedIn() && (
+        isAdmin() ||
+        resource.data.userId == request.auth.uid
+      );
+      allow write: if isAdmin();
+    }
+
     match /config/{docId} {
       allow read: if signedIn();
       allow write: if isAdmin();

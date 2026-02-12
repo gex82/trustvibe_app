@@ -186,6 +186,7 @@ export function createBookingRequest(payload: {
   projectId: string;
   startAt: string;
   endAt: string;
+  estimateDepositId?: string;
   note?: string;
 }): Promise<{ bookingRequest: any }> {
   return call('createBookingRequest', payload);
@@ -197,6 +198,120 @@ export function respondBookingRequest(payload: {
   response: 'confirm' | 'decline';
 }): Promise<{ bookingRequestId: string; status: string }> {
   return call('respondBookingRequest', payload);
+}
+
+export function recordBookingAttendance(payload: {
+  projectId: string;
+  bookingRequestId: string;
+  attendeeRole: 'customer' | 'contractor';
+  attended: boolean;
+  note?: string;
+}): Promise<{ bookingRequestId: string; attended: boolean }> {
+  return call('recordBookingAttendance', payload);
+}
+
+export function createEstimateDeposit(payload: {
+  projectId: string;
+  category?: string;
+  appointmentStartAt?: string;
+}): Promise<{ deposit: any }> {
+  return call('createEstimateDeposit', payload);
+}
+
+export function captureEstimateDeposit(payload: { depositId: string; paymentMethodId?: string }): Promise<{ deposit: any }> {
+  return call('captureEstimateDeposit', payload);
+}
+
+export function markEstimateAttendance(payload: {
+  depositId: string;
+  attendance: 'customer_present' | 'contractor_present' | 'customer_no_show' | 'contractor_no_show';
+  note?: string;
+}): Promise<{ deposit: any }> {
+  return call('markEstimateAttendance', payload);
+}
+
+export function refundEstimateDeposit(payload: { depositId: string; reason: string }): Promise<{ deposit: any }> {
+  return call('refundEstimateDeposit', payload);
+}
+
+export function applyEstimateDepositToJob(payload: {
+  projectId: string;
+  depositId: string;
+}): Promise<{ projectId: string; creditedAmountCents: number }> {
+  return call('applyEstimateDepositToJob', payload);
+}
+
+export function createConnectedPaymentAccount(payload: {
+  country?: string;
+  type?: 'express' | 'standard';
+}): Promise<{ paymentAccountId: string; providerAccountId: string }> {
+  return call('createConnectedPaymentAccount', payload);
+}
+
+export function getPaymentOnboardingLink(payload: {
+  accountId?: string;
+  returnUrl?: string;
+  refreshUrl?: string;
+}): Promise<{ onboardingUrl: string }> {
+  return call('getPaymentOnboardingLink', payload);
+}
+
+export function getReliabilityScore(payload: { contractorId?: string }): Promise<{ score: any }> {
+  return call('getReliabilityScore', payload);
+}
+
+export function submitCredentialForVerification(payload: {
+  credentialType: 'daco_registration' | 'perito_license';
+  identifier: string;
+  documentUrl?: string;
+  expiresAt?: string;
+}): Promise<{ verification: any }> {
+  return call('submitCredentialForVerification', payload);
+}
+
+export function createSubscription(payload: {
+  audience: 'contractor' | 'property_manager';
+  planId: string;
+  billingEmail?: string;
+  unitCount?: number;
+}): Promise<{ subscriptionId: string }> {
+  return call('createSubscription', payload);
+}
+
+export function updateSubscription(payload: {
+  subscriptionId: string;
+  planId?: string;
+  unitCount?: number;
+}): Promise<{ subscriptionId: string; updated: boolean }> {
+  return call('updateSubscription', payload);
+}
+
+export function cancelSubscription(payload: {
+  subscriptionId: string;
+  cancelAtPeriodEnd?: boolean;
+}): Promise<{ subscriptionId: string; status: string }> {
+  return call('cancelSubscription', payload);
+}
+
+export function listInvoices(payload: { subscriptionId?: string; limit?: number }): Promise<{ invoices: any[] }> {
+  return call('listInvoices', payload);
+}
+
+export function createHighTicketCase(payload: {
+  projectId: string;
+  intakeNotes: string;
+  preferredStartDate?: string;
+}): Promise<{ highTicketCase: any }> {
+  return call('createHighTicketCase', payload);
+}
+
+export function submitConciergeBid(payload: {
+  caseId: string;
+  projectId: string;
+  amountCents: number;
+  milestoneTemplate?: Array<{ title: string; amountCents: number; acceptanceCriteria: string }>;
+}): Promise<{ caseId: string; bidId: string }> {
+  return call('submitConciergeBid', payload);
 }
 
 export function getRecommendations(payload: {

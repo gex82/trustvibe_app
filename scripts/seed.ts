@@ -40,12 +40,105 @@ async function seedConfig(): Promise<void> {
 
   await db.collection('config').doc('featureFlags').set({
     stripeConnectEnabled: false,
+    estimateDepositsEnabled: true,
     milestonePaymentsEnabled: false,
     changeOrdersEnabled: false,
-    credentialVerificationEnabled: false,
+    credentialVerificationEnabled: true,
     schedulingEnabled: false,
+    reliabilityScoringEnabled: true,
+    subscriptionsEnabled: true,
+    highTicketConciergeEnabled: true,
     recommendationsEnabled: false,
     growthEnabled: false,
+    updatedAt: now,
+    updatedBy: 'seed-script',
+  });
+
+  await db.collection('config').doc('platformFeesV2').set({
+    schemaVersion: 2,
+    tiers: [
+      { id: 'small', minAmountCents: 0, maxAmountCents: 99999, percentBps: 900, fixedFeeCents: 0 },
+      { id: 'standard', minAmountCents: 100000, maxAmountCents: 749999, percentBps: 700, fixedFeeCents: 0 },
+      { id: 'high_ticket', minAmountCents: 750000, percentBps: 500, fixedFeeCents: 0 },
+    ],
+    updatedAt: now,
+    updatedBy: 'seed-script',
+  });
+
+  await db.collection('config').doc('depositPolicies').set({
+    schemaVersion: 1,
+    rules: [
+      { category: 'plumbing', amountCents: 2900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'electrical', amountCents: 3900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'painting', amountCents: 2900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'roofing', amountCents: 7900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'carpentry', amountCents: 3900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'hvac', amountCents: 5900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'landscaping', amountCents: 2900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'cleaning', amountCents: 2900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+      { category: 'general', amountCents: 3900, currency: 'USD', refundableOnContractorNoShow: true, creditToJobOnProceed: true },
+    ],
+    updatedAt: now,
+    updatedBy: 'seed-script',
+  });
+
+  await db.collection('config').doc('subscriptionPlans').set({
+    schemaVersion: 1,
+    plans: [
+      {
+        id: 'contractor_pro',
+        audience: 'contractor',
+        name: 'Contractor Pro',
+        monthlyPriceCents: 2900,
+        annualPriceCents: 29900,
+        featureCodes: ['priority_ranking', 'reduced_fees'],
+        active: true,
+      },
+      {
+        id: 'contractor_premium',
+        audience: 'contractor',
+        name: 'Contractor Premium',
+        monthlyPriceCents: 6900,
+        annualPriceCents: 69900,
+        featureCodes: ['priority_ranking', 'concierge_access', 'reduced_fees'],
+        active: true,
+      },
+      {
+        id: 'property_manager_team',
+        audience: 'property_manager',
+        name: 'Property Manager Team',
+        monthlyPriceCents: 9900,
+        includedUnits: 10,
+        overageUnitPriceCents: 500,
+        featureCodes: ['consolidated_invoicing', 'multi_property_dashboard'],
+        active: true,
+      },
+    ],
+    updatedAt: now,
+    updatedBy: 'seed-script',
+  });
+
+  await db.collection('config').doc('reliabilityWeights').set({
+    schemaVersion: 1,
+    showUpRateWeight: 0.3,
+    responseTimeWeight: 0.2,
+    disputeFrequencyWeight: 0.2,
+    proofCompletenessWeight: 0.15,
+    onTimeCompletionWeight: 0.15,
+    autoReleaseThreshold: 80,
+    largeJobThreshold: 75,
+    highTicketThreshold: 85,
+    updatedAt: now,
+    updatedBy: 'seed-script',
+  });
+
+  await db.collection('config').doc('highTicketPolicy').set({
+    schemaVersion: 1,
+    thresholdCents: 500000,
+    feeMode: 'intake_success',
+    intakeFeeCents: 9900,
+    successFeeBps: 300,
+    contractorReferralFeeBps: 600,
     updatedAt: now,
     updatedBy: 'seed-script',
   });
@@ -61,6 +154,13 @@ async function run(): Promise<void> {
   await clearCollection('agreements');
   await clearCollection('cases');
   await clearCollection('reviews');
+  await clearCollection('estimateDeposits');
+  await clearCollection('paymentAccounts');
+  await clearCollection('subscriptions');
+  await clearCollection('billingInvoices');
+  await clearCollection('reliabilityScores');
+  await clearCollection('highTicketCases');
+  await clearCollection('credentialVerifications');
 
   const users = loadJson<any[]>('users.json');
   const contractors = loadJson<any[]>('contractors.json');
@@ -113,6 +213,42 @@ async function run(): Promise<void> {
     });
   });
   await contractorBatch.commit();
+
+  const reliabilityBatch = db.batch();
+  contractors.forEach((c) => {
+    const score = Math.round(Number(c.rating ?? 4) * 20);
+    reliabilityBatch.set(db.collection('reliabilityScores').doc(c.id), {
+      contractorId: c.id,
+      score,
+      metrics: {
+        showUpRate: score,
+        responseTimeScore: score,
+        disputeScore: score,
+        proofScore: score,
+        onTimeScore: score,
+      },
+      counters: {
+        appointmentsTotal: 10,
+        appointmentsAttended: Math.max(1, Math.round((score / 100) * 10)),
+        disputesTotal: 1,
+        completionsTotal: 10,
+        completionsOnTime: Math.max(1, Math.round((score / 100) * 10)),
+        proofSubmissionsTotal: 10,
+        proofSubmissionsComplete: Math.max(1, Math.round((score / 100) * 10)),
+        responseSamples: 10,
+        responseMedianMinutes: Math.max(5, 200 - score),
+      },
+      eligibility: {
+        autoRelease: score >= 80,
+        largeJobs: score >= 75,
+        highTicket: score >= 85,
+      },
+      schemaVersion: 1,
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'seed-script',
+    });
+  });
+  await reliabilityBatch.commit();
 
   const customerBatch = db.batch();
   customers.forEach((c) => {

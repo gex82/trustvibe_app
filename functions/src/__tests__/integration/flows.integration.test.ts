@@ -28,6 +28,13 @@ import {
   submitQuoteHandler,
   uploadResolutionDocumentHandler,
 } from '../../http/handlers';
+import {
+  applyEstimateDepositToJobHandler,
+  captureEstimateDepositHandler,
+  createEstimateDepositHandler,
+  getReliabilityScoreHandler,
+  markEstimateAttendanceHandler,
+} from '../../http/productionHandlers';
 
 function req(uid: string, role: 'customer' | 'contractor' | 'admin', data: unknown): any {
   return {
@@ -179,10 +186,14 @@ describeIfEmulator('integration flows against emulators', () => {
       req(adminId, 'admin', {
         featureFlags: {
           stripeConnectEnabled: false,
+          estimateDepositsEnabled: true,
           milestonePaymentsEnabled: true,
           changeOrdersEnabled: true,
-          credentialVerificationEnabled: false,
+          credentialVerificationEnabled: true,
           schedulingEnabled: true,
+          reliabilityScoringEnabled: true,
+          subscriptionsEnabled: true,
+          highTicketConciergeEnabled: true,
           recommendationsEnabled: true,
           growthEnabled: true,
         },
@@ -276,6 +287,71 @@ describeIfEmulator('integration flows against emulators', () => {
     const user = (await db.collection('users').doc(targetUserId).get()).data();
     expect(user?.role).toBe('contractor');
     expect(user?.disabled).toBe(false);
+  });
+
+  it('estimate request -> deposit capture -> contractor no-show -> auto-refund and reliability penalty', async () => {
+    await adminSetConfigHandler(
+      req(adminId, 'admin', {
+        featureFlags: {
+          estimateDepositsEnabled: true,
+          reliabilityScoringEnabled: true,
+          credentialVerificationEnabled: true,
+        },
+      })
+    );
+
+    const { projectId } = await createBaselineProject();
+    const created = await createEstimateDepositHandler(req(customerId, 'customer', { projectId }));
+    await captureEstimateDepositHandler(req(customerId, 'customer', { depositId: created.deposit.id }));
+    await markEstimateAttendanceHandler(req(contractorId, 'contractor', { depositId: created.deposit.id, attendance: 'contractor_no_show' }));
+
+    const deposit = (await db.collection('estimateDeposits').doc(created.deposit.id).get()).data();
+    expect(deposit?.status).toBe('REFUNDED');
+
+    const reliability = await getReliabilityScoreHandler(req(contractorId, 'contractor', {}));
+    expect(typeof reliability.score?.score).toBe('number');
+  });
+
+  it('estimate deposit credit reduces funding hold amount', async () => {
+    await adminSetConfigHandler(
+      req(adminId, 'admin', {
+        featureFlags: {
+          estimateDepositsEnabled: true,
+        },
+      })
+    );
+
+    const createdProject = await createProjectHandler(
+      req(customerId, 'customer', {
+        category: 'plumbing',
+        title: 'Deposit credit flow',
+        description: 'Testing estimate credit before funding.',
+        photos: [],
+        municipality: 'San Juan',
+        desiredTimeline: 'Within 5 days',
+      })
+    );
+    const projectId = createdProject.project.id;
+    const quoted = await submitQuoteHandler(
+      req(contractorId, 'contractor', {
+        projectId,
+        priceCents: 100000,
+        timelineDays: 2,
+        scopeNotes: 'Test quote',
+      })
+    );
+    await selectContractorHandler(req(customerId, 'customer', { projectId, quoteId: quoted.quote.id }));
+    await acceptAgreementHandler(req(customerId, 'customer', { agreementId: projectId }));
+    await acceptAgreementHandler(req(contractorId, 'contractor', { agreementId: projectId }));
+
+    const created = await createEstimateDepositHandler(req(customerId, 'customer', { projectId }));
+    await captureEstimateDepositHandler(req(customerId, 'customer', { depositId: created.deposit.id }));
+    await applyEstimateDepositToJobHandler(req(customerId, 'customer', { projectId, depositId: created.deposit.id }));
+    await fundHoldHandler(req(customerId, 'customer', { projectId }));
+
+    const fundedProject = (await db.collection('projects').doc(projectId).get()).data();
+    expect(fundedProject?.estimateDepositCreditCents).toBeGreaterThan(0);
+    expect(fundedProject?.heldAmountCents).toBeLessThan(100000);
   });
 
   afterAll(async () => {

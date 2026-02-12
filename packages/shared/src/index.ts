@@ -7,3 +7,5 @@ export * from './fees';
 export * from './holdPolicy';
 export * from './featureFlags';
 export * from './i18n';
+export * from './reliability';
+export * from './deposits';

@@ -9,6 +9,10 @@ const nav = [
   { href: '/users', label: 'Users' },
   { href: '/projects', label: 'Projects' },
   { href: '/cases', label: 'Cases' },
+  { href: '/deposits', label: 'Deposits' },
+  { href: '/reliability', label: 'Reliability' },
+  { href: '/subscriptions', label: 'Subscriptions' },
+  { href: '/concierge', label: 'Concierge' },
   { href: '/reviews', label: 'Reviews' },
   { href: '/config', label: 'Config' },
 ];

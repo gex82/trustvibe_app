@@ -60,8 +60,14 @@ Last updated: 2026-02-11
 ## Phase 2 (Feature Flagged)
 
 - [ ] Enable Phase 2 flags in Admin Config.
+- [ ] Create estimate deposit, capture it, then apply deposit credit before funding.
+- [ ] Mark contractor no-show and verify auto-refund for estimate deposit.
 - [ ] Create milestones and approve a milestone release.
 - [ ] Propose and accept a change order.
 - [ ] Create and confirm a booking request.
+- [ ] Record booking attendance and verify reliability score updates.
+- [ ] Submit DACO/perito credential and verify status badge updates.
+- [ ] Create subscription and verify invoice appears in admin subscriptions page.
+- [ ] Create high-ticket concierge case and assign concierge manager in admin page.
 - [ ] Load recommendations for both customer and contractor views.
 - [ ] Create featured promotion code and verify featured listings + referral code apply.

@@ -10,7 +10,11 @@
     "seed": "node -r ts-node/register ../scripts/seed.ts",
     "scenario:happy": "node -r ts-node/register ../scripts/scenarios/happy_path_release.ts",
     "scenario:joint": "node -r ts-node/register ../scripts/scenarios/issue_then_joint_release_partial.ts",
-    "scenario:external": "node -r ts-node/register ../scripts/scenarios/issue_then_external_resolution_refund_full.ts"
+    "scenario:external": "node -r ts-node/register ../scripts/scenarios/issue_then_external_resolution_refund_full.ts",
+    "scenario:deposit-no-show": "node -r ts-node/register ../scripts/scenarios/deposit_no_show_refund.ts",
+    "scenario:milestone-partial": "node -r ts-node/register ../scripts/scenarios/milestone_partial_release.ts",
+    "scenario:verified-credential": "node -r ts-node/register ../scripts/scenarios/verified_credential_job.ts",
+    "scenario:high-ticket": "node -r ts-node/register ../scripts/scenarios/high_ticket_concierge.ts"
   },
   "engines": {
     "node": "20"
@@ -19,6 +23,7 @@
     "@trustvibe/shared": "file:../packages/shared",
     "firebase-admin": "^12.7.0",
     "firebase-functions": "^5.1.1",
+    "stripe": "^18.3.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
