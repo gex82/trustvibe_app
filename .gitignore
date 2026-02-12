@@ -8,3 +8,4 @@ functions/lib
 apps/admin/.next
 apps/mobile/.expo
 .env*
+*-debug.log
