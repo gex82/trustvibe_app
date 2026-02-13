@@ -150,10 +150,26 @@ function MainTabs(): React.JSX.Element {
         },
       })}
     >
-      <Tabs.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: t('nav.home') }} />
-      <Tabs.Screen name="SearchTab" component={SearchStackNavigator} options={{ title: t('nav.search') }} />
-      <Tabs.Screen name="ProjectsTab" component={ProjectsStackNavigator} options={{ title: t('nav.projects') }} />
-      <Tabs.Screen name="ProfileTab" component={ProfileStackNavigator} options={{ title: t('nav.profile') }} />
+      <Tabs.Screen
+        name="HomeTab"
+        component={HomeStackNavigator}
+        options={{ title: t('nav.home'), tabBarTestID: 'tab-home' }}
+      />
+      <Tabs.Screen
+        name="SearchTab"
+        component={SearchStackNavigator}
+        options={{ title: t('nav.search'), tabBarTestID: 'tab-search' }}
+      />
+      <Tabs.Screen
+        name="ProjectsTab"
+        component={ProjectsStackNavigator}
+        options={{ title: t('nav.projects'), tabBarTestID: 'tab-projects' }}
+      />
+      <Tabs.Screen
+        name="ProfileTab"
+        component={ProfileStackNavigator}
+        options={{ title: t('nav.profile'), tabBarTestID: 'tab-profile' }}
+      />
     </Tabs.Navigator>
   );
 }

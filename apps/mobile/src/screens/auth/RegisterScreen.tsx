@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -12,6 +12,7 @@ import { register, mapApiError } from '../../services/api';
 import type { AuthStackParamList } from '../../navigation/types';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
+import { logError, logWarn } from '../../services/logger';
 
 type FormValue = {
   name: string;
@@ -27,6 +28,9 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 export function RegisterScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const role = useAppStore((s) => s.role) ?? 'customer';
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [slowRequestMessage, setSlowRequestMessage] = React.useState<string | null>(null);
+  const slowTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const schema = React.useMemo(
     () =>
       z
@@ -50,6 +54,15 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
   });
   const accepted = watch('accepted');
 
+  React.useEffect(
+    () => () => {
+      if (slowTimerRef.current) {
+        clearTimeout(slowTimerRef.current);
+      }
+    },
+    []
+  );
+
   return (
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('auth.registerTitle')}</Text>
@@ -59,7 +72,15 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         control={control}
         name="name"
         render={({ field: { value, onChange }, fieldState }) => (
-          <FormInput value={value} onChangeText={onChange} label={t('profile.name')} iconName="person-outline" error={fieldState.error?.message} />
+          <FormInput
+            testID="register-name-input"
+            containerTestID="register-name-field"
+            value={value}
+            onChangeText={onChange}
+            label={t('profile.name')}
+            iconName="person-outline"
+            error={fieldState.error?.message}
+          />
         )}
       />
 
@@ -68,6 +89,8 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         name="email"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="register-email-input"
+            containerTestID="register-email-field"
             value={value}
             onChangeText={onChange}
             autoCapitalize="none"
@@ -84,6 +107,8 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         name="phone"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="register-phone-input"
+            containerTestID="register-phone-field"
             value={value}
             onChangeText={onChange}
             keyboardType="phone-pad"
@@ -99,6 +124,8 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         name="password"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="register-password-input"
+            containerTestID="register-password-field"
             value={value}
             onChangeText={onChange}
             secureTextEntry
@@ -114,6 +141,8 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         name="confirmPassword"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="register-confirm-password-input"
+            containerTestID="register-confirm-password-field"
             value={value}
             onChangeText={onChange}
             secureTextEntry
@@ -124,24 +153,57 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         )}
       />
 
-      <Pressable onPress={() => setValue('accepted', !accepted)} style={styles.checkboxRow}>
+      <Pressable
+        testID="register-accept-terms"
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: accepted }}
+        onPress={() => setValue('accepted', !accepted)}
+        style={styles.checkboxRow}
+      >
         <View style={[styles.checkbox, accepted ? styles.checkboxOn : null]} />
         <Text style={styles.checkboxLabel}>{t('auth.acceptTerms')}</Text>
       </Pressable>
 
       <PrimaryButton
+        testID="register-submit"
         label={t('auth.registerTitle')}
         disabled={formState.isSubmitting}
         onPress={handleSubmit(async (values) => {
           try {
+            setSubmitError(null);
+            setSlowRequestMessage(null);
+            if (slowTimerRef.current) {
+              clearTimeout(slowTimerRef.current);
+            }
+            slowTimerRef.current = setTimeout(() => {
+              setSlowRequestMessage(t('auth.requestTakingLonger'));
+              logWarn('auth.register.slow_request', { email: values.email, role });
+            }, 8000);
             await register({ name: values.name, email: values.email, password: values.password, role });
           } catch (error) {
-            Alert.alert(t('common.error'), mapApiError(error));
+            const message = mapApiError(error);
+            setSubmitError(message);
+            logError('auth.register.failed', error, { email: values.email, role });
+            Alert.alert(t('common.error'), message);
+          } finally {
+            if (slowTimerRef.current) {
+              clearTimeout(slowTimerRef.current);
+              slowTimerRef.current = null;
+            }
+            setSlowRequestMessage(null);
           }
         })}
       />
+      {formState.isSubmitting ? (
+        <View testID="register-progress" style={styles.progressRow}>
+          <ActivityIndicator color={colors.navy} />
+          <Text style={styles.progressText}>{t('auth.registerInProgress')}</Text>
+        </View>
+      ) : null}
+      {slowRequestMessage ? <Text style={styles.warning}>{slowRequestMessage}</Text> : null}
+      {submitError ? <Text testID="register-error" style={styles.error}>{submitError}</Text> : null}
 
-      <PrimaryButton label={t('auth.loginTitle')} variant="secondary" onPress={() => navigation.navigate('Login')} />
+      <PrimaryButton testID="register-go-login" label={t('auth.loginTitle')} variant="secondary" onPress={() => navigation.navigate('Login')} />
     </ScreenContainer>
   );
 }
@@ -179,5 +241,22 @@ const styles = StyleSheet.create({
   checkboxLabel: {
     color: colors.textSecondary,
     flex: 1,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  progressText: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  warning: {
+    color: colors.warning,
+    fontWeight: '600',
+  },
+  error: {
+    color: colors.danger,
+    fontWeight: '600',
   },
 });

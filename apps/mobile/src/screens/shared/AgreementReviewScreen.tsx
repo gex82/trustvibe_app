@@ -3,17 +3,20 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { acceptAgreement, getProject } from '../../services/api';
+import { acceptAgreement, getProject, mapApiError } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { colors, spacing } from '../../theme/tokens';
 import type { HomeStackParamList } from '../../navigation/types';
 import { getEscrowStateLabel } from '../../utils/escrowState';
+import { useAppStore } from '../../store/appStore';
+import { getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'AgreementReview'>;
 
 export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
   const projectId = route.params.projectId;
 
   const projectQuery = useQuery({
@@ -32,7 +35,7 @@ export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.E
         Alert.alert(t('common.status'), t('agreement.waitingOtherParty'));
       }
     },
-    onError: (error) => Alert.alert(t('common.error'), String(error)),
+    onError: (error) => Alert.alert(t('common.error'), mapApiError(error)),
   });
 
   if (projectQuery.isLoading) {
@@ -57,7 +60,7 @@ export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.E
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('agreement.title')}</Text>
       <View style={styles.card}>
-        <Text style={styles.text}>{`${t('agreement.scopeSummary')}: ${project.title}`}</Text>
+        <Text style={styles.text}>{`${t('agreement.scopeSummary')}: ${getLocalizedProjectTitle(project, language)}`}</Text>
         <Text style={styles.text}>{`${t('agreement.policySummary')}: ${t('escrow.hold.policy')}`}</Text>
         <Text style={styles.text}>{`${t('common.status')}: ${getEscrowStateLabel(t, project.escrowState)}`}</Text>
       </View>

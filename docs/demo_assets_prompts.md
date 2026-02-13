@@ -1,6 +1,6 @@
 # Demo Asset Prompts (Reproducible)
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 Use these prompts if you regenerate synthetic demo media externally.
 
@@ -44,7 +44,33 @@ Output targets:
 - `apps/mobile/assets/demo/projects/bathroom_remodel_02.png`
 - `apps/mobile/assets/demo/projects/bathroom_remodel_03.png`
 
-## 4. Credential Mock Document
+## 4. Kitchen Remodel Gallery Set
+
+Prompt template:
+
+`Generate a realistic kitchen remodel progress photo in Puerto Rico residential style. Stage: {{stage}}. Clean, bright interior, no people, no logos, no text overlays.`
+
+Stage variants:
+
+- `Cabinet and backsplash replacement`
+- `Countertops, lighting, and finishing`
+
+Output targets:
+
+- `apps/mobile/assets/demo/projects/kitchen_remodel_01.png`
+- `apps/mobile/assets/demo/projects/kitchen_remodel_02.png`
+
+## 5. Concrete Driveway Gallery
+
+Prompt:
+
+`Generate a realistic residential concrete driveway resurfacing photo in Puerto Rico style. Show clean finish, subtle curb line, daylight conditions, no people, no logos, no text overlays.`
+
+Output target:
+
+- `apps/mobile/assets/demo/projects/concrete_driveway_01.png`
+
+## 6. Credential Mock Document
 
 Prompt:
 
@@ -54,7 +80,7 @@ Output target:
 
 - `apps/mobile/assets/demo/documents/license_certificate_mock.txt` (or `.pdf` if replaced)
 
-## 5. Insurance Mock Document
+## 7. Insurance Mock Document
 
 Prompt:
 
@@ -64,7 +90,7 @@ Output target:
 
 - `apps/mobile/assets/demo/documents/general_liability_mock.txt` (or `.pdf` if replaced)
 
-## 6. Resolution Mock Document
+## 8. Resolution Mock Document
 
 Prompt:
 

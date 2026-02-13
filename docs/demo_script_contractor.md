@@ -1,6 +1,6 @@
 # Contractor Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Preflight (before opening camera)
 
@@ -38,8 +38,8 @@ Last updated: 2026-02-12
 19. Return to `Profile`.
 20. Tap `History`.
 21. Return and open `Earnings` (if present for this seeded state).
-22. Return to `Profile`.
-23. Tap `Log out` (red button).
+22. Return to `Home`.
+23. In the Home top row, tap the small `Log out` action (next to language switch).
 24. In confirmation alert, tap `Log out`.
 25. End recording on role-selection screen.
 
@@ -47,4 +47,4 @@ Last updated: 2026-02-12
 
 1. Language switch is visible and responsive.
 2. Contractor profile/docs flow is functional and upload paths complete.
-3. Logout from Profile returns to unauthenticated entry flow.
+3. Quick logout from Home returns to unauthenticated entry flow.

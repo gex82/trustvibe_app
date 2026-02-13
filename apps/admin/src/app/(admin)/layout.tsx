@@ -53,7 +53,7 @@ export default function AdminLayout({ children }: { children: any }) {
         <strong>TrustVibe Admin Console</strong>
         <nav style={{ marginTop: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {nav.map((item) => (
-            <Link key={item.href} href={item.href} className="muted">
+            <Link key={item.href} href={item.href} className="muted" data-testid={`admin-nav-${item.label.toLowerCase()}`}>
               {item.label}
             </Link>
           ))}

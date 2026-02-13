@@ -1,6 +1,6 @@
 # iPad Demo Recording Runbook
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Goal
 
@@ -38,7 +38,8 @@ Produce one-take customer and contractor recordings with deterministic state, cl
 ## Final pre-record checklist
 
 1. Language switcher visible on Home and Profile.
-2. Profile screen has visible red `Log out` button.
-3. Demo credentials match `docs/demo_credentials.md`.
-4. Upload actions work and complete with no blocking error.
-5. End state after logout is role-selection screen.
+2. Home screen has visible quick `Log out` action in the top row.
+3. Profile screen has visible red `Log out` button.
+4. Demo credentials match `docs/demo_credentials.md`.
+5. Upload actions work and complete with no blocking error.
+6. End state after logout is role-selection screen.

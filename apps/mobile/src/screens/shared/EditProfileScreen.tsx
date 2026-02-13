@@ -32,6 +32,7 @@ export function EditProfileScreen({ navigation }: Props): React.JSX.Element {
       <View style={styles.avatarWrap}>
         <Avatar name={name || profile?.name} uri={avatarUrl} size={88} />
         <PrimaryButton
+          testID="edit-profile-upload-avatar"
           label={t('profile.uploadPhoto')}
           variant="secondary"
           onPress={async () => {
@@ -51,10 +52,11 @@ export function EditProfileScreen({ navigation }: Props): React.JSX.Element {
           }}
         />
       </View>
-      <FormInput label={t('profile.name')} value={name} onChangeText={setName} iconName="person-outline" />
-      <FormInput label={t('profile.phone')} value={phone} onChangeText={setPhone} iconName="call-outline" />
-      <FormInput label={t('auth.email')} value={profile?.email ?? user?.email ?? ''} editable={false} iconName="mail-outline" />
+      <FormInput testID="edit-profile-name-input" containerTestID="edit-profile-name-field" label={t('profile.name')} value={name} onChangeText={setName} iconName="person-outline" />
+      <FormInput testID="edit-profile-phone-input" containerTestID="edit-profile-phone-field" label={t('profile.phone')} value={phone} onChangeText={setPhone} iconName="call-outline" />
+      <FormInput testID="edit-profile-email-input" containerTestID="edit-profile-email-field" label={t('auth.email')} value={profile?.email ?? user?.email ?? ''} editable={false} iconName="mail-outline" />
       <PrimaryButton
+        testID="edit-profile-save"
         label={saving ? t('common.loading') : t('common.save')}
         disabled={saving || !user?.uid}
         onPress={async () => {

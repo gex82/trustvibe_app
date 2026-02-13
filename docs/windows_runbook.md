@@ -107,6 +107,11 @@ Bootstrap script:
 npm run emulators
 ```
 
+CLI compatibility note:
+
+- On installed Firebase CLI (`firebase --version`), `firebase emulators:start --help` does not expose a `--host` option.
+- Keep emulator host binding in `firebase.json` under `emulators.*.host` (already set to `0.0.0.0`).
+
 Services:
 
 - Auth: `0.0.0.0:9099`

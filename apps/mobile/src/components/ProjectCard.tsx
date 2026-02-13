@@ -9,11 +9,12 @@ type Props = {
   phaseLabel: string;
   progress: number;
   onPress?: () => void;
+  testID?: string;
 };
 
-export function ProjectCard({ title, phaseLabel, progress, onPress }: Props): React.JSX.Element {
+export function ProjectCard({ title, phaseLabel, progress, onPress, testID }: Props): React.JSX.Element {
   return (
-    <Pressable onPress={onPress}>
+    <Pressable testID={testID} onPress={onPress}>
       <Card style={styles.card}>
         <View style={styles.row}>
           <Text style={styles.title} numberOfLines={1}>

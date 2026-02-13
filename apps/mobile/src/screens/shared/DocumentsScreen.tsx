@@ -50,6 +50,7 @@ export function DocumentsScreen(_: Props): React.JSX.Element {
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('profile.documents')}</Text>
       <PrimaryButton
+        testID="documents-upload"
         label={uploading ? t('common.loading') : t('documents.upload')}
         disabled={uploading || !user?.uid}
         onPress={async () => {
@@ -93,7 +94,7 @@ export function DocumentsScreen(_: Props): React.JSX.Element {
             <View style={styles.docRow}>
               <View style={styles.docMain}>
                 <Text style={styles.docTitle}>{item.name}</Text>
-                <Text style={styles.meta} numberOfLines={1}>
+                <Text testID={`documents-url-${item.id}`} style={styles.meta} numberOfLines={1}>
                   {item.url}
                 </Text>
               </View>

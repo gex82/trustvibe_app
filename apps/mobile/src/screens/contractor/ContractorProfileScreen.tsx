@@ -32,6 +32,9 @@ const demoPortfolioMap: Record<string, ImageSourcePropType> = {
   'demo://projects/bathroom_remodel_01.png': demoProjectPhotos[0],
   'demo://projects/bathroom_remodel_02.png': demoProjectPhotos[1],
   'demo://projects/bathroom_remodel_03.png': demoProjectPhotos[2],
+  'demo://projects/kitchen_remodel_01.png': demoProjectPhotos[3],
+  'demo://projects/kitchen_remodel_02.png': demoProjectPhotos[4],
+  'demo://projects/concrete_driveway_01.png': demoProjectPhotos[5],
 };
 
 function resolvePortfolioAsset(value: string): string | ImageSourcePropType | null {
@@ -104,7 +107,7 @@ export function ContractorProfileScreen({ route, navigation }: Props): React.JSX
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.wrap}>
-        <Text style={styles.screenTitle}>{t('contractor.verifiedPortfolio')}</Text>
+        <Text testID="contractor-profile-title" style={styles.screenTitle}>{t('contractor.verifiedPortfolio')}</Text>
         <Card>
           <View style={styles.header}>
             <Avatar name={profile.name} uri={profile.avatarUrl} source={profile.avatarSource} size={84} />
@@ -137,6 +140,7 @@ export function ContractorProfileScreen({ route, navigation }: Props): React.JSX
         <PhotoGallery photos={profile.portfolio} />
 
         <CTAButton
+          testID="contractor-profile-request-quote"
           label={loading ? t('common.loading') : t('contractor.requestQuote')}
           onPress={() => {
             Alert.alert(t('common.status'), t('contractor.requestQuoteHint'));

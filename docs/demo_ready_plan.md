@@ -12,6 +12,7 @@
 
 ## Critical Corrections to Current Plan
 - Emulator host binding must be configured in `firebase.json` (`emulators.*.host`), not `firebase emulators:start --host`.
+- Host binding truth: for this repo and installed Firebase CLI, keep host configuration in `firebase.json`; do not add `--host` flags to `npm run emulators`.
 - Translation source of truth is `packages/shared/src/i18n/en.json` and `packages/shared/src/i18n/es.json`.
 - Backend callable surface is broad; main gaps are mobile UX, role-aware flow control, and feature-flag-aware UI.
 - Integration baseline must be green (`npm run test:integration`).

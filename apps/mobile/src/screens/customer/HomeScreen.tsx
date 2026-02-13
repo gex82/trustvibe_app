@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import type { HomeStackParamList } from '../../navigation/types';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
 import { getEscrowStateLabel } from '../../utils/escrowState';
+import { getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
@@ -40,6 +41,7 @@ function deriveProgress(escrowState: string): number {
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const profile = useAppStore((s) => s.profile);
+  const language = useAppStore((s) => s.language);
   const projectsQuery = useQuery({
     queryKey: ['home-projects'],
     queryFn: () => listProjects({ limit: 20 }),
@@ -49,21 +51,30 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const activeProjects = projects.filter((item) => !['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL'].includes(String(item.escrowState)));
   const escrowTotalCents = activeProjects.reduce((sum, item) => sum + Number(item.heldAmountCents ?? item.selectedQuotePriceCents ?? 0), 0);
 
+  async function performLogout(): Promise<void> {
+    try {
+      await logout();
+    } catch (error) {
+      Alert.alert(t('common.error'), mapApiError(error));
+    }
+  }
+
   function handleLogout(): void {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const confirmed = window.confirm(`${t('home.logoutConfirmTitle')}\n\n${t('home.logoutConfirmBody')}`);
+      if (!confirmed) {
+        return;
+      }
+      void performLogout();
+      return;
+    }
+
     Alert.alert(t('home.logoutConfirmTitle'), t('home.logoutConfirmBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('home.logoutConfirmAction'),
         style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert(t('common.error'), mapApiError(error));
-            }
-          })();
-        },
+        onPress: () => void performLogout(),
       },
     ]);
   }
@@ -73,14 +84,16 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       <View style={styles.top}>
         <Text style={styles.greeting}>{t('home.greeting', { name: profile?.name?.split(' ')[0] ?? t('home.greetingFallbackName') })}</Text>
         <View style={styles.topActions}>
-          <LanguageSwitcher compact />
-          <Pressable onPress={handleLogout}>
+          <LanguageSwitcher compact testIDPrefix="home-language" />
+          <Pressable testID="home-quick-logout" onPress={handleLogout}>
             <Text style={styles.logoutText}>{t('home.logout')}</Text>
           </Pressable>
         </View>
       </View>
 
       <SearchBar
+        containerTestID="home-search"
+        testID="home-search-input"
         value=""
         editable={false}
         placeholder={t('home.searchPlaceholder')}
@@ -103,7 +116,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <ProjectCard
-              title={String(item.title)}
+              testID={`home-project-card-${item.id}`}
+              title={getLocalizedProjectTitle(item, language)}
               phaseLabel={getEscrowStateLabel(t, String(item.escrowState))}
               progress={deriveProgress(String(item.escrowState))}
               onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })}
@@ -128,7 +142,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         <SectionHeader title={t('home.recentActivity')} />
         {activeProjects.slice(0, 3).map((item) => (
           <View key={item.id} style={styles.activityRow}>
-            <Text style={styles.activityTitle}>{String(item.title)}</Text>
+            <Text style={styles.activityTitle}>{getLocalizedProjectTitle(item, language)}</Text>
             <Text style={styles.activityMeta}>{getEscrowStateLabel(t, String(item.escrowState))}</Text>
           </View>
         ))}

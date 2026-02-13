@@ -9,11 +9,12 @@ type Props = {
   disabled?: boolean;
   iconName?: React.ComponentProps<typeof Ionicons>['name'];
   style?: ViewStyle;
+  testID?: string;
 };
 
-export function CTAButton({ label, onPress, disabled = false, iconName, style }: Props): React.JSX.Element {
+export function CTAButton({ label, onPress, disabled = false, iconName, style, testID }: Props): React.JSX.Element {
   return (
-    <Pressable disabled={disabled} style={[styles.button, disabled ? styles.disabled : null, style]} onPress={onPress}>
+    <Pressable testID={testID} disabled={disabled} style={[styles.button, disabled ? styles.disabled : null, style]} onPress={onPress}>
       {iconName ? <Ionicons name={iconName} size={16} color={colors.textInverse} /> : null}
       <Text style={styles.label}>{label}</Text>
     </Pressable>

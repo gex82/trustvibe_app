@@ -156,63 +156,65 @@ export default function ConfigPage() {
 
       <label>
         Fee %
-        <input value={percent} onChange={(e) => setPercent(e.target.value)} style={inputStyle} />
+        <input data-testid="config-fee-percent" value={percent} onChange={(e) => setPercent(e.target.value)} style={inputStyle} />
       </label>
       <label>
         High-ticket threshold (USD)
-        <input value={highTicketThreshold} onChange={(e) => setHighTicketThreshold(e.target.value)} style={inputStyle} />
+        <input data-testid="config-high-ticket-threshold" value={highTicketThreshold} onChange={(e) => setHighTicketThreshold(e.target.value)} style={inputStyle} />
       </label>
       <label>
         Approval Window Days (N)
-        <input value={approvalDays} onChange={(e) => setApprovalDays(e.target.value)} style={inputStyle} />
+        <input data-testid="config-approval-days" value={approvalDays} onChange={(e) => setApprovalDays(e.target.value)} style={inputStyle} />
       </label>
       <label>
         Admin Attention Days (M)
-        <input value={adminDays} onChange={(e) => setAdminDays(e.target.value)} style={inputStyle} />
+        <input data-testid="config-admin-days" value={adminDays} onChange={(e) => setAdminDays(e.target.value)} style={inputStyle} />
       </label>
 
       <h3 style={sectionTitle}>Feature Flags</h3>
-      <Flag label="Stripe Connect Enabled" checked={stripeConnectEnabled} onChange={setStripeConnectEnabled} />
-      <Flag label="Estimate Deposits Enabled" checked={estimateDepositsEnabled} onChange={setEstimateDepositsEnabled} />
-      <Flag label="Milestone Payments Enabled" checked={milestonesEnabled} onChange={setMilestonesEnabled} />
-      <Flag label="Change Orders Enabled" checked={changeOrdersEnabled} onChange={setChangeOrdersEnabled} />
-      <Flag label="Credential Verification Enabled" checked={credentialVerificationEnabled} onChange={setCredentialVerificationEnabled} />
-      <Flag label="Scheduling Enabled" checked={schedulingEnabled} onChange={setSchedulingEnabled} />
-      <Flag label="Reliability Scoring Enabled" checked={reliabilityScoringEnabled} onChange={setReliabilityScoringEnabled} />
-      <Flag label="Subscriptions Enabled" checked={subscriptionsEnabled} onChange={setSubscriptionsEnabled} />
-      <Flag label="High-ticket Concierge Enabled" checked={highTicketConciergeEnabled} onChange={setHighTicketConciergeEnabled} />
-      <Flag label="Recommendations Enabled" checked={recommendationsEnabled} onChange={setRecommendationsEnabled} />
-      <Flag label="Growth Enabled" checked={growthEnabled} onChange={setGrowthEnabled} />
+      <Flag testId="config-flag-stripe-connect" label="Stripe Connect Enabled" checked={stripeConnectEnabled} onChange={setStripeConnectEnabled} />
+      <Flag testId="config-flag-estimate-deposits" label="Estimate Deposits Enabled" checked={estimateDepositsEnabled} onChange={setEstimateDepositsEnabled} />
+      <Flag testId="config-flag-milestones" label="Milestone Payments Enabled" checked={milestonesEnabled} onChange={setMilestonesEnabled} />
+      <Flag testId="config-flag-change-orders" label="Change Orders Enabled" checked={changeOrdersEnabled} onChange={setChangeOrdersEnabled} />
+      <Flag testId="config-flag-credential-verification" label="Credential Verification Enabled" checked={credentialVerificationEnabled} onChange={setCredentialVerificationEnabled} />
+      <Flag testId="config-flag-scheduling" label="Scheduling Enabled" checked={schedulingEnabled} onChange={setSchedulingEnabled} />
+      <Flag testId="config-flag-reliability" label="Reliability Scoring Enabled" checked={reliabilityScoringEnabled} onChange={setReliabilityScoringEnabled} />
+      <Flag testId="config-flag-subscriptions" label="Subscriptions Enabled" checked={subscriptionsEnabled} onChange={setSubscriptionsEnabled} />
+      <Flag testId="config-flag-high-ticket" label="High-ticket Concierge Enabled" checked={highTicketConciergeEnabled} onChange={setHighTicketConciergeEnabled} />
+      <Flag testId="config-flag-recommendations" label="Recommendations Enabled" checked={recommendationsEnabled} onChange={setRecommendationsEnabled} />
+      <Flag testId="config-flag-growth" label="Growth Enabled" checked={growthEnabled} onChange={setGrowthEnabled} />
 
       <h3 style={sectionTitle}>Fee Tiers (JSON)</h3>
-      <textarea value={feeTiersJson} onChange={(e) => setFeeTiersJson(e.target.value)} style={textareaStyle} rows={8} />
+      <textarea data-testid="config-fee-tiers-json" value={feeTiersJson} onChange={(e) => setFeeTiersJson(e.target.value)} style={textareaStyle} rows={8} />
 
       <h3 style={sectionTitle}>Deposit Policies (JSON)</h3>
-      <textarea value={depositPoliciesJson} onChange={(e) => setDepositPoliciesJson(e.target.value)} style={textareaStyle} rows={8} />
+      <textarea data-testid="config-deposit-policies-json" value={depositPoliciesJson} onChange={(e) => setDepositPoliciesJson(e.target.value)} style={textareaStyle} rows={8} />
 
       <h3 style={sectionTitle}>Subscription Plans (JSON)</h3>
-      <textarea value={subscriptionPlansJson} onChange={(e) => setSubscriptionPlansJson(e.target.value)} style={textareaStyle} rows={8} />
+      <textarea data-testid="config-subscription-plans-json" value={subscriptionPlansJson} onChange={(e) => setSubscriptionPlansJson(e.target.value)} style={textareaStyle} rows={8} />
 
-      <button className="btn btn-primary" onClick={save}>
+      <button data-testid="config-save" className="btn btn-primary" onClick={save}>
         Save Config
       </button>
-      {message ? <p className="muted">{message}</p> : null}
+      {message ? <p data-testid="config-message" className="muted">{message}</p> : null}
     </section>
   );
 }
 
 function Flag({
+  testId,
   label,
   checked,
   onChange,
 }: {
+  testId: string;
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
 }): React.JSX.Element {
   return (
     <label>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ marginRight: 8 }} />
+      <input data-testid={testId} type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} style={{ marginRight: 8 }} />
       {label}
     </label>
   );

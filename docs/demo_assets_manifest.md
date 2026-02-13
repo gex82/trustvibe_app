@@ -1,6 +1,6 @@
 # Demo Assets Manifest
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Asset Root
 
@@ -15,6 +15,9 @@ Last updated: 2026-02-12
 | `apps/mobile/assets/demo/projects/bathroom_remodel_01.png` | image | Featured project gallery image (milestone phase 1). |
 | `apps/mobile/assets/demo/projects/bathroom_remodel_02.png` | image | Featured project gallery image (milestone phase 2). |
 | `apps/mobile/assets/demo/projects/bathroom_remodel_03.png` | image | Featured project gallery image (milestone phase 3). |
+| `apps/mobile/assets/demo/projects/kitchen_remodel_01.png` | image | Featured project gallery image (kitchen category). |
+| `apps/mobile/assets/demo/projects/kitchen_remodel_02.png` | image | Featured project gallery image (kitchen finishing variant). |
+| `apps/mobile/assets/demo/projects/concrete_driveway_01.png` | image | Featured project gallery image (concrete/driveway category). |
 | `apps/mobile/assets/demo/documents/license_certificate_mock.txt` | document | Credential upload sample for contractor docs flow. |
 | `apps/mobile/assets/demo/documents/general_liability_mock.txt` | document | Insurance upload sample for contractor docs flow. |
 | `apps/mobile/assets/demo/documents/resolution_settlement_mock.txt` | document | Dispute/resolution upload sample in issue path demo. |
@@ -29,4 +32,5 @@ Last updated: 2026-02-12
 ## Notes
 
 - All files are synthetic and safe for customer/contractor demos.
+- Portfolio walkthrough now covers at least 3 categories: bathroom, kitchen, and concrete/driveway.
 - Replace these with final brand/media assets before production launch work.

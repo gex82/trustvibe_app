@@ -8,11 +8,14 @@ import { Card } from '../../components/Card';
 import { EmptyState } from '../../components/EmptyState';
 import { colors, spacing } from '../../theme/tokens';
 import { getEscrowStateLabel } from '../../utils/escrowState';
+import { useAppStore } from '../../store/appStore';
+import { getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 const paidStates = new Set(['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_RELEASE_PARTIAL']);
 
 export function EarningsScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
   const projectsQuery = useQuery({
     queryKey: ['contractor-earnings-projects'],
     queryFn: () => listProjects({ limit: 100 }),
@@ -39,7 +42,7 @@ export function EarningsScreen(): React.JSX.Element {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Card>
-            <Text style={styles.itemTitle}>{item.title}</Text>
+            <Text style={styles.itemTitle}>{getLocalizedProjectTitle(item, language)}</Text>
             <Text style={styles.meta}>{getEscrowStateLabel(t, item.escrowState)}</Text>
           </Card>
         )}

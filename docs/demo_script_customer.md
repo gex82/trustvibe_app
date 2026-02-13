@@ -1,6 +1,6 @@
 # Customer Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Preflight (before opening camera)
 
@@ -36,8 +36,8 @@ Last updated: 2026-02-12
 17. Tap `Documents`.
 18. Tap `Upload Document`.
 19. Pick a demo file and confirm upload.
-20. Navigate back to `Profile`.
-21. Tap `Log out` (red button).
+20. Navigate back to `Home`.
+21. In the Home top row, tap the small `Log out` action (next to language switch).
 22. In confirmation alert, tap `Log out`.
 23. End recording on role-selection screen.
 
@@ -45,4 +45,4 @@ Last updated: 2026-02-12
 
 1. Language switch is visible on Home and works immediately.
 2. No hardcoded English remains on Home/Profile/role entry while in Spanish mode.
-3. Logout from Profile returns to unauthenticated entry flow.
+3. Quick logout from Home returns to unauthenticated entry flow.

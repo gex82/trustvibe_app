@@ -23,9 +23,13 @@
     "scenario:milestone-partial": "npm run scenario:milestone-partial -w @trustvibe/functions",
     "scenario:verified-credential": "npm run scenario:verified-credential -w @trustvibe/functions",
     "scenario:high-ticket": "npm run scenario:high-ticket -w @trustvibe/functions",
-    "bootstrap:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_demo.ps1"
+    "bootstrap:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_demo.ps1",
+    "check:demo:localization": "npm exec -w @trustvibe/functions ts-node ../scripts/check_demo_localization.ts",
+    "test:e2e:web": "playwright test --config=playwright.config.ts",
+    "pass:web:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run_web_demo_pass.ps1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.41.2",
     "@types/jest": "^29.5.14",
     "expo": "^54.0.33",
     "jest": "^29.7.0",

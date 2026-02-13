@@ -15,6 +15,12 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-config.resolver.disableHierarchicalLookup = false;
+// Force a single React/React Native instance in monorepo mode to avoid invalid hook calls.
+config.resolver.disableHierarchicalLookup = true;
+config.resolver.extraNodeModules = {
+  react: path.resolve(workspaceRoot, 'node_modules/react'),
+  'react-dom': path.resolve(workspaceRoot, 'node_modules/react-dom'),
+  'react-native': path.resolve(workspaceRoot, 'node_modules/react-native'),
+};
 
 module.exports = config;

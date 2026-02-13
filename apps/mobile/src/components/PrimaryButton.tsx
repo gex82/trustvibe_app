@@ -7,14 +7,20 @@ type Props = {
   onPress: () => void;
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'danger';
+  testID?: string;
 };
 
-export function PrimaryButton({ label, onPress, disabled = false, variant = 'primary' }: Props): React.JSX.Element {
+export function PrimaryButton({ label, onPress, disabled = false, variant = 'primary', testID }: Props): React.JSX.Element {
   const bg = variant === 'primary' ? colors.navy : variant === 'danger' ? colors.danger : colors.backgroundSecondary;
   const labelColor = variant === 'secondary' ? colors.navyDark : colors.textInverse;
 
   return (
-    <Pressable disabled={disabled} style={[styles.button, { backgroundColor: bg }, disabled && styles.disabled]} onPress={onPress}>
+    <Pressable
+      testID={testID}
+      disabled={disabled}
+      style={[styles.button, { backgroundColor: bg }, disabled && styles.disabled]}
+      onPress={onPress}
+    >
       <Text style={[styles.label, { color: labelColor }]}>{label}</Text>
     </Pressable>
   );

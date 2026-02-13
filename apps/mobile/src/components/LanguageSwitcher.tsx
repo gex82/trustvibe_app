@@ -6,9 +6,10 @@ import { colors, radii, spacing } from '../theme/tokens';
 
 type Props = {
   compact?: boolean;
+  testIDPrefix?: string;
 };
 
-export function LanguageSwitcher({ compact = false }: Props): React.JSX.Element {
+export function LanguageSwitcher({ compact = false, testIDPrefix = 'language-switcher' }: Props): React.JSX.Element {
   const language = useAppStore((s) => s.language);
   const setLanguage = useAppStore((s) => s.setLanguage);
 
@@ -18,14 +19,16 @@ export function LanguageSwitcher({ compact = false }: Props): React.JSX.Element 
   }
 
   return (
-    <View style={[styles.wrap, compact && styles.wrapCompact]}>
+    <View testID={`${testIDPrefix}-container`} style={[styles.wrap, compact && styles.wrapCompact]}>
       <Pressable
+        testID={`${testIDPrefix}-en`}
         style={[styles.option, language === 'en' && styles.optionActive]}
         onPress={() => select('en')}
       >
         <Text style={[styles.label, language === 'en' && styles.labelActive]}>EN</Text>
       </Pressable>
       <Pressable
+        testID={`${testIDPrefix}-es`}
         style={[styles.option, language === 'es' && styles.optionActive]}
         onPress={() => select('es')}
       >

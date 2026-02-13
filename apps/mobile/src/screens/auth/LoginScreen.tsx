@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
@@ -11,6 +11,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { login, mapApiError, resetPassword } from '../../services/api';
 import type { AuthStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
+import { logError, logWarn } from '../../services/logger';
 
 type FormValue = {
   email: string;
@@ -22,6 +23,8 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export function LoginScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [slowRequestMessage, setSlowRequestMessage] = React.useState<string | null>(null);
+  const slowTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const schema = React.useMemo(
     () =>
       z.object({
@@ -36,6 +39,15 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
   });
   const email = watch('email');
 
+  React.useEffect(
+    () => () => {
+      if (slowTimerRef.current) {
+        clearTimeout(slowTimerRef.current);
+      }
+    },
+    []
+  );
+
   return (
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.brand}>TrustVibe</Text>
@@ -46,6 +58,8 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
         name="email"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="login-email-input"
+            containerTestID="login-email-field"
             value={value}
             onChangeText={onChange}
             autoCapitalize="none"
@@ -63,6 +77,8 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
         name="password"
         render={({ field: { value, onChange }, fieldState }) => (
           <FormInput
+            testID="login-password-input"
+            containerTestID="login-password-field"
             value={value}
             onChangeText={onChange}
             secureTextEntry
@@ -75,6 +91,7 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
       />
 
       <Pressable
+        testID="login-reset-password"
         onPress={async () => {
           if (!email) {
             Alert.alert(t('common.error'), t('auth.resetPasswordEmailPrompt'));
@@ -92,22 +109,45 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
       </Pressable>
 
       <PrimaryButton
+        testID="login-submit"
         label={t('auth.loginTitle')}
         disabled={formState.isSubmitting}
         onPress={handleSubmit(async (values) => {
           try {
             setSubmitError(null);
+            setSlowRequestMessage(null);
+            if (slowTimerRef.current) {
+              clearTimeout(slowTimerRef.current);
+            }
+            slowTimerRef.current = setTimeout(() => {
+              setSlowRequestMessage(t('auth.requestTakingLonger'));
+              logWarn('auth.login.slow_request', { email: values.email });
+            }, 8000);
             await login(values);
           } catch (error) {
             const message = mapApiError(error);
             setSubmitError(message);
+            logError('auth.login.failed', error, { email: values.email });
             Alert.alert(t('common.error'), message);
+          } finally {
+            if (slowTimerRef.current) {
+              clearTimeout(slowTimerRef.current);
+              slowTimerRef.current = null;
+            }
+            setSlowRequestMessage(null);
           }
         })}
       />
-      {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
+      {formState.isSubmitting ? (
+        <View testID="login-progress" style={styles.progressRow}>
+          <ActivityIndicator color={colors.navy} />
+          <Text style={styles.progressText}>{t('auth.signInInProgress')}</Text>
+        </View>
+      ) : null}
+      {slowRequestMessage ? <Text style={styles.warning}>{slowRequestMessage}</Text> : null}
+      {submitError ? <Text testID="login-error" style={styles.error}>{submitError}</Text> : null}
 
-      <PrimaryButton label={t('auth.registerTitle')} variant="secondary" onPress={() => navigation.navigate('Register')} />
+      <PrimaryButton testID="login-go-register" label={t('auth.registerTitle')} variant="secondary" onPress={() => navigation.navigate('Register')} />
     </ScreenContainer>
   );
 }
@@ -137,6 +177,19 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.danger,
+    fontWeight: '600',
+  },
+  warning: {
+    color: colors.warning,
+    fontWeight: '600',
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  progressText: {
+    color: colors.textSecondary,
     fontWeight: '600',
   },
 });

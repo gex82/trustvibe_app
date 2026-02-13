@@ -8,9 +8,12 @@ import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { EmptyState } from '../../components/EmptyState';
 import { colors, spacing } from '../../theme/tokens';
+import { useAppStore } from '../../store/appStore';
+import { getLocalizedField, getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 export function MessagesScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [body, setBody] = React.useState('');
 
@@ -54,7 +57,8 @@ export function MessagesScreen(): React.JSX.Element {
         contentContainerStyle={styles.projects}
         renderItem={({ item }) => (
           <PrimaryButton
-            label={item.title}
+            testID={`messages-project-${item.id}`}
+            label={getLocalizedProjectTitle(item, language)}
             variant={projectId === item.id ? 'primary' : 'secondary'}
             onPress={() => setProjectId(item.id)}
           />
@@ -70,7 +74,7 @@ export function MessagesScreen(): React.JSX.Element {
           <Card>
             <View style={styles.messageBubble}>
               <Text style={styles.messageMeta}>{item.senderId}</Text>
-              <Text style={styles.text}>{item.body}</Text>
+              <Text style={styles.text}>{getLocalizedField(item, 'body', language)}</Text>
             </View>
           </Card>
         )}
@@ -84,6 +88,7 @@ export function MessagesScreen(): React.JSX.Element {
       />
 
       <TextInput
+        testID="messages-input"
         value={body}
         onChangeText={setBody}
         placeholder={t('messaging.typeMessage')}
@@ -91,6 +96,7 @@ export function MessagesScreen(): React.JSX.Element {
         style={styles.input}
       />
       <PrimaryButton
+        testID="messages-send"
         label={t('common.submit')}
         disabled={!projectId || !body.trim() || sendMutation.isPending}
         onPress={() => {

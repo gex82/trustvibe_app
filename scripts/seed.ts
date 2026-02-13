@@ -47,6 +47,13 @@ function loadJson<T>(fileName: string): T {
   return JSON.parse(readFileSync(path, 'utf-8')) as T;
 }
 
+function asString(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  return fallback;
+}
+
 async function clearCollection(path: string): Promise<void> {
   const snap = await db.collection(path).get();
   const batch = db.batch();
@@ -61,6 +68,13 @@ async function seedAuthUsers(): Promise<void> {
   }
 
   for (const item of demoAuthUsers) {
+    const role =
+      item.uid === 'admin-001'
+        ? 'admin'
+        : item.uid === 'contractor-001'
+        ? 'contractor'
+        : 'customer';
+
     try {
       const existing = await auth.getUser(item.uid);
       await auth.updateUser(existing.uid, {
@@ -80,6 +94,11 @@ async function seedAuthUsers(): Promise<void> {
         throw error;
       }
     }
+
+    await auth.setCustomUserClaims(item.uid, {
+      role,
+      admin: role === 'admin',
+    });
   }
 }
 
@@ -259,6 +278,9 @@ async function run(): Promise<void> {
             { imageUrl: 'demo://projects/bathroom_remodel_01.png', caption: c.bioEn },
             { imageUrl: 'demo://projects/bathroom_remodel_02.png', caption: c.bioEs },
             { imageUrl: 'demo://projects/bathroom_remodel_03.png', caption: 'Milestone gallery asset' },
+            { imageUrl: 'demo://projects/kitchen_remodel_01.png', caption: 'Kitchen cabinet and backsplash upgrade' },
+            { imageUrl: 'demo://projects/kitchen_remodel_02.png', caption: 'Kitchen finishing and lighting' },
+            { imageUrl: 'demo://projects/concrete_driveway_01.png', caption: 'Concrete driveway resurfacing' },
           ]
         : [],
       credentials: [
@@ -340,12 +362,21 @@ async function run(): Promise<void> {
   await customerBatch.commit();
 
   for (const project of projects) {
+    const titleEn = asString((project as any).titleEn, asString((project as any).title));
+    const titleEs = asString((project as any).titleEs, titleEn);
+    const descriptionEn = asString((project as any).descriptionEn, asString((project as any).description));
+    const descriptionEs = asString((project as any).descriptionEs, descriptionEn);
+
     await db.collection('projects').doc(project.id).set({
       id: project.id,
       customerId: project.customerId,
       category: project.category,
-      title: project.titleEn,
-      description: `${project.descriptionEn} / ${project.descriptionEs}`,
+      title: titleEn,
+      titleEn,
+      titleEs,
+      description: descriptionEn,
+      descriptionEn,
+      descriptionEs,
       photos: [],
       municipality: project.municipality,
       desiredTimeline: project.desiredTimeline,
@@ -377,6 +408,9 @@ async function run(): Promise<void> {
   }
 
   for (const message of messages) {
+    const bodyEn = asString((message as any).bodyEn, asString((message as any).body));
+    const bodyEs = asString((message as any).bodyEs, bodyEn);
+
     await db
       .collection('messages')
       .doc(message.projectId)
@@ -385,16 +419,23 @@ async function run(): Promise<void> {
       .set({
         id: message.id,
         senderId: message.senderId,
-        body: `${message.bodyEn} / ${message.bodyEs}`,
+        body: bodyEn,
+        bodyEn,
+        bodyEs,
         attachments: [],
         createdAt: message.createdAt,
       });
   }
 
   for (const review of reviews) {
+    const feedbackEn = asString((review as any).feedbackEn, asString((review as any).feedback));
+    const feedbackEs = asString((review as any).feedbackEs, feedbackEn);
+
     await db.collection('reviews').doc(review.id).set({
       ...review,
-      feedback: `${review.feedbackEn} / ${review.feedbackEs}`,
+      feedback: feedbackEn,
+      feedbackEn,
+      feedbackEs,
       flagged: false,
       createdAt: new Date().toISOString(),
     });

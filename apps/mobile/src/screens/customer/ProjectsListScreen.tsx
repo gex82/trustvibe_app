@@ -11,6 +11,8 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
 import { getEscrowStateLabel } from '../../utils/escrowState';
+import { useAppStore } from '../../store/appStore';
+import { getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ProjectsList'>;
 
@@ -35,6 +37,7 @@ function deriveProgress(escrowState: string): number {
 
 export function ProjectsListScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
   const projectsQuery = useQuery({
     queryKey: ['projects-list'],
     queryFn: () => listProjects({ limit: 50 }),
@@ -43,7 +46,7 @@ export function ProjectsListScreen({ navigation }: Props): React.JSX.Element {
   return (
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('nav.projects')}</Text>
-      <PrimaryButton label={t('project.create.title')} onPress={() => navigation.navigate('CreateProject')} />
+      <PrimaryButton testID="projects-create" label={t('project.create.title')} onPress={() => navigation.navigate('CreateProject')} />
 
       {projectsQuery.isError ? <Text style={styles.error}>{mapApiError(projectsQuery.error)}</Text> : null}
 
@@ -53,7 +56,8 @@ export function ProjectsListScreen({ navigation }: Props): React.JSX.Element {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <ProjectCard
-            title={String(item.title)}
+            testID={`projects-list-card-${item.id}`}
+            title={getLocalizedProjectTitle(item, language)}
             phaseLabel={getEscrowStateLabel(t, String(item.escrowState))}
             progress={deriveProgress(String(item.escrowState))}
             onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })}

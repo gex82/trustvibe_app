@@ -37,6 +37,7 @@ import { useAppStore } from '../../store/appStore';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
 import { getEscrowStateLabel } from '../../utils/escrowState';
+import { getLocalizedProjectDescription, getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ProjectDetail'>;
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -84,6 +85,7 @@ function buildMilestones(project: any, t: Translate): MilestoneItem[] {
 export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const role = useAppStore((s) => s.role);
+  const language = useAppStore((s) => s.language);
   const featureFlags = useAppStore((s) => s.featureFlags);
   const projectId = route.params.projectId;
   const [busy, setBusy] = React.useState(false);
@@ -135,7 +137,8 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.wrap}>
-        <Text style={styles.title}>{project.title}</Text>
+        <Text style={styles.title}>{getLocalizedProjectTitle(project, language)}</Text>
+        <Text style={styles.meta}>{getLocalizedProjectDescription(project, language)}</Text>
         <View style={styles.contractorRow}>
           <Text style={styles.contractorLabel}>{t('project.contractorLabel', { contractor: project.contractorId ?? t('project.pendingSelection') })}</Text>
           <Badge label={t('contractor.verifiedPro')} />
@@ -160,6 +163,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
         <View style={styles.ctaWrap}>
           {role === 'customer' && project.escrowState === 'OPEN_FOR_QUOTES' && quotes.length > 0 ? (
             <CTAButton
+              testID="project-detail-select-contractor"
               label={t('project.selectContractor')}
               onPress={() =>
                 runAction(
@@ -172,19 +176,35 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
           ) : null}
 
           {role === 'customer' && project.escrowState === 'CONTRACTOR_SELECTED' ? (
-            <CTAButton label={t('agreement.accept')} onPress={() => runAction(() => acceptAgreement({ agreementId: projectId }), t('project.agreementAccepted'))} disabled={busy} />
+            <CTAButton
+              testID="project-detail-accept-agreement"
+              label={t('agreement.accept')}
+              onPress={() => runAction(() => acceptAgreement({ agreementId: projectId }), t('project.agreementAccepted'))}
+              disabled={busy}
+            />
           ) : null}
 
           {role === 'customer' && project.escrowState === 'AGREEMENT_ACCEPTED' ? (
-            <CTAButton label={t('escrow.fund')} onPress={() => runAction(() => fundHold({ projectId }), t('project.escrowFunded'))} disabled={busy} />
+            <CTAButton
+              testID="project-detail-fund-escrow"
+              label={t('escrow.fund')}
+              onPress={() => runAction(() => fundHold({ projectId }), t('project.escrowFunded'))}
+              disabled={busy}
+            />
           ) : null}
 
           {role === 'contractor' && project.escrowState === 'FUNDED_HELD' ? (
-            <CTAButton label={t('escrow.requestCompletion')} onPress={() => runAction(() => requestCompletion({ projectId }), t('phase2.completionRequested'))} disabled={busy} />
+            <CTAButton
+              testID="project-detail-request-completion"
+              label={t('escrow.requestCompletion')}
+              onPress={() => runAction(() => requestCompletion({ projectId }), t('phase2.completionRequested'))}
+              disabled={busy}
+            />
           ) : null}
 
           {role === 'customer' && project.escrowState === 'COMPLETION_REQUESTED' && nextMilestone ? (
             <CTAButton
+              testID="project-detail-review-release"
               label={t('project.reviewAndRelease', { amount: `$${(nextMilestone.amountCents / 100).toLocaleString()}` })}
               iconName="lock-closed-outline"
               onPress={() => runAction(() => approveRelease({ projectId }), t('project.fundsReleased'))}
@@ -193,7 +213,12 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
           ) : null}
 
           {role === 'customer' && project.escrowState === 'COMPLETION_REQUESTED' ? (
-            <CTAButton label={t('escrow.raiseIssue')} onPress={() => runAction(() => raiseIssueHold({ projectId, reason: t('escrow.raiseIssue') }))} disabled={busy} />
+            <CTAButton
+              testID="project-detail-raise-issue"
+              label={t('escrow.raiseIssue')}
+              onPress={() => runAction(() => raiseIssueHold({ projectId, reason: t('escrow.raiseIssue') }))}
+              disabled={busy}
+            />
           ) : null}
         </View>
 
@@ -328,7 +353,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
           />
         ) : null}
 
-        <CTAButton label={t('project.openMessages')} onPress={() => navigation.navigate('Messages')} disabled={busy} />
+        <CTAButton testID="project-detail-open-messages" label={t('project.openMessages')} onPress={() => navigation.navigate('Messages')} disabled={busy} />
       </ScrollView>
     </ScreenContainer>
   );

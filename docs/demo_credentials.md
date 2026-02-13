@@ -1,6 +1,6 @@
 # Demo Credentials (Deterministic)
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Precondition
 
@@ -24,8 +24,30 @@ npm run bootstrap:demo
 
 - Featured customer persona: `users/customer-001`
 - Featured contractor persona: `users/contractor-001`
-- Featured project: `projects/project-001` (`Bathroom Remodel`)
+- Featured project: `projects/project-001` (`Primary Bathroom Renovation`)
 - Demo profile marker: `config/demoProfile`
+
+## Demo Config Snapshot (`config/demoProfile`)
+
+- `name`: `demo_critical_v2`
+- `personas.customer`: `customer-001`
+- `personas.contractor`: `contractor-001`
+- `personas.admin`: `admin-001`
+- `projectId`: `project-001`
+
+## Feature Flag Snapshot (`config/featureFlags`)
+
+- `stripeConnectEnabled=false`
+- `estimateDepositsEnabled=true`
+- `milestonePaymentsEnabled=true`
+- `changeOrdersEnabled=true`
+- `credentialVerificationEnabled=true`
+- `schedulingEnabled=true`
+- `reliabilityScoringEnabled=true`
+- `subscriptionsEnabled=true`
+- `highTicketConciergeEnabled=true`
+- `recommendationsEnabled=true`
+- `growthEnabled=true`
 
 ## Notes
 

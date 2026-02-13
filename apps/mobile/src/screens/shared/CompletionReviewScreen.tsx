@@ -76,6 +76,7 @@ export function CompletionReviewScreen({ navigation, route }: Props): React.JSX.
       {role === 'contractor' ? (
         <>
           <PrimaryButton
+            testID="completion-upload-proof-photo"
             label={t('completion.uploadProofPhoto')}
             variant="secondary"
             onPress={async () => {
@@ -94,13 +95,13 @@ export function CompletionReviewScreen({ navigation, route }: Props): React.JSX.
               }
             }}
           />
-          <PrimaryButton label={t('escrow.requestCompletion')} disabled={requestMutation.isPending} onPress={() => void requestMutation.mutateAsync()} />
+          <PrimaryButton testID="completion-request-completion" label={t('escrow.requestCompletion')} disabled={requestMutation.isPending} onPress={() => void requestMutation.mutateAsync()} />
         </>
       ) : null}
       {role === 'customer' ? (
         <>
-          <PrimaryButton label={t('escrow.approveCompletion')} disabled={approveMutation.isPending} onPress={() => void approveMutation.mutateAsync()} />
-          <PrimaryButton label={t('escrow.raiseIssue')} variant="danger" disabled={issueMutation.isPending} onPress={() => void issueMutation.mutateAsync()} />
+          <PrimaryButton testID="completion-approve" label={t('escrow.approveCompletion')} disabled={approveMutation.isPending} onPress={() => void approveMutation.mutateAsync()} />
+          <PrimaryButton testID="completion-raise-issue" label={t('escrow.raiseIssue')} variant="danger" disabled={issueMutation.isPending} onPress={() => void issueMutation.mutateAsync()} />
         </>
       ) : null}
     </ScreenContainer>

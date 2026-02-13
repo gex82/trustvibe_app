@@ -3,11 +3,13 @@ import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing } from '../theme/tokens';
 
-type Props = TextInputProps;
+type Props = TextInputProps & {
+  containerTestID?: string;
+};
 
-export function SearchBar(props: Props): React.JSX.Element {
+export function SearchBar({ containerTestID, ...props }: Props): React.JSX.Element {
   return (
-    <View style={styles.wrap}>
+    <View testID={containerTestID} style={styles.wrap}>
       <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
       <TextInput
         {...props}

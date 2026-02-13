@@ -22,7 +22,7 @@ export function RoleSelectScreen({ navigation }: Props): React.JSX.Element {
       <Text style={styles.subtitle}>{t('auth.tagline')}</Text>
       <View style={styles.languageRow}>
         <Text style={styles.languageLabel}>{t('settings.language')}</Text>
-        <LanguageSwitcher />
+        <LanguageSwitcher testIDPrefix="role-language" />
       </View>
 
       <Card>
@@ -30,6 +30,7 @@ export function RoleSelectScreen({ navigation }: Props): React.JSX.Element {
           <Text style={styles.roleTitle}>{t('auth.roleCustomer')}</Text>
           <Text style={styles.roleText}>{t('auth.roleCustomerDescription')}</Text>
           <PrimaryButton
+            testID="role-select-customer"
             label={t('auth.continueAsCustomer')}
             onPress={() => {
               setRole('customer');
@@ -44,6 +45,7 @@ export function RoleSelectScreen({ navigation }: Props): React.JSX.Element {
           <Text style={styles.roleTitle}>{t('auth.roleContractor')}</Text>
           <Text style={styles.roleText}>{t('auth.roleContractorDescription')}</Text>
           <PrimaryButton
+            testID="role-select-contractor"
             label={t('auth.continueAsContractor')}
             variant="secondary"
             onPress={() => {

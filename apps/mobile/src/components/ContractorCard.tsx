@@ -12,11 +12,12 @@ type Props = {
   municipality?: string;
   avatarUri?: string | null;
   onPress?: () => void;
+  testID?: string;
 };
 
-export function ContractorCard({ name, rating, municipality, avatarUri, onPress }: Props): React.JSX.Element {
+export function ContractorCard({ name, rating, municipality, avatarUri, onPress, testID }: Props): React.JSX.Element {
   return (
-    <Pressable onPress={onPress}>
+    <Pressable testID={testID} onPress={onPress}>
       <Card>
         <View style={styles.row}>
           <Avatar name={name} uri={avatarUri} size={52} />

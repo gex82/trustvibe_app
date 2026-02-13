@@ -1,22 +1,23 @@
 # Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-12
+Last updated: 2026-02-13
 
 ## Environment + Startup
 
-- [ ] Run `npm run bootstrap:demo` successfully.
-- [ ] `scripts/check_local_demo_env.ps1` returns pass state.
-- [ ] Emulators listening on `4000`, `5001`, `8080`, `9099`, `9199`.
+- [x] Run `npm run bootstrap:demo` successfully.
+- [x] `scripts/check_local_demo_env.ps1` returns pass state.
+- [x] Emulators listening on `4000`, `5001`, `8080`, `9099`, `9199`.
 - [ ] Mobile app launches on physical iPhone with LAN emulator host.
 - [ ] Admin app launches at `http://localhost:3000`.
 
 ## Auth Reliability
 
 - [ ] Register flow works without `auth/network-request-failed`.
-- [ ] Login flow works for seeded personas.
+- [x] Login flow works for seeded personas.
 - [ ] Back navigation is available on Login and Register screens.
 - [ ] Forgot password action triggers reset email call path.
-- [ ] Logout returns to auth stack cleanly.
+- [ ] Home quick logout returns to auth stack cleanly.
+- [ ] Profile logout returns to auth stack cleanly.
 
 ## Role + Config Hydration
 
@@ -65,5 +66,5 @@ Last updated: 2026-02-12
 
 ## Automation Parity
 
-- [ ] `npm run test:unit` passes.
-- [ ] `npm run test:integration` passes with emulator env vars set.
+- [x] `npm run test:unit` passes.
+- [x] `npm run test:integration` passes with emulator env vars set.

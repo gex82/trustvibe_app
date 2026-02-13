@@ -7,11 +7,12 @@ type Props = TextInputProps & {
   label?: string;
   error?: string;
   iconName?: React.ComponentProps<typeof Ionicons>['name'];
+  containerTestID?: string;
 };
 
-export function FormInput({ label, error, iconName, style, ...rest }: Props): React.JSX.Element {
+export function FormInput({ label, error, iconName, style, containerTestID, ...rest }: Props): React.JSX.Element {
   return (
-    <View style={styles.wrap}>
+    <View testID={containerTestID} style={styles.wrap}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={[styles.inputWrap, error ? styles.inputWrapError : null]}>
         {iconName ? <Ionicons name={iconName} size={18} color={colors.textSecondary} /> : null}

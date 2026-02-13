@@ -2,9 +2,7 @@
 
 import React from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { httpsCallable } from 'firebase/functions';
 import { adminAuth, maybeConnectAdminEmulators } from '../../../lib/firebase';
-import { adminFunctions } from '../../../lib/firebase';
 import { useAdminGuard } from '../../../lib/useAdminGuard';
 
 export default function LoginPage() {
@@ -25,8 +23,6 @@ export default function LoginPage() {
     try {
       maybeConnectAdminEmulators();
       await signInWithEmailAndPassword(adminAuth, email, password);
-      const verify = httpsCallable<Record<string, never>, { uid: string; role: string }>(adminFunctions, 'getAdminSession');
-      await verify({});
       window.location.href = '/users';
     } catch (err) {
       setError(String(err));
@@ -39,13 +35,13 @@ export default function LoginPage() {
         <h1>Admin Login</h1>
         <p className="muted">Use an admin account seeded in emulator data.</p>
         <form className="grid" onSubmit={onSubmit}>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" style={inputStyle} />
-          <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" style={inputStyle} />
-          <button className="btn btn-primary" type="submit">
+          <input data-testid="admin-login-email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" style={inputStyle} />
+          <input data-testid="admin-login-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" style={inputStyle} />
+          <button data-testid="admin-login-submit" className="btn btn-primary" type="submit">
             Sign in
           </button>
         </form>
-        {error ? <p className="muted">{error}</p> : null}
+        {error ? <p data-testid="admin-login-error" className="muted">{error}</p> : null}
       </section>
     </main>
   );

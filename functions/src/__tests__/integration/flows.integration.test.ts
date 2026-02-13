@@ -8,6 +8,7 @@ import {
   adminSetPromotionHandler,
   adminExecuteOutcomeHandler,
   applyReferralCodeHandler,
+  getCurrentConfigHandler,
   approveMilestoneHandler,
   approveReleaseHandler,
   createBookingRequestHandler,
@@ -272,6 +273,27 @@ describeIfEmulator('integration flows against emulators', () => {
 
     const featured = await listFeaturedListingsHandler(req(customerId, 'customer', { limit: 5 }));
     expect(featured.featured.length).toBeGreaterThan(0);
+  });
+
+  it('adminSetConfig round-trips feature flags through getCurrentConfig', async () => {
+    const expectedFlags = {
+      stripeConnectEnabled: false,
+      estimateDepositsEnabled: true,
+      milestonePaymentsEnabled: true,
+      changeOrdersEnabled: true,
+      credentialVerificationEnabled: true,
+      schedulingEnabled: true,
+      reliabilityScoringEnabled: true,
+      subscriptionsEnabled: true,
+      highTicketConciergeEnabled: true,
+      recommendationsEnabled: true,
+      growthEnabled: true,
+    };
+
+    await adminSetConfigHandler(req(adminId, 'admin', { featureFlags: expectedFlags }));
+    const config = await getCurrentConfigHandler(req(adminId, 'admin', {}));
+
+    expect(config.featureFlags).toMatchObject(expectedFlags);
   });
 
   it('admin role management syncs profile role updates', async () => {

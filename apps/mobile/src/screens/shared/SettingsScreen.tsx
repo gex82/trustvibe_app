@@ -33,18 +33,23 @@ export function SettingsScreen({ navigation }: Props): React.JSX.Element {
       </Card>
 
       <Text style={styles.groupLabel}>{t('settings.language')}</Text>
-      <LanguageSwitcher />
+      <LanguageSwitcher testIDPrefix="settings-language" />
 
       <Text style={styles.groupLabel}>{t('settings.account')}</Text>
-      <PrimaryButton label={t('settings.paymentMethods')} variant="secondary" onPress={() => navigation.navigate('PaymentMethods')} />
-      <PrimaryButton label={t('settings.notifications')} variant="secondary" onPress={() => navigation.navigate('Notifications')} />
-      <PrimaryButton label={t('settings.logout')} variant="danger" onPress={async () => {
-        try {
-          await logout();
-        } catch (error) {
-          Alert.alert(t('common.error'), mapApiError(error));
-        }
-      }} />
+      <PrimaryButton testID="settings-payment-methods" label={t('settings.paymentMethods')} variant="secondary" onPress={() => navigation.navigate('PaymentMethods')} />
+      <PrimaryButton testID="settings-notifications" label={t('settings.notifications')} variant="secondary" onPress={() => navigation.navigate('Notifications')} />
+      <PrimaryButton
+        testID="settings-logout"
+        label={t('settings.logout')}
+        variant="danger"
+        onPress={async () => {
+          try {
+            await logout();
+          } catch (error) {
+            Alert.alert(t('common.error'), mapApiError(error));
+          }
+        }}
+      />
     </ScreenContainer>
   );
 }

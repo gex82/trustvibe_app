@@ -89,7 +89,11 @@ export interface Project {
   contractorId?: string;
   category: ProjectCategory;
   title: string;
+  titleEn?: string;
+  titleEs?: string;
   description: string;
+  descriptionEn?: string;
+  descriptionEs?: string;
   photos: string[];
   municipality: Municipality;
   desiredTimeline: string;
@@ -216,6 +220,8 @@ export interface Review {
   contractorId: string;
   rating: 1 | 2 | 3 | 4 | 5;
   feedback: string;
+  feedbackEn?: string;
+  feedbackEs?: string;
   tags: Array<'quality' | 'communication' | 'timeliness'>;
   verified: boolean;
   flagged: boolean;
@@ -229,6 +235,8 @@ export interface MessageItem {
   projectId: string;
   senderId: string;
   body: string;
+  bodyEn?: string;
+  bodyEs?: string;
   attachments: string[];
   createdAt: string;
 }

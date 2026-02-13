@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -20,7 +20,24 @@ export function ProfileScreen({ navigation }: Props): React.JSX.Element {
   const role = useAppStore((s) => s.role);
   const roleLabel = role === 'contractor' ? t('auth.roleContractor') : t('auth.roleCustomer');
 
+  async function performLogout(): Promise<void> {
+    try {
+      await logout();
+    } catch (error) {
+      Alert.alert(t('common.error'), mapApiError(error));
+    }
+  }
+
   function handleLogout(): void {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const confirmed = window.confirm(`${t('profile.logoutConfirmTitle')}\n\n${t('profile.logoutConfirmBody')}`);
+      if (!confirmed) {
+        return;
+      }
+      void performLogout();
+      return;
+    }
+
     Alert.alert(t('profile.logoutConfirmTitle'), t('profile.logoutConfirmBody'), [
       {
         text: t('common.cancel'),
@@ -29,15 +46,7 @@ export function ProfileScreen({ navigation }: Props): React.JSX.Element {
       {
         text: t('profile.logoutConfirmAction'),
         style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            try {
-              await logout();
-            } catch (error) {
-              Alert.alert(t('common.error'), mapApiError(error));
-            }
-          })();
-        },
+        onPress: () => void performLogout(),
       },
     ]);
   }
@@ -57,18 +66,18 @@ export function ProfileScreen({ navigation }: Props): React.JSX.Element {
       </Card>
 
       <Text style={styles.groupLabel}>{t('settings.language')}</Text>
-      <LanguageSwitcher />
+      <LanguageSwitcher testIDPrefix="profile-language" />
 
       <Text style={styles.groupLabel}>{t('profile.account')}</Text>
-      <PrimaryButton label={t('profile.edit')} onPress={() => navigation.navigate('EditProfile')} />
-      <PrimaryButton label={t('profile.documents')} variant="secondary" onPress={() => navigation.navigate('Documents')} />
-      <PrimaryButton label={t('messaging.title')} variant="secondary" onPress={() => navigation.navigate('Messages')} />
-      <PrimaryButton label={t('history.title')} variant="secondary" onPress={() => navigation.navigate('History')} />
+      <PrimaryButton testID="profile-edit" label={t('profile.edit')} onPress={() => navigation.navigate('EditProfile')} />
+      <PrimaryButton testID="profile-documents" label={t('profile.documents')} variant="secondary" onPress={() => navigation.navigate('Documents')} />
+      <PrimaryButton testID="profile-messages" label={t('messaging.title')} variant="secondary" onPress={() => navigation.navigate('Messages')} />
+      <PrimaryButton testID="profile-history" label={t('history.title')} variant="secondary" onPress={() => navigation.navigate('History')} />
       {role === 'contractor' ? (
-        <PrimaryButton label={t('earnings.title')} variant="secondary" onPress={() => navigation.navigate('Earnings')} />
+        <PrimaryButton testID="profile-earnings" label={t('earnings.title')} variant="secondary" onPress={() => navigation.navigate('Earnings')} />
       ) : null}
-      <PrimaryButton label={t('settings.title')} variant="secondary" onPress={() => navigation.navigate('Settings')} />
-      <PrimaryButton label={t('settings.logout')} variant="danger" onPress={handleLogout} />
+      <PrimaryButton testID="profile-settings" label={t('settings.title')} variant="secondary" onPress={() => navigation.navigate('Settings')} />
+      <PrimaryButton testID="profile-logout" label={t('settings.logout')} variant="danger" onPress={handleLogout} />
     </ScreenContainer>
   );
 }
