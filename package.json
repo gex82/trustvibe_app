@@ -14,7 +14,7 @@
     "test": "jest",
     "test:unit": "jest packages/shared/src/__tests__ --runInBand",
     "test:integration": "jest functions/src/__tests__/integration --runInBand --detectOpenHandles",
-    "emulators": "firebase emulators:start --only auth,firestore,functions,storage --import=.firebase/emulator-data --export-on-exit",
+    "emulators": "firebase emulators:start --only auth,firestore,functions,storage --host 0.0.0.0 --import=.firebase/emulator-data --export-on-exit",
     "seed": "npm run seed -w @trustvibe/functions",
     "scenario:happy": "npm run scenario:happy -w @trustvibe/functions",
     "scenario:joint": "npm run scenario:joint -w @trustvibe/functions",
