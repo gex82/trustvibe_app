@@ -22,7 +22,8 @@
     "scenario:deposit-no-show": "npm run scenario:deposit-no-show -w @trustvibe/functions",
     "scenario:milestone-partial": "npm run scenario:milestone-partial -w @trustvibe/functions",
     "scenario:verified-credential": "npm run scenario:verified-credential -w @trustvibe/functions",
-    "scenario:high-ticket": "npm run scenario:high-ticket -w @trustvibe/functions"
+    "scenario:high-ticket": "npm run scenario:high-ticket -w @trustvibe/functions",
+    "bootstrap:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_demo.ps1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
@@ -36,6 +37,8 @@
   },
   "dependencies": {
     "@babel/traverse--for-generate-function-map": "npm:@babel/traverse@^7.29.0",
-    "@opentelemetry/api": "^1.9.0"
+    "@opentelemetry/api": "^1.9.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }

@@ -1,36 +1,67 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { useAppStore } from '../../store/appStore';
-import { colors } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
+import type { HomeStackParamList } from '../../navigation/types';
 
-export function HistoryScreen(): React.JSX.Element {
+type Props = NativeStackScreenProps<HomeStackParamList, 'History'>;
+
+export function HistoryScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const role = useAppStore((s) => s.role);
-  const navigation = useNavigation<any>();
+  const sampleEvents = [
+    { id: 'h1', title: t('history.eventEscrowFundedTitle'), subtitle: t('history.eventEscrowFundedSubtitle') },
+    { id: 'h2', title: t('history.eventCompletionRequestedTitle'), subtitle: t('history.eventCompletionRequestedSubtitle') },
+    { id: 'h3', title: t('history.eventMessageReceivedTitle'), subtitle: t('history.eventMessageReceivedSubtitle') },
+  ];
+
   return (
-    <ScreenContainer>
-      <Text style={styles.text}>{t('history.title')}</Text>
-      <Text style={styles.text}>{t('history.transactions')}</Text>
-      <View style={styles.actions}>
-        <PrimaryButton label="Recommendations" onPress={() => navigation.navigate('Projects', { screen: 'Recommendations' })} />
-        {role === 'contractor' ? (
-          <PrimaryButton label="Availability" variant="secondary" onPress={() => navigation.navigate('Projects', { screen: 'Availability' })} />
-        ) : null}
+    <ScreenContainer style={styles.wrap}>
+      <Text style={styles.title}>{t('history.title')}</Text>
+      <Text style={styles.subtitle}>{t('history.transactions')}</Text>
+
+      <View style={styles.list}>
+        {sampleEvents.map((event) => (
+          <Card key={event.id}>
+            <Text style={styles.itemTitle}>{event.title}</Text>
+            <Text style={styles.itemMeta}>{event.subtitle}</Text>
+          </Card>
+        ))}
       </View>
+
+      <PrimaryButton label={t('phase2.recommendationsTitle')} variant="secondary" onPress={() => navigation.navigate('Recommendations')} />
+      {role === 'contractor' ? (
+        <PrimaryButton label={t('availability.title')} variant="secondary" onPress={() => navigation.navigate('Availability')} />
+      ) : null}
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    color: colors.textPrimary,
-    marginBottom: 12,
+  wrap: {
+    gap: spacing.sm,
   },
-  actions: {
-    gap: 10,
+  title: {
+    color: colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '800',
+  },
+  subtitle: {
+    color: colors.textSecondary,
+  },
+  list: {
+    gap: spacing.sm,
+  },
+  itemTitle: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+  },
+  itemMeta: {
+    color: colors.textSecondary,
   },
 });

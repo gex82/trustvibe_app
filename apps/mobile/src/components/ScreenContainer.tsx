@@ -19,7 +19,7 @@ export function ScreenContainer({ children, style }: Props): React.JSX.Element {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.background,
   },
   inner: {
     flex: 1,

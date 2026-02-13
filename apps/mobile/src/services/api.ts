@@ -1,15 +1,17 @@
 import {
   createUserWithEmailAndPassword,
+  type AuthError,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
+import i18n from 'i18next';
+import { DEFAULT_FEATURE_FLAGS, type FeatureFlags, type Role } from '@trustvibe/shared';
 import { auth, db, functions, maybeConnectEmulators } from './firebase';
-import type { Role } from '@trustvibe/shared';
 
 maybeConnectEmulators();
 
@@ -55,10 +57,75 @@ export function onAuthChange(callback: (user: { uid: string; email: string | nul
   });
 }
 
+export type UserProfile = {
+  id: string;
+  role: Role;
+  email: string;
+  name: string;
+  phone?: string;
+  avatarUrl?: string;
+};
+
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  const snap = await getDoc(doc(db, 'users', uid));
+  if (!snap.exists()) {
+    return null;
+  }
+  const data = snap.data() as Record<string, unknown>;
+  return {
+    id: uid,
+    role: (data.role as Role | undefined) ?? 'customer',
+    email: String(data.email ?? ''),
+    name: String(data.name ?? ''),
+    phone: typeof data.phone === 'string' ? data.phone : undefined,
+    avatarUrl: typeof data.avatarUrl === 'string' ? data.avatarUrl : undefined,
+  };
+}
+
 async function call<TInput extends object, TOutput>(name: string, payload: TInput): Promise<TOutput> {
   const fn = httpsCallable<TInput, TOutput>(functions, name);
   const result = await fn(payload);
   return result.data;
+}
+
+export async function getCurrentConfig(): Promise<{
+  featureFlags: FeatureFlags;
+}> {
+  try {
+    const result = await call<Record<string, never>, { featureFlags?: FeatureFlags }>('getCurrentConfig', {});
+    return {
+      featureFlags: result.featureFlags ?? DEFAULT_FEATURE_FLAGS,
+    };
+  } catch {
+    return { featureFlags: DEFAULT_FEATURE_FLAGS };
+  }
+}
+
+export function mapApiError(error: unknown): string {
+  const maybeError = error as Partial<AuthError> & { message?: string };
+  const code = maybeError.code ?? '';
+  const message = maybeError.message ?? String(error);
+
+  if (code.includes('network-request-failed') || message.includes('network-request-failed')) {
+    return i18n.t('errors.networkUnavailable');
+  }
+  if (code.includes('too-many-requests')) {
+    return i18n.t('errors.tooManyRequests');
+  }
+  if (code.includes('invalid-credential') || code.includes('wrong-password')) {
+    return i18n.t('errors.invalidCredentials');
+  }
+  if (code.includes('email-already-in-use')) {
+    return i18n.t('errors.emailInUse');
+  }
+  if (code.includes('failed-precondition')) {
+    return i18n.t('errors.failedPrecondition');
+  }
+  if (code.includes('permission-denied')) {
+    return i18n.t('errors.permissionDenied');
+  }
+
+  return message;
 }
 
 export function listProjects(payload: {

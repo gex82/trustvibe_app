@@ -6,16 +6,15 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// Watch all files in the monorepo
+// Watch all files in the monorepo.
 config.watchFolders = Array.from(new Set([...(config.watchFolders || []), workspaceRoot]));
 
-// Let Metro know where to resolve packages
+// Resolve dependencies from app first, then workspace root.
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-// Allow transitive package internal resolution (e.g., firebase nested deps).
 config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;

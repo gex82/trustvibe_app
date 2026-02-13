@@ -1,47 +1,59 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text } from 'react-native';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, Controller } from 'react-hook-form';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { FormInput } from '../../components/FormInput';
 import { PrimaryButton } from '../../components/PrimaryButton';
-import { login } from '../../services/api';
+import { login, mapApiError, resetPassword } from '../../services/api';
 import type { AuthStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-});
-
-type FormValue = z.infer<typeof schema>;
+type FormValue = {
+  email: string;
+  password: string;
+};
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export function LoginScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
-  const { control, handleSubmit, formState } = useForm<FormValue>({
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const schema = React.useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('validation.emailInvalid')),
+        password: z.string().min(6, t('validation.passwordMin')),
+      }),
+    [t]
+  );
+  const { control, handleSubmit, watch, formState } = useForm<FormValue>({
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   });
+  const email = watch('email');
 
   return (
     <ScreenContainer style={styles.wrap}>
+      <Text style={styles.brand}>TrustVibe</Text>
       <Text style={styles.title}>{t('auth.loginTitle')}</Text>
 
       <Controller
         control={control}
         name="email"
-        render={({ field: { value, onChange } }) => (
-          <TextInput
+        render={({ field: { value, onChange }, fieldState }) => (
+          <FormInput
             value={value}
             onChangeText={onChange}
             autoCapitalize="none"
+            keyboardType="email-address"
+            label={t('auth.email')}
             placeholder={t('auth.email')}
-            placeholderTextColor={colors.textSecondary}
-            style={styles.input}
+            iconName="mail-outline"
+            error={fieldState.error?.message}
           />
         )}
       />
@@ -49,29 +61,51 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
       <Controller
         control={control}
         name="password"
-        render={({ field: { value, onChange } }) => (
-          <TextInput
+        render={({ field: { value, onChange }, fieldState }) => (
+          <FormInput
             value={value}
             onChangeText={onChange}
             secureTextEntry
+            label={t('auth.password')}
             placeholder={t('auth.password')}
-            placeholderTextColor={colors.textSecondary}
-            style={styles.input}
+            iconName="lock-closed-outline"
+            error={fieldState.error?.message}
           />
         )}
       />
+
+      <Pressable
+        onPress={async () => {
+          if (!email) {
+            Alert.alert(t('common.error'), t('auth.resetPasswordEmailPrompt'));
+            return;
+          }
+          try {
+            await resetPassword(email);
+            Alert.alert(t('common.status'), t('auth.resetPasswordSent'));
+          } catch (error) {
+            Alert.alert(t('common.error'), mapApiError(error));
+          }
+        }}
+      >
+        <Text style={styles.link}>{t('auth.resetPassword')}</Text>
+      </Pressable>
 
       <PrimaryButton
         label={t('auth.loginTitle')}
         disabled={formState.isSubmitting}
         onPress={handleSubmit(async (values) => {
           try {
+            setSubmitError(null);
             await login(values);
           } catch (error) {
-            Alert.alert(t('common.error'), String(error));
+            const message = mapApiError(error);
+            setSubmitError(message);
+            Alert.alert(t('common.error'), message);
           }
         })}
       />
+      {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
 
       <PrimaryButton label={t('auth.registerTitle')} variant="secondary" onPress={() => navigation.navigate('Register')} />
     </ScreenContainer>
@@ -83,19 +117,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
   },
+  brand: {
+    color: colors.navy,
+    fontSize: 30,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
   title: {
     color: colors.textPrimary,
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
+    textAlign: 'center',
     marginBottom: spacing.sm,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
-    color: colors.textPrimary,
-    borderRadius: 10,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  link: {
+    color: colors.navy,
+    fontWeight: '600',
+    textAlign: 'right',
+  },
+  error: {
+    color: colors.danger,
+    fontWeight: '600',
   },
 });

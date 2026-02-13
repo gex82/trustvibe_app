@@ -1,70 +1,195 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { listProjects } from '../../services/api';
+import { listProjects, logout, mapApiError } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
-import { PrimaryButton } from '../../components/PrimaryButton';
+import { SearchBar } from '../../components/SearchBar';
+import { FinancialCard } from '../../components/FinancialCard';
+import { ProjectCard } from '../../components/ProjectCard';
+import { SectionHeader } from '../../components/SectionHeader';
+import { EmptyState } from '../../components/EmptyState';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import type { HomeStackParamList } from '../../navigation/types';
+import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
+import { getEscrowStateLabel } from '../../utils/escrowState';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
 
+function deriveProgress(escrowState: string): number {
+  switch (escrowState) {
+    case 'OPEN_FOR_QUOTES':
+      return 15;
+    case 'CONTRACTOR_SELECTED':
+    case 'AGREEMENT_ACCEPTED':
+      return 35;
+    case 'FUNDED_HELD':
+      return 55;
+    case 'COMPLETION_REQUESTED':
+      return 80;
+    case 'RELEASED_PAID':
+    case 'EXECUTED_RELEASE_FULL':
+      return 100;
+    default:
+      return 45;
+  }
+}
+
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const profile = useAppStore((s) => s.profile);
   const projectsQuery = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => listProjects({ limit: 50 }),
+    queryKey: ['home-projects'],
+    queryFn: () => listProjects({ limit: 20 }),
   });
 
+  const projects = projectsQuery.data?.projects ?? [];
+  const activeProjects = projects.filter((item) => !['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL'].includes(String(item.escrowState)));
+  const escrowTotalCents = activeProjects.reduce((sum, item) => sum + Number(item.heldAmountCents ?? item.selectedQuotePriceCents ?? 0), 0);
+
+  function handleLogout(): void {
+    Alert.alert(t('home.logoutConfirmTitle'), t('home.logoutConfirmBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('home.logoutConfirmAction'),
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            try {
+              await logout();
+            } catch (error) {
+              Alert.alert(t('common.error'), mapApiError(error));
+            }
+          })();
+        },
+      },
+    ]);
+  }
+
   return (
-    <ScreenContainer>
-      <PrimaryButton label={t('project.create.title')} onPress={() => navigation.navigate('CreateProject')} />
+    <ScreenContainer style={styles.wrap}>
+      <View style={styles.top}>
+        <Text style={styles.greeting}>{t('home.greeting', { name: profile?.name?.split(' ')[0] ?? t('home.greetingFallbackName') })}</Text>
+        <View style={styles.topActions}>
+          <LanguageSwitcher compact />
+          <Pressable onPress={handleLogout}>
+            <Text style={styles.logoutText}>{t('home.logout')}</Text>
+          </Pressable>
+        </View>
+      </View>
 
-      {projectsQuery.isLoading ? <ActivityIndicator color={colors.accent} /> : null}
-
-      <FlatList
-        data={projectsQuery.data?.projects ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.municipality}</Text>
-            <Text style={styles.subtitle}>{item.escrowState}</Text>
-            <PrimaryButton label={t('common.nextAction')} onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })} />
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.empty}>{t('common.loading')}</Text>}
+      <SearchBar
+        value=""
+        editable={false}
+        placeholder={t('home.searchPlaceholder')}
+        onFocus={() => navigation.getParent()?.navigate('SearchTab')}
+        onPressIn={() => navigation.getParent()?.navigate('SearchTab')}
       />
+
+      <View>
+        <SectionHeader title={t('home.financialOverview')} />
+        <FinancialCard totalCents={escrowTotalCents} />
+      </View>
+
+      <View style={styles.projectsSection}>
+        <SectionHeader title={t('home.activeProjects')} actionLabel={t('home.seeAll')} onPressAction={() => navigation.getParent()?.navigate('ProjectsTab')} />
+        <FlatList
+          horizontal
+          data={activeProjects}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.projectList}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ProjectCard
+              title={String(item.title)}
+              phaseLabel={getEscrowStateLabel(t, String(item.escrowState))}
+              progress={deriveProgress(String(item.escrowState))}
+              onPress={() => navigation.navigate('ProjectDetail', { projectId: item.id })}
+            />
+          )}
+          ListEmptyComponent={
+            projectsQuery.isLoading ? (
+              <Text style={styles.meta}>{t('common.loading')}</Text>
+            ) : (
+              <EmptyState
+                title={t('home.noActiveProjectsTitle')}
+                description={t('home.noActiveProjectsDescription')}
+                ctaLabel={t('project.create.title')}
+                onPressCta={() => navigation.navigate('CreateProject')}
+              />
+            )
+          }
+        />
+      </View>
+
+      <View style={styles.activitySection}>
+        <SectionHeader title={t('home.recentActivity')} />
+        {activeProjects.slice(0, 3).map((item) => (
+          <View key={item.id} style={styles.activityRow}>
+            <Text style={styles.activityTitle}>{String(item.title)}</Text>
+            <Text style={styles.activityMeta}>{getEscrowStateLabel(t, String(item.escrowState))}</Text>
+          </View>
+        ))}
+        {!activeProjects.length && !projectsQuery.isLoading ? (
+          <Text style={styles.meta}>{t('common.noData')}</Text>
+        ) : null}
+      </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  list: {
+  wrap: {
     gap: spacing.md,
-    paddingVertical: spacing.md,
   },
-  card: {
-    backgroundColor: colors.bgCard,
-    borderRadius: 12,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+  top: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  topActions: {
+    alignItems: 'flex-end',
     gap: spacing.xs,
   },
-  title: {
+  greeting: {
     color: colors.textPrimary,
-    fontSize: 16,
+    fontSize: 28,
+    fontWeight: '800',
+    flex: 1,
+    marginRight: spacing.sm,
+  },
+  logoutText: {
+    color: colors.danger,
+    fontSize: 12,
     fontWeight: '700',
   },
-  subtitle: {
+  projectsSection: {
+    gap: spacing.xs,
+  },
+  projectList: {
+    gap: spacing.sm,
+  },
+  activitySection: {
+    gap: spacing.sm,
+  },
+  activityRow: {
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
+    borderRadius: 12,
+    padding: spacing.sm,
+    backgroundColor: colors.surface,
+  },
+  activityTitle: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+  },
+  activityMeta: {
     color: colors.textSecondary,
   },
-  empty: {
+  meta: {
     color: colors.textSecondary,
-    textAlign: 'center',
   },
 });

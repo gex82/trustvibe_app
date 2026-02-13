@@ -1,16 +1,49 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { initializeApp, getApps } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+
+// Local demo seeding should default to emulators if callers did not set env vars.
+process.env.FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST ?? '127.0.0.1:8080';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST ?? '127.0.0.1:9099';
 
 if (!getApps().length) {
   initializeApp({ projectId: process.env.GCLOUD_PROJECT ?? 'trustvibe-dev' });
 }
 
 const db = getFirestore();
+const auth = getAuth();
+const repoRoot = join(__dirname, '..');
+
+const demoAuthUsers: Array<{
+  uid: string;
+  email: string;
+  displayName: string;
+  password: string;
+}> = [
+  {
+    uid: 'customer-001',
+    email: 'maria.rodriguez@trustvibe.test',
+    displayName: 'Maria Rodriguez',
+    password: 'DemoCustomer!123',
+  },
+  {
+    uid: 'contractor-001',
+    email: 'juan.services@trustvibe.test',
+    displayName: "Juan's Services",
+    password: 'DemoContractor!123',
+  },
+  {
+    uid: 'admin-001',
+    email: 'admin@trustvibe.test',
+    displayName: 'Admin One',
+    password: 'DemoAdmin!123',
+  },
+];
 
 function loadJson<T>(fileName: string): T {
-  const path = join(process.cwd(), 'data', 'demo', fileName);
+  const path = join(repoRoot, 'data', 'demo', fileName);
   return JSON.parse(readFileSync(path, 'utf-8')) as T;
 }
 
@@ -19,6 +52,35 @@ async function clearCollection(path: string): Promise<void> {
   const batch = db.batch();
   snap.docs.forEach((doc) => batch.delete(doc.ref));
   await batch.commit();
+}
+
+async function seedAuthUsers(): Promise<void> {
+  if (!process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+    console.warn('FIREBASE_AUTH_EMULATOR_HOST is not set; skipping demo auth user bootstrap.');
+    return;
+  }
+
+  for (const item of demoAuthUsers) {
+    try {
+      const existing = await auth.getUser(item.uid);
+      await auth.updateUser(existing.uid, {
+        email: item.email,
+        displayName: item.displayName,
+        password: item.password,
+      });
+    } catch (error: any) {
+      if (error?.code === 'auth/user-not-found') {
+        await auth.createUser({
+          uid: item.uid,
+          email: item.email,
+          displayName: item.displayName,
+          password: item.password,
+        });
+      } else {
+        throw error;
+      }
+    }
+  }
 }
 
 async function seedConfig(): Promise<void> {
@@ -161,6 +223,7 @@ async function run(): Promise<void> {
   await clearCollection('reliabilityScores');
   await clearCollection('highTicketCases');
   await clearCollection('credentialVerifications');
+  await seedAuthUsers();
 
   const users = loadJson<any[]>('users.json');
   const contractors = loadJson<any[]>('contractors.json');
@@ -184,17 +247,31 @@ async function run(): Promise<void> {
 
   const contractorBatch = db.batch();
   contractors.forEach((c) => {
+    const isFeaturedDemoContractor = c.id === 'contractor-001';
     contractorBatch.set(db.collection('contractorProfiles').doc(c.id), {
       userId: c.id,
       skills: c.skills,
       serviceMunicipalities: [c.municipality],
       serviceRadiusKm: 25,
-      portfolio: [
-        { imageUrl: 'https://example.com/portfolio1.jpg', caption: c.bioEn },
-        { imageUrl: 'https://example.com/portfolio2.jpg', caption: c.bioEs },
-      ],
+      // Keep seeded profile media deterministic for local demos.
+      portfolio: isFeaturedDemoContractor
+        ? [
+            { imageUrl: 'demo://projects/bathroom_remodel_01.png', caption: c.bioEn },
+            { imageUrl: 'demo://projects/bathroom_remodel_02.png', caption: c.bioEs },
+            { imageUrl: 'demo://projects/bathroom_remodel_03.png', caption: 'Milestone gallery asset' },
+          ]
+        : [],
       credentials: [
-        { type: 'license', fileUrl: 'https://example.com/license.pdf', status: 'UNVERIFIED' },
+        {
+          type: 'license',
+          fileUrl: 'demo://documents/license_certificate_mock.txt',
+          status: isFeaturedDemoContractor ? 'VERIFIED' : 'UNVERIFIED',
+        },
+        {
+          type: 'insurance',
+          fileUrl: 'demo://documents/general_liability_mock.txt',
+          status: isFeaturedDemoContractor ? 'VERIFIED' : 'UNVERIFIED',
+        },
       ],
       availability: {
         weekly: {
@@ -207,7 +284,8 @@ async function run(): Promise<void> {
         blackoutDates: [],
       },
       ratingAvg: c.rating,
-      reviewCount: 6,
+      reviewCount: isFeaturedDemoContractor ? 50 : 6,
+      verificationStatus: isFeaturedDemoContractor ? 'VERIFIED_PRO' : 'PENDING',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });

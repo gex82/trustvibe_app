@@ -8,6 +8,7 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { colors, spacing } from '../../theme/tokens';
 import type { HomeStackParamList } from '../../navigation/types';
+import { getEscrowStateLabel } from '../../utils/escrowState';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'AgreementReview'>;
 
@@ -58,7 +59,7 @@ export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.E
       <View style={styles.card}>
         <Text style={styles.text}>{`${t('agreement.scopeSummary')}: ${project.title}`}</Text>
         <Text style={styles.text}>{`${t('agreement.policySummary')}: ${t('escrow.hold.policy')}`}</Text>
-        <Text style={styles.text}>{`${t('common.status')}: ${project.escrowState}`}</Text>
+        <Text style={styles.text}>{`${t('common.status')}: ${getEscrowStateLabel(t, project.escrowState)}`}</Text>
       </View>
       <PrimaryButton label={t('agreement.accept')} disabled={acceptMutation.isPending} onPress={() => void acceptMutation.mutateAsync()} />
       <PrimaryButton label={t('quote.compare')} variant="secondary" onPress={() => navigation.replace('QuotesCompare', { projectId })} />

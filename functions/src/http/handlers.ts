@@ -1371,7 +1371,14 @@ export async function adminSetUserRoleHandler(req: CallableRequest<unknown>) {
     try {
       await authClient.getUser(input.userId);
     } catch (error) {
-      if (!String(error).includes('auth/user-not-found')) {
+      const code = (error as { code?: string } | null | undefined)?.code ?? '';
+      const message = String(error);
+      const isUserNotFound =
+        code === 'auth/user-not-found' ||
+        message.includes('auth/user-not-found') ||
+        message.includes('There is no user record corresponding to the provided identifier.');
+
+      if (!isUserNotFound) {
         throw error;
       }
       const seededUser = (await db.collection('users').doc(input.userId).get()).data() as any;

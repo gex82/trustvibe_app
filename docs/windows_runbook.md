@@ -1,6 +1,6 @@
 # Windows Runbook
 
-Last updated: 2026-02-11 (productionization pass)
+Last updated: 2026-02-12 (demo readiness pass)
 
 ## 1. Prerequisites
 
@@ -71,7 +71,37 @@ NEXT_PUBLIC_USE_EMULATORS=true
 NEXT_PUBLIC_EMULATOR_HOST=127.0.0.1
 ```
 
-## 4. Run Firebase Emulators
+## 4. Firewall + Network Checklist
+
+Before starting demos on a physical iPhone, ensure Windows allows inbound access to emulator ports:
+
+- 4000 (Emulator UI)
+- 5001 (Functions)
+- 8080 (Firestore)
+- 9099 (Auth)
+- 9199 (Storage)
+
+Quick validation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\check_local_demo_env.ps1
+```
+
+## 5. One-Command Demo Bootstrap (Recommended)
+
+This starts emulators (if needed), seeds deterministic demo data, and applies demo config profile.
+
+```powershell
+npm run bootstrap:demo
+```
+
+Bootstrap script:
+
+- `scripts/bootstrap_demo.ps1`
+- Generates/uses personas defined in `docs/demo_credentials.md`
+- Applies demo feature flags and persona mapping in `config/demoProfile`
+
+## 6. Run Firebase Emulators (Manual Mode)
 
 ```powershell
 npm run emulators
@@ -79,13 +109,13 @@ npm run emulators
 
 Services:
 
-- Auth: `localhost:9099`
-- Firestore: `localhost:8080`
-- Functions: `localhost:5001`
-- Storage: `localhost:9199`
-- Emulator UI: `http://localhost:4000`
+- Auth: `0.0.0.0:9099`
+- Firestore: `0.0.0.0:8080`
+- Functions: `0.0.0.0:5001`
+- Storage: `0.0.0.0:9199`
+- Emulator UI: `http://0.0.0.0:4000`
 
-## 5. Seed Demo Data
+## 7. Seed Demo Data (Manual Mode)
 
 In another terminal:
 
@@ -95,23 +125,23 @@ $env:GCLOUD_PROJECT='trustvibe-dev'
 npm run seed
 ```
 
-## 6. Run Mobile App (Physical iPhone)
+## 8. Run Mobile App (Physical iPhone)
 
 ```powershell
 npm run dev -w @trustvibe/mobile
 ```
 
-- This default runs Expo in `--offline` mode for demo reliability.
+- This default runs Expo in `--lan` mode to avoid iOS manifest signing failures when no offline dev certificate cache exists.
 - Scan QR with Expo Go / dev client.
 - Ensure iPhone is on same LAN as Windows host.
 
-If you want online dependency checks instead:
+If you need offline mode:
 
 ```powershell
-npm run dev:online -w @trustvibe/mobile
+npm run dev:offline -w @trustvibe/mobile
 ```
 
-## 7. Run Admin Console
+## 9. Run Admin Console
 
 ```powershell
 npm run dev -w @trustvibe/admin
@@ -119,7 +149,7 @@ npm run dev -w @trustvibe/admin
 
 Open `http://localhost:3000`.
 
-## 8. Run Tests
+## 10. Run Tests
 
 Unit tests:
 
@@ -158,7 +188,35 @@ Productionization demo:
 4. Use mobile project detail actions to demo deposits, booking request creation, credential submission, reliability view, and concierge intake.
 5. Use admin pages (`/deposits`, `/reliability`, `/subscriptions`, `/concierge`) for operations views.
 
-## 9. EAS Build + TestFlight
+## 11. Canonical Demo Startup (Single Flow)
+
+Recommended:
+
+```powershell
+npm run bootstrap:demo
+npm run dev -w @trustvibe/mobile
+npm run dev -w @trustvibe/admin
+```
+
+Manual order (if not using bootstrap script):
+
+```powershell
+# terminal 1
+npm run emulators
+
+# terminal 2
+$env:FIRESTORE_EMULATOR_HOST='127.0.0.1:8080'
+$env:GCLOUD_PROJECT='trustvibe-dev'
+npm run seed
+
+# terminal 3
+npm run dev -w @trustvibe/mobile
+
+# terminal 4
+npm run dev -w @trustvibe/admin
+```
+
+## 12. EAS Build + TestFlight
 
 From `apps/mobile`:
 
@@ -174,6 +232,6 @@ eas submit -p ios --profile production
 - `preview`: internal distribution
 - `production`: App Store/TestFlight path
 
-## 10. Disclaimer
+## 13. Disclaimer
 
 Live payment operations require compliance/legal readiness. Keep local demos in mock or Stripe simulation mode.

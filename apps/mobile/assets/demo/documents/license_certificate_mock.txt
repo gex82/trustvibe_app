@@ -1,0 +1,6 @@
+﻿TrustVibe Demo Credential Document
+===============================
+Document generated for demo-only purposes.
+No production or legal validity.
+Profile: Juan's Services
+Status: Verified (demo fixture)

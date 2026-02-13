@@ -2,10 +2,12 @@ import React from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { listMessages, listProjects, sendMessage } from '../../services/api';
+import { listMessages, listProjects, mapApiError, sendMessage } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
-import { colors } from '../../theme/tokens';
+import { EmptyState } from '../../components/EmptyState';
+import { colors, spacing } from '../../theme/tokens';
 
 export function MessagesScreen(): React.JSX.Element {
   const { t } = useTranslation();
@@ -36,15 +38,14 @@ export function MessagesScreen(): React.JSX.Element {
       await messagesQuery.refetch();
     },
     onError: (error) => {
-      Alert.alert(t('common.error'), String(error));
+      Alert.alert(t('common.error'), mapApiError(error));
     },
   });
 
   return (
-    <ScreenContainer>
+    <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('messaging.title')}</Text>
-      {projectsQuery.isLoading ? <Text style={styles.text}>{t('common.loading')}</Text> : null}
-      {projectsQuery.isError ? <Text style={styles.text}>{t('common.error')}</Text> : null}
+      {projectsQuery.isError ? <Text style={styles.error}>{mapApiError(projectsQuery.error)}</Text> : null}
 
       <FlatList
         horizontal
@@ -58,7 +59,7 @@ export function MessagesScreen(): React.JSX.Element {
             onPress={() => setProjectId(item.id)}
           />
         )}
-        ListEmptyComponent={<Text style={styles.text}>{t('messaging.noProjects')}</Text>}
+        ListEmptyComponent={<EmptyState title={t('messaging.noProjects')} description={t('messaging.startConversationHint')} />}
       />
 
       <FlatList
@@ -66,18 +67,26 @@ export function MessagesScreen(): React.JSX.Element {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messages}
         renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text style={styles.messageMeta}>{item.senderId}</Text>
-            <Text style={styles.text}>{item.body}</Text>
-          </View>
+          <Card>
+            <View style={styles.messageBubble}>
+              <Text style={styles.messageMeta}>{item.senderId}</Text>
+              <Text style={styles.text}>{item.body}</Text>
+            </View>
+          </Card>
         )}
-        ListEmptyComponent={<Text style={styles.text}>{t('messaging.noMessages')}</Text>}
+        ListEmptyComponent={
+          messagesQuery.isLoading ? (
+            <Text style={styles.text}>{t('common.loading')}</Text>
+          ) : (
+            <EmptyState title={t('messaging.noMessages')} description={t('messaging.firstMessageHint')} />
+          )
+        }
       />
 
       <TextInput
         value={body}
         onChangeText={setBody}
-        placeholder={t('messaging.attachImage')}
+        placeholder={t('messaging.typeMessage')}
         placeholderTextColor={colors.textSecondary}
         style={styles.input}
       />
@@ -96,43 +105,44 @@ export function MessagesScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
+  wrap: {
+    gap: spacing.sm,
+  },
   title: {
     color: colors.textPrimary,
-    marginBottom: 12,
-    fontSize: 20,
-    fontWeight: '700',
+    marginBottom: spacing.xs,
+    fontSize: 28,
+    fontWeight: '800',
   },
   text: {
     color: colors.textPrimary,
   },
+  error: {
+    color: colors.danger,
+  },
   projects: {
-    gap: 8,
-    marginBottom: 12,
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
   },
   messages: {
-    gap: 8,
-    paddingBottom: 12,
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
   },
   messageBubble: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
-    borderRadius: 10,
-    padding: 10,
+    gap: spacing.xs,
   },
   messageMeta: {
     color: colors.textSecondary,
-    marginBottom: 4,
     fontSize: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
+    borderColor: colors.surfaceBorder,
+    backgroundColor: colors.surface,
     color: colors.textPrimary,
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.xs,
   },
 });

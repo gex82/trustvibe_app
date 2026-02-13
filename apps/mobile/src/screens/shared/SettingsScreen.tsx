@@ -1,58 +1,81 @@
 import React from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import i18n from 'i18next';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { Avatar } from '../../components/Avatar';
+import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
-import { logout } from '../../services/api';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { logout, mapApiError } from '../../services/api';
 import { useAppStore } from '../../store/appStore';
-import { colors } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
+import type { HomeStackParamList } from '../../navigation/types';
 
-export function SettingsScreen(): React.JSX.Element {
+type Props = NativeStackScreenProps<HomeStackParamList, 'Settings'>;
+
+export function SettingsScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
-  const language = useAppStore((s) => s.language);
-  const setLanguage = useAppStore((s) => s.setLanguage);
+  const profile = useAppStore((s) => s.profile);
 
   return (
-    <ScreenContainer>
-      <Text style={styles.text}>{t('settings.title')}</Text>
-      <Text style={styles.text}>{t('settings.language')}</Text>
+    <ScreenContainer style={styles.wrap}>
+      <Text style={styles.title}>{t('settings.title')}</Text>
 
-      <PrimaryButton
-        label={t('settings.language.en')}
-        onPress={() => {
-          setLanguage('en');
-          void i18n.changeLanguage('en');
-        }}
-        variant={language === 'en' ? 'primary' : 'secondary'}
-      />
-      <PrimaryButton
-        label={t('settings.language.es')}
-        onPress={() => {
-          setLanguage('es');
-          void i18n.changeLanguage('es');
-        }}
-        variant={language === 'es' ? 'primary' : 'secondary'}
-      />
+      <Card>
+        <View style={styles.profileRow}>
+          <Avatar name={profile?.name} uri={profile?.avatarUrl} size={56} />
+          <View>
+            <Text style={styles.profileName}>{profile?.name ?? t('common.demoUser')}</Text>
+            <Text style={styles.profileMeta}>{profile?.email ?? ''}</Text>
+          </View>
+        </View>
+      </Card>
 
-      <PrimaryButton
-        label={t('settings.logout')}
-        variant="danger"
-        onPress={async () => {
-          try {
-            await logout();
-          } catch (error) {
-            Alert.alert(t('common.error'), String(error));
-          }
-        }}
-      />
+      <Text style={styles.groupLabel}>{t('settings.language')}</Text>
+      <LanguageSwitcher />
+
+      <Text style={styles.groupLabel}>{t('settings.account')}</Text>
+      <PrimaryButton label={t('settings.paymentMethods')} variant="secondary" onPress={() => navigation.navigate('PaymentMethods')} />
+      <PrimaryButton label={t('settings.notifications')} variant="secondary" onPress={() => navigation.navigate('Notifications')} />
+      <PrimaryButton label={t('settings.logout')} variant="danger" onPress={async () => {
+        try {
+          await logout();
+        } catch (error) {
+          Alert.alert(t('common.error'), mapApiError(error));
+        }
+      }} />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
+  wrap: {
+    gap: spacing.sm,
+  },
+  title: {
     color: colors.textPrimary,
-    marginBottom: 12,
+    fontSize: 28,
+    fontWeight: '800',
+  },
+  groupLabel: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginTop: spacing.xs,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  profileName: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+    fontSize: 18,
+  },
+  profileMeta: {
+    color: colors.textSecondary,
   },
 });

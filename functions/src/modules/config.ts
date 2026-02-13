@@ -1,5 +1,6 @@
 import {
   DEFAULT_FEATURE_FLAGS,
+  PROJECT_CATEGORIES,
   type DepositPolicyConfig,
   type FeatureFlags,
   type HighTicketPolicyConfig,
@@ -29,9 +30,31 @@ const defaultHoldPolicy: HoldPolicyConfig = {
   updatedBy: 'system',
 };
 
+const defaultDepositRules: DepositPolicyConfig['rules'] = PROJECT_CATEGORIES.map((category) => {
+  const amountByCategory: Record<(typeof PROJECT_CATEGORIES)[number], number> = {
+    plumbing: 2900,
+    electrical: 3900,
+    painting: 2900,
+    roofing: 7900,
+    carpentry: 3900,
+    hvac: 5900,
+    landscaping: 2900,
+    cleaning: 2900,
+    general: 3900,
+  };
+
+  return {
+    category,
+    amountCents: amountByCategory[category],
+    currency: 'USD',
+    refundableOnContractorNoShow: true,
+    creditToJobOnProceed: true,
+  };
+});
+
 const defaultDepositPolicies: DepositPolicyConfig = {
   schemaVersion: 1,
-  rules: [],
+  rules: defaultDepositRules,
   updatedAt: EPOCH,
   updatedBy: 'system',
 };
@@ -98,7 +121,15 @@ export async function getFeatureFlags(): Promise<FeatureFlags> {
 }
 
 export async function getDepositPolicyConfig(): Promise<DepositPolicyConfig> {
-  return getOrSetConfig<DepositPolicyConfig>('depositPolicies', defaultDepositPolicies);
+  const configured = await getOrSetConfig<DepositPolicyConfig>('depositPolicies', defaultDepositPolicies);
+  if (configured.rules.length > 0) {
+    return configured;
+  }
+
+  return {
+    ...configured,
+    rules: defaultDepositRules,
+  };
 }
 
 export async function getPlatformFeeConfigV2(): Promise<PlatformFeeConfigV2> {

@@ -1,73 +1,69 @@
-# Manual QA Checklist (iPhone + Emulator)
+# Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-11
+Last updated: 2026-02-12
 
-## Setup
+## Environment + Startup
 
-- [ ] Windows machine and iPhone on same network.
-- [ ] Emulators running (`auth`, `firestore`, `functions`, `storage`).
-- [ ] Mobile app using emulator host LAN IP.
-- [ ] Seed script executed successfully.
+- [ ] Run `npm run bootstrap:demo` successfully.
+- [ ] `scripts/check_local_demo_env.ps1` returns pass state.
+- [ ] Emulators listening on `4000`, `5001`, `8080`, `9099`, `9199`.
+- [ ] Mobile app launches on physical iPhone with LAN emulator host.
+- [ ] Admin app launches at `http://localhost:3000`.
 
-## Auth + Profiles
+## Auth Reliability
 
-- [ ] Role select screen loads in selected language.
-- [ ] Register customer account works.
-- [ ] Register contractor account works.
-- [ ] Login/logout flows work.
+- [ ] Register flow works without `auth/network-request-failed`.
+- [ ] Login flow works for seeded personas.
+- [ ] Back navigation is available on Login and Register screens.
+- [ ] Forgot password action triggers reset email call path.
+- [ ] Logout returns to auth stack cleanly.
 
-## Happy Path (Release)
+## Role + Config Hydration
 
-- [ ] Customer creates project.
-- [ ] Contractor submits quote.
-- [ ] Customer selects contractor.
-- [ ] Both accept agreement.
-- [ ] Customer funds hold.
-- [ ] Contractor requests completion.
-- [ ] Customer approves release.
-- [ ] Ledger events show hold, release, fee.
+- [ ] After login, role is hydrated from `users/{uid}` document.
+- [ ] Feature flags are loaded at app init/login.
+- [ ] When a feature is disabled, UI hides/disables action and avoids failed call attempts.
 
-## Issue Path (Joint Release)
+## Customer Demo Path (Maria)
 
-- [ ] Customer raises issue after completion request.
-- [ ] Joint release proposal created.
-- [ ] Both parties sign.
-- [ ] Outcome executed and ledger updated.
+- [ ] Home screen shows search, financial card, active projects.
+- [ ] Search screen lists contractors and opens contractor profile.
+- [ ] Contractor profile renders verified layout and project gallery.
+- [ ] Project detail screen renders milestone ledger structure.
+- [ ] Completion review path supports approve and issue flows.
+- [ ] Resolution submission supports document upload + summary submit.
+- [ ] Recommendations and referral interactions load without hard failures.
 
-## Issue Path (External Resolution)
+## Contractor Demo Path (Juan)
 
-- [ ] Resolution document uploaded.
-- [ ] Admin sees case in console.
-- [ ] Admin executes explicit release/refund outcome.
-- [ ] Audit entry written.
+- [ ] Project list/detail flows render with current status.
+- [ ] Messages screen can send and list project messages.
+- [ ] Completion request supports proof photo upload to storage emulator.
+- [ ] Profile edit supports avatar upload and save.
+- [ ] Documents screen supports credential doc upload and list rendering.
+- [ ] Earnings/history/settings screens are visually consistent and functional.
 
-## Bilingual
+## Upload Flows
 
-- [ ] Language switch EN/ES updates screen labels.
-- [ ] Terms use glossary wording (Cuenta de resguardo, Liberar pago, Reportar inconveniente, Instruccion de liberacion conjunta).
+- [ ] Avatar upload stores a real URL in Firestore user doc.
+- [ ] Document upload stores a real URL in Firestore user doc.
+- [ ] Completion proof upload stores URL and submission succeeds.
+- [ ] Resolution file upload stores URL and callable succeeds.
 
-## Reliability + Policy
+## Admin Smoke (Minimal)
 
-- [ ] Completion deadline auto-release job runs for overdue completion requests.
-- [ ] M-day admin-attention job marks stale cases.
+- [ ] Admin login works.
+- [ ] Feature flags are visible and editable.
+- [ ] Credential verification status is visible for demo contractor.
+- [ ] Dispute/case outcome updates are visible after issue path actions.
 
-## Reviews + Moderation
+## Error-Path Quality
 
-- [ ] Customer can submit verified review only after final state.
-- [ ] Review flagging works.
-- [ ] Admin moderation status updates.
+- [ ] Emulator offline shows user-safe network guidance.
+- [ ] Auth failures show user-safe messages (not raw stack traces).
+- [ ] Disabled-feature actions do not surface precondition exceptions to users.
 
-## Phase 2 (Feature Flagged)
+## Automation Parity
 
-- [ ] Enable Phase 2 flags in Admin Config.
-- [ ] Create estimate deposit, capture it, then apply deposit credit before funding.
-- [ ] Mark contractor no-show and verify auto-refund for estimate deposit.
-- [ ] Create milestones and approve a milestone release.
-- [ ] Propose and accept a change order.
-- [ ] Create and confirm a booking request.
-- [ ] Record booking attendance and verify reliability score updates.
-- [ ] Submit DACO/perito credential and verify status badge updates.
-- [ ] Create subscription and verify invoice appears in admin subscriptions page.
-- [ ] Create high-ticket concierge case and assign concierge manager in admin page.
-- [ ] Load recommendations for both customer and contractor views.
-- [ ] Create featured promotion code and verify featured listings + referral code apply.
+- [ ] `npm run test:unit` passes.
+- [ ] `npm run test:integration` passes with emulator env vars set.
