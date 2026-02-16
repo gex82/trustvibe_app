@@ -11,7 +11,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { login, mapApiError, resetPassword } from '../../services/api';
 import type { AuthStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
-import { logError, logWarn } from '../../services/logger';
+import { logWarn } from '../../services/logger';
 
 type FormValue = {
   email: string;
@@ -127,7 +127,7 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
           } catch (error) {
             const message = mapApiError(error);
             setSubmitError(message);
-            logError('auth.login.failed', error, { email: values.email });
+            logWarn('auth.login.failed', { email: values.email }, error);
             Alert.alert(t('common.error'), message);
           } finally {
             if (slowTimerRef.current) {

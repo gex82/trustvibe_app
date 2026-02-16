@@ -64,6 +64,16 @@ Last updated: 2026-02-13
 - [ ] Auth failures show user-safe messages (not raw stack traces).
 - [ ] Disabled-feature actions do not surface precondition exceptions to users.
 
+## Batch 1 UX (iPad / iPhone)
+
+- [ ] Register password fields expose eye toggle and can show/hide password.
+- [ ] Terms link opens scrollable modal and in-modal EN/ES switch works.
+- [ ] Register submit is blocked until modal "I Agree / Acepto" acceptance.
+- [ ] Messages project selector cards keep uniform dimensions across labels.
+- [ ] Create Project Category/Municipality/Timeline fields use picker menus.
+- [ ] Picker "Other (custom)" flow works and submits successfully.
+- [ ] Handled auth failures show friendly messages without raw debug payload bars.
+
 ## Automation Parity
 
 - [x] `npm run test:unit` passes.

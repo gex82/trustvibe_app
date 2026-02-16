@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { listMessages, listProjects, mapApiError, sendMessage } from '../../services/api';
@@ -56,12 +56,18 @@ export function MessagesScreen(): React.JSX.Element {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.projects}
         renderItem={({ item }) => (
-          <PrimaryButton
+          <Pressable
             testID={`messages-project-${item.id}`}
-            label={getLocalizedProjectTitle(item, language)}
-            variant={projectId === item.id ? 'primary' : 'secondary'}
+            style={[
+              styles.projectCard,
+              projectId === item.id ? styles.projectCardActive : null,
+            ]}
             onPress={() => setProjectId(item.id)}
-          />
+          >
+            <Text numberOfLines={2} style={[styles.projectCardLabel, projectId === item.id ? styles.projectCardLabelActive : null]}>
+              {getLocalizedProjectTitle(item, language)}
+            </Text>
+          </Pressable>
         )}
         ListEmptyComponent={<EmptyState title={t('messaging.noProjects')} description={t('messaging.startConversationHint')} />}
       />
@@ -129,6 +135,32 @@ const styles = StyleSheet.create({
   projects: {
     gap: spacing.xs,
     marginBottom: spacing.sm,
+  },
+  projectCard: {
+    width: 220,
+    minHeight: 124,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
+    borderRadius: 14,
+    backgroundColor: colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  projectCardActive: {
+    backgroundColor: colors.navy,
+    borderColor: colors.navy,
+  },
+  projectCardLabel: {
+    color: colors.textPrimary,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 26,
+  },
+  projectCardLabelActive: {
+    color: colors.textInverse,
   },
   messages: {
     gap: spacing.sm,

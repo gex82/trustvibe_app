@@ -9,8 +9,10 @@ import { createProject, mapApiError } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
+import { PickerInput, type PickerOption } from '../../components/PickerInput';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
+import municipalitiesData from '../../../../../data/demo/municipalities.json';
 
 const schema = z.object({
   category: z.string().min(2),
@@ -26,6 +28,40 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'CreateProject'>;
 
 export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const categoryOptions = React.useMemo<PickerOption[]>(
+    () => [
+      { value: 'plumbing', label: t('project.category.plumbing') },
+      { value: 'electrical', label: t('project.category.electrical') },
+      { value: 'painting', label: t('project.category.painting') },
+      { value: 'carpentry', label: t('project.category.carpentry') },
+      { value: 'roofing', label: t('project.category.roofing') },
+      { value: 'general', label: t('project.category.general') },
+      { value: 'other', label: t('common.other') },
+    ],
+    [t]
+  );
+  const municipalityOptions = React.useMemo<PickerOption[]>(
+    () => [
+      ...(municipalitiesData as Array<{ name: string }>).map((item) => ({
+        value: item.name,
+        label: item.name,
+      })),
+      { value: 'other', label: t('common.other') },
+    ],
+    [t]
+  );
+  const timelineOptions = React.useMemo<PickerOption[]>(
+    () => [
+      { value: 'immediately', label: t('project.timeline.immediately') },
+      { value: 'within1Week', label: t('project.timeline.within1Week') },
+      { value: 'within2Weeks', label: t('project.timeline.within2Weeks') },
+      { value: 'within1Month', label: t('project.timeline.within1Month') },
+      { value: 'flexible', label: t('project.timeline.flexible') },
+      { value: 'other', label: t('common.other') },
+    ],
+    [t]
+  );
+
   const { control, handleSubmit, formState } = useForm<FormValue>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -33,7 +69,7 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
       title: '',
       description: '',
       municipality: 'San Juan',
-      desiredTimeline: 'Within 2 weeks',
+      desiredTimeline: 'within2Weeks',
     },
   });
 
@@ -45,7 +81,18 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
         control={control}
         name="category"
         render={({ field: { value, onChange }, fieldState }) => (
-          <FormInput value={value} onChangeText={onChange} label={t('project.category')} iconName="hammer-outline" error={fieldState.error?.message} />
+          <PickerInput
+            testID="project-category"
+            value={value}
+            onChange={onChange}
+            label={t('project.category')}
+            iconName="hammer-outline"
+            error={fieldState.error?.message}
+            options={categoryOptions}
+            allowCustom
+            customOptionLabel={t('common.other')}
+            customInputPlaceholder={t('project.create.customValuePlaceholder')}
+          />
         )}
       />
       <Controller
@@ -75,14 +122,36 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
         control={control}
         name="municipality"
         render={({ field: { value, onChange }, fieldState }) => (
-          <FormInput value={value} onChangeText={onChange} label={t('profile.municipality')} iconName="location-outline" error={fieldState.error?.message} />
+          <PickerInput
+            testID="project-municipality"
+            value={value}
+            onChange={onChange}
+            label={t('profile.municipality')}
+            iconName="location-outline"
+            error={fieldState.error?.message}
+            options={municipalityOptions}
+            allowCustom
+            customOptionLabel={t('common.other')}
+            customInputPlaceholder={t('project.create.customValuePlaceholder')}
+          />
         )}
       />
       <Controller
         control={control}
         name="desiredTimeline"
         render={({ field: { value, onChange }, fieldState }) => (
-          <FormInput value={value} onChangeText={onChange} label={t('project.timeline')} iconName="time-outline" error={fieldState.error?.message} />
+          <PickerInput
+            testID="project-desired-timeline"
+            value={value}
+            onChange={onChange}
+            label={t('project.timeline')}
+            iconName="time-outline"
+            error={fieldState.error?.message}
+            options={timelineOptions}
+            allowCustom
+            customOptionLabel={t('common.other')}
+            customInputPlaceholder={t('project.create.customValuePlaceholder')}
+          />
         )}
       />
 
@@ -93,6 +162,8 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
           try {
             const result = await createProject({
               ...values,
+              category: categoryOptions.find((item) => item.value === values.category)?.label ?? values.category,
+              desiredTimeline: timelineOptions.find((item) => item.value === values.desiredTimeline)?.label ?? values.desiredTimeline,
               photos: [],
             });
             navigation.replace('ProjectDetail', { projectId: result.project.id });

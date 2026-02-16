@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radii, spacing } from '../theme/tokens';
 
@@ -11,6 +11,15 @@ type Props = TextInputProps & {
 };
 
 export function FormInput({ label, error, iconName, style, containerTestID, ...rest }: Props): React.JSX.Element {
+  const secureInputEnabled = Boolean(rest.secureTextEntry);
+  const [isMasked, setIsMasked] = React.useState(secureInputEnabled);
+
+  React.useEffect(() => {
+    setIsMasked(secureInputEnabled);
+  }, [secureInputEnabled]);
+
+  const visibilityToggleTestID = typeof rest.testID === 'string' ? `${rest.testID}-visibility-toggle` : undefined;
+
   return (
     <View testID={containerTestID} style={styles.wrap}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
@@ -18,9 +27,26 @@ export function FormInput({ label, error, iconName, style, containerTestID, ...r
         {iconName ? <Ionicons name={iconName} size={18} color={colors.textSecondary} /> : null}
         <TextInput
           {...rest}
+          secureTextEntry={secureInputEnabled ? isMasked : rest.secureTextEntry}
           placeholderTextColor={colors.textSecondary}
           style={[styles.input, style]}
         />
+        {secureInputEnabled ? (
+          <Pressable
+            testID={visibilityToggleTestID}
+            accessibilityRole="button"
+            accessibilityLabel={isMasked ? 'Show password' : 'Hide password'}
+            onPress={() => setIsMasked((current) => !current)}
+            hitSlop={8}
+            style={styles.visibilityToggle}
+          >
+            <Ionicons
+              name={isMasked ? 'eye-outline' : 'eye-off-outline'}
+              size={18}
+              color={colors.textSecondary}
+            />
+          </Pressable>
+        ) : null}
       </View>
       {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
@@ -55,6 +81,10 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: 16,
     paddingVertical: 0,
+  },
+  visibilityToggle: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   error: {
     color: colors.danger,
