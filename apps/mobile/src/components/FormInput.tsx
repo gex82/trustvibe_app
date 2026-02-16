@@ -11,14 +11,20 @@ type Props = TextInputProps & {
 };
 
 export function FormInput({ label, error, iconName, style, containerTestID, ...rest }: Props): React.JSX.Element {
-  const secureInputEnabled = Boolean(rest.secureTextEntry);
-  const [isMasked, setIsMasked] = React.useState(secureInputEnabled);
+  const isSecureField = rest.secureTextEntry === true;
+  const [isMasked, setIsMasked] = React.useState(isSecureField);
 
   React.useEffect(() => {
-    setIsMasked(secureInputEnabled);
-  }, [secureInputEnabled]);
+    setIsMasked(isSecureField);
+  }, [isSecureField]);
 
   const visibilityToggleTestID = typeof rest.testID === 'string' ? `${rest.testID}-visibility-toggle` : undefined;
+  const secureTextEntry = isSecureField ? isMasked : rest.secureTextEntry;
+  const visibilityLabel = isMasked ? 'Show password' : 'Hide password';
+
+  const toggleMaskedState = React.useCallback(() => {
+    setIsMasked((current) => !current);
+  }, []);
 
   return (
     <View testID={containerTestID} style={styles.wrap}>
@@ -27,16 +33,16 @@ export function FormInput({ label, error, iconName, style, containerTestID, ...r
         {iconName ? <Ionicons name={iconName} size={18} color={colors.textSecondary} /> : null}
         <TextInput
           {...rest}
-          secureTextEntry={secureInputEnabled ? isMasked : rest.secureTextEntry}
+          secureTextEntry={secureTextEntry}
           placeholderTextColor={colors.textSecondary}
           style={[styles.input, style]}
         />
-        {secureInputEnabled ? (
+        {isSecureField ? (
           <Pressable
             testID={visibilityToggleTestID}
             accessibilityRole="button"
-            accessibilityLabel={isMasked ? 'Show password' : 'Hide password'}
-            onPress={() => setIsMasked((current) => !current)}
+            accessibilityLabel={visibilityLabel}
+            onPress={toggleMaskedState}
             hitSlop={8}
             style={styles.visibilityToggle}
           >

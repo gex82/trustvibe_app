@@ -50,6 +50,10 @@ export function PickerInput({
   const hasCustomValue = Boolean(value) && !optionValues.has(value);
   const [customDraft, setCustomDraft] = React.useState(hasCustomValue ? value : '');
   const [selectingCustom, setSelectingCustom] = React.useState(hasCustomValue);
+  const hasBuiltInCustomOption = React.useMemo(
+    () => options.some((item) => item.value === customOptionValue),
+    [customOptionValue, options]
+  );
 
   React.useEffect(() => {
     const nextCustom = Boolean(value) && !optionValues.has(value);
@@ -61,11 +65,10 @@ export function PickerInput({
 
   const selectedOption = options.find((item) => item.value === value);
   const displayValue = selectedOption?.label ?? (value || placeholder || '');
-
-  const pickerTestID = testID ? `${testID}-picker` : undefined;
-  const modalTestID = testID ? `${testID}-modal` : undefined;
-  const customInputTestID = testID ? `${testID}-custom-input` : undefined;
-  const customSubmitTestID = testID ? `${testID}-custom-submit` : undefined;
+  const getTestID = React.useCallback(
+    (suffix: string): string | undefined => (testID ? `${testID}-${suffix}` : undefined),
+    [testID]
+  );
 
   function openPicker(): void {
     setVisible(true);
@@ -98,7 +101,7 @@ export function PickerInput({
     <View style={styles.wrap}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <Pressable
-        testID={pickerTestID}
+        testID={getTestID('picker')}
         style={[styles.inputWrap, error ? styles.inputWrapError : null]}
         onPress={openPicker}
       >
@@ -112,13 +115,17 @@ export function PickerInput({
 
       <Modal visible={visible} transparent animationType="fade" onRequestClose={closePicker}>
         <Pressable style={styles.overlay} onPress={closePicker}>
-          <Pressable testID={modalTestID} style={styles.modalCard} onPress={(event) => event.stopPropagation()}>
+          <Pressable
+            testID={getTestID('modal')}
+            style={styles.modalCard}
+            onPress={(event) => event.stopPropagation()}
+          >
             <Text style={styles.modalTitle}>{label}</Text>
             <ScrollView contentContainerStyle={styles.optionsWrap}>
               {options.map((item) => (
                 <Pressable
                   key={item.value}
-                  testID={testID ? `${testID}-option-${item.value}` : undefined}
+                  testID={getTestID(`option-${item.value}`)}
                   style={[
                     styles.option,
                     value === item.value ? styles.optionSelected : null,
@@ -128,9 +135,9 @@ export function PickerInput({
                   <Text style={styles.optionLabel}>{item.label}</Text>
                 </Pressable>
               ))}
-              {allowCustom && !options.some((item) => item.value === customOptionValue) ? (
+              {allowCustom && !hasBuiltInCustomOption ? (
                 <Pressable
-                  testID={testID ? `${testID}-option-${customOptionValue}` : undefined}
+                  testID={getTestID(`option-${customOptionValue}`)}
                   style={styles.option}
                   onPress={() => selectOption(customOptionValue)}
                 >
@@ -141,7 +148,7 @@ export function PickerInput({
             {allowCustom && selectingCustom ? (
               <View style={styles.customWrap}>
                 <TextInput
-                  testID={customInputTestID}
+                  testID={getTestID('custom-input')}
                   value={customDraft}
                   onChangeText={setCustomDraft}
                   placeholder={customInputPlaceholder}
@@ -149,7 +156,7 @@ export function PickerInput({
                   style={styles.customInput}
                 />
                 <Pressable
-                  testID={customSubmitTestID}
+                  testID={getTestID('custom-submit')}
                   style={[styles.customButton, !customDraft.trim() ? styles.customButtonDisabled : null]}
                   onPress={applyCustomValue}
                   disabled={!customDraft.trim()}
@@ -268,4 +275,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-
