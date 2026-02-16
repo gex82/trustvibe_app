@@ -58,17 +58,23 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
   });
   const accepted = watch('accepted');
 
+  const clearSlowTimer = React.useCallback(() => {
+    if (!slowTimerRef.current) {
+      return;
+    }
+    clearTimeout(slowTimerRef.current);
+    slowTimerRef.current = null;
+  }, []);
+
   React.useEffect(() => {
     setTermsLanguage(appLanguage === 'es' ? 'es' : 'en');
   }, [appLanguage]);
 
   React.useEffect(
     () => () => {
-      if (slowTimerRef.current) {
-        clearTimeout(slowTimerRef.current);
-      }
+      clearSlowTimer();
     },
-    []
+    [clearSlowTimer]
   );
 
   function openTermsModal(): void {
@@ -83,6 +89,30 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
     setValue('accepted', true, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
     setTermsVisible(false);
   }
+
+  const submitRegister = React.useCallback(
+    async (values: FormValue) => {
+      try {
+        setSubmitError(null);
+        setSlowRequestMessage(null);
+        clearSlowTimer();
+        slowTimerRef.current = setTimeout(() => {
+          setSlowRequestMessage(t('auth.requestTakingLonger'));
+          logWarn('auth.register.slow_request', { email: values.email, role });
+        }, 8000);
+        await register({ name: values.name, email: values.email, password: values.password, role });
+      } catch (error) {
+        const message = mapApiError(error);
+        setSubmitError(message);
+        logWarn('auth.register.failed', { email: values.email, role }, error);
+        Alert.alert(t('common.error'), message);
+      } finally {
+        clearSlowTimer();
+        setSlowRequestMessage(null);
+      }
+    },
+    [clearSlowTimer, role, t]
+  );
 
   return (
     <ScreenContainer style={styles.wrap}>
@@ -206,31 +236,7 @@ export function RegisterScreen({ navigation }: Props): React.JSX.Element {
         testID="register-submit"
         label={t('auth.registerTitle')}
         disabled={formState.isSubmitting || !accepted}
-        onPress={handleSubmit(async (values) => {
-          try {
-            setSubmitError(null);
-            setSlowRequestMessage(null);
-            if (slowTimerRef.current) {
-              clearTimeout(slowTimerRef.current);
-            }
-            slowTimerRef.current = setTimeout(() => {
-              setSlowRequestMessage(t('auth.requestTakingLonger'));
-              logWarn('auth.register.slow_request', { email: values.email, role });
-            }, 8000);
-            await register({ name: values.name, email: values.email, password: values.password, role });
-          } catch (error) {
-            const message = mapApiError(error);
-            setSubmitError(message);
-            logWarn('auth.register.failed', { email: values.email, role }, error);
-            Alert.alert(t('common.error'), message);
-          } finally {
-            if (slowTimerRef.current) {
-              clearTimeout(slowTimerRef.current);
-              slowTimerRef.current = null;
-            }
-            setSlowRequestMessage(null);
-          }
-        })}
+        onPress={handleSubmit(submitRegister)}
       />
       {formState.isSubmitting ? (
         <View testID="register-progress" style={styles.progressRow}>

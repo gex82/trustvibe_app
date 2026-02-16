@@ -39,13 +39,56 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
   });
   const email = watch('email');
 
+  const clearSlowTimer = React.useCallback(() => {
+    if (!slowTimerRef.current) {
+      return;
+    }
+    clearTimeout(slowTimerRef.current);
+    slowTimerRef.current = null;
+  }, []);
+
   React.useEffect(
     () => () => {
-      if (slowTimerRef.current) {
-        clearTimeout(slowTimerRef.current);
+      clearSlowTimer();
+    },
+    [clearSlowTimer]
+  );
+
+  const handleResetPassword = React.useCallback(async () => {
+    if (!email) {
+      Alert.alert(t('common.error'), t('auth.resetPasswordEmailPrompt'));
+      return;
+    }
+    try {
+      await resetPassword(email);
+      Alert.alert(t('common.status'), t('auth.resetPasswordSent'));
+    } catch (error) {
+      Alert.alert(t('common.error'), mapApiError(error));
+    }
+  }, [email, t]);
+
+  const submitLogin = React.useCallback(
+    async (values: FormValue) => {
+      try {
+        setSubmitError(null);
+        setSlowRequestMessage(null);
+        clearSlowTimer();
+        slowTimerRef.current = setTimeout(() => {
+          setSlowRequestMessage(t('auth.requestTakingLonger'));
+          logWarn('auth.login.slow_request', { email: values.email });
+        }, 8000);
+        await login(values);
+      } catch (error) {
+        const message = mapApiError(error);
+        setSubmitError(message);
+        logWarn('auth.login.failed', { email: values.email }, error);
+        Alert.alert(t('common.error'), message);
+      } finally {
+        clearSlowTimer();
+        setSlowRequestMessage(null);
       }
     },
-    []
+    [clearSlowTimer, t]
   );
 
   return (
@@ -92,17 +135,8 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
 
       <Pressable
         testID="login-reset-password"
-        onPress={async () => {
-          if (!email) {
-            Alert.alert(t('common.error'), t('auth.resetPasswordEmailPrompt'));
-            return;
-          }
-          try {
-            await resetPassword(email);
-            Alert.alert(t('common.status'), t('auth.resetPasswordSent'));
-          } catch (error) {
-            Alert.alert(t('common.error'), mapApiError(error));
-          }
+        onPress={() => {
+          void handleResetPassword();
         }}
       >
         <Text style={styles.link}>{t('auth.resetPassword')}</Text>
@@ -112,31 +146,7 @@ export function LoginScreen({ navigation }: Props): React.JSX.Element {
         testID="login-submit"
         label={t('auth.loginTitle')}
         disabled={formState.isSubmitting}
-        onPress={handleSubmit(async (values) => {
-          try {
-            setSubmitError(null);
-            setSlowRequestMessage(null);
-            if (slowTimerRef.current) {
-              clearTimeout(slowTimerRef.current);
-            }
-            slowTimerRef.current = setTimeout(() => {
-              setSlowRequestMessage(t('auth.requestTakingLonger'));
-              logWarn('auth.login.slow_request', { email: values.email });
-            }, 8000);
-            await login(values);
-          } catch (error) {
-            const message = mapApiError(error);
-            setSubmitError(message);
-            logWarn('auth.login.failed', { email: values.email }, error);
-            Alert.alert(t('common.error'), message);
-          } finally {
-            if (slowTimerRef.current) {
-              clearTimeout(slowTimerRef.current);
-              slowTimerRef.current = null;
-            }
-            setSlowRequestMessage(null);
-          }
-        })}
+        onPress={handleSubmit(submitLogin)}
       />
       {formState.isSubmitting ? (
         <View testID="login-progress" style={styles.progressRow}>
