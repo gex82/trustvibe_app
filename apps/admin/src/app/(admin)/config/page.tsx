@@ -2,10 +2,22 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type {
+  CallableRequest,
+  CallableResponse,
+  DepositPolicyConfig,
+  FeeTier,
+  FeatureFlags,
+  SubscriptionPlansConfig,
+} from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 
 function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
+}
+
+function parseJson<T>(json: string): T {
+  return JSON.parse(json) as T;
 }
 
 export default function ConfigPage() {
@@ -35,11 +47,14 @@ export default function ConfigPage() {
     async function loadConfig() {
       try {
         maybeConnectAdminEmulators();
-        const fn = httpsCallable(adminFunctions, 'getCurrentConfig');
-        const result: any = await fn({});
+        const fn = httpsCallable<CallableRequest<'getCurrentConfig'>, CallableResponse<'getCurrentConfig'>>(
+          adminFunctions,
+          'getCurrentConfig'
+        );
+        const result = await fn({});
         const fees = result.data?.fees;
         const holdPolicy = result.data?.holdPolicy;
-        const featureFlags = result.data?.featureFlags ?? {};
+        const featureFlags: Partial<FeatureFlags> = result.data?.featureFlags ?? {};
         const feesV2 = result.data?.feesV2;
         const depositPolicies = result.data?.depositPolicies;
         const subscriptionPlans = result.data?.subscriptionPlans;
@@ -82,13 +97,16 @@ export default function ConfigPage() {
   async function save() {
     setMessage('');
     try {
-      const parsedFeeTiers = JSON.parse(feeTiersJson);
-      const parsedDepositPolicies = JSON.parse(depositPoliciesJson);
-      const parsedSubscriptionPlans = JSON.parse(subscriptionPlansJson);
+      const parsedFeeTiers = parseJson<FeeTier[]>(feeTiersJson);
+      const parsedDepositPolicies = parseJson<DepositPolicyConfig['rules']>(depositPoliciesJson);
+      const parsedSubscriptionPlans = parseJson<SubscriptionPlansConfig['plans']>(subscriptionPlansJson);
 
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'adminSetConfig');
-      await fn({
+      const fn = httpsCallable<CallableRequest<'adminSetConfig'>, CallableResponse<'adminSetConfig'>>(
+        adminFunctions,
+        'adminSetConfig'
+      );
+      const payload: CallableRequest<'adminSetConfig'> = {
         platformFees: {
           percentBps: Number(percent) * 100,
           fixedFeeCents: 0,
@@ -142,7 +160,8 @@ export default function ConfigPage() {
           recommendationsEnabled,
           growthEnabled,
         },
-      });
+      };
+      await fn(payload);
       setMessage('Saved config.');
     } catch (err) {
       setMessage(String(err));

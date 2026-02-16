@@ -2,20 +2,32 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type { CallableRequest, CallableResponse } from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 import { useCollectionData } from '../../../lib/useCollectionData';
+
+type CaseRow = {
+  id: string;
+  projectId: string;
+  status?: string;
+  heldAmountCents?: number;
+  resolutionDocumentUrl?: string;
+};
 
 export default function CasesPage() {
   const { rows, loading, error } = useCollectionData('cases');
   const [busyId, setBusyId] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<string>('');
 
-  async function executeRefund(caseRow: any) {
+  async function executeRefund(caseRow: CaseRow) {
     setBusyId(caseRow.id);
     setResult('');
     try {
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'adminExecuteOutcome');
+      const fn = httpsCallable<CallableRequest<'adminExecuteOutcome'>, CallableResponse<'adminExecuteOutcome'>>(
+        adminFunctions,
+        'adminExecuteOutcome'
+      );
       const projectId = caseRow.projectId;
       await fn({
         projectId,
@@ -58,7 +70,12 @@ export default function CasesPage() {
               <td>{row.status}</td>
               <td>{row.resolutionDocumentUrl ?? '-'}</td>
               <td>
-                <button data-testid={`cases-execute-${row.id}`} className="btn btn-secondary" disabled={busyId === row.id} onClick={() => executeRefund(row)}>
+                <button
+                  data-testid={`cases-execute-${row.id}`}
+                  className="btn btn-secondary"
+                  disabled={busyId === row.id}
+                  onClick={() => executeRefund(row as CaseRow)}
+                >
                   Execute Outcome
                 </button>
               </td>

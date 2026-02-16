@@ -8,7 +8,8 @@
     "dev:online": "expo start --clear --lan",
     "dev:offline": "expo start --clear --offline",
     "build": "expo export",
-    "lint": "echo mobile lint placeholder"
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "typecheck": "expo export --platform web --output-dir ../../artifacts/mobile-typecheck"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",

@@ -11,7 +11,6 @@ import {
   type BookingRequest,
   type ChangeOrder,
   type EscrowState,
-  type FeatureFlags,
   type HoldPolicyConfig,
   type MessageItem,
   type Milestone,
@@ -63,6 +62,12 @@ import { writeLedgerEvent } from '../modules/ledger';
 import { writeAuditLog } from '../modules/audit';
 import { resolveTieredFee } from '../modules/pricing';
 import { updateReliabilityScore } from '../modules/reliability';
+import {
+  ensureProjectParty,
+  getProjectOrThrow,
+  nowIso,
+  requireFeatureFlag,
+} from './common';
 
 const PROJECTS = db.collection('projects');
 const AGREEMENTS = db.collection('agreements');
@@ -71,32 +76,15 @@ const REVIEWS = db.collection('reviews');
 const MESSAGES = db.collection('messages');
 const PROMOTIONS = db.collection('promotions');
 
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-function ensureProjectParty(project: any, actor: Actor): void {
-  if (actor.role === 'admin') {
-    return;
-  }
-
-  const isCustomer = project.customerId === actor.uid;
-  const isContractor = project.contractorId && project.contractorId === actor.uid;
-  if (!isCustomer && !isContractor) {
-    throw new HttpsError('permission-denied', 'Project access denied.');
-  }
-}
-
 function getHeldAmountCents(project: any): number {
   return Number(project.heldAmountCents ?? 0);
 }
 
-async function requireFeatureFlag<K extends keyof FeatureFlags>(key: K, message: string): Promise<FeatureFlags> {
-  const flags = await getFeatureFlags();
-  if (!flags[key]) {
-    throw new HttpsError('failed-precondition', message);
-  }
-  return flags;
+async function requireConfigFeatureFlag<K extends keyof Awaited<ReturnType<typeof getFeatureFlags>>>(
+  key: K,
+  message: string
+) {
+  return requireFeatureFlag(getFeatureFlags, key, message);
 }
 
 function parseVersion(version: string | undefined): number {
@@ -123,14 +111,6 @@ function assertFinalProjectStateForReview(escrowState: EscrowState): void {
   if (!allowed.includes(escrowState)) {
     throw new HttpsError('failed-precondition', 'Reviews are available only after project completion.');
   }
-}
-
-async function getProjectOrThrow(projectId: string): Promise<any> {
-  const projectSnap = await PROJECTS.doc(projectId).get();
-  if (!projectSnap.exists) {
-    throw new HttpsError('not-found', 'Project not found.');
-  }
-  return projectSnap.data();
 }
 
 async function getSelectedQuoteOrThrow(project: any): Promise<any> {
@@ -1431,7 +1411,7 @@ export async function adminSetUserRoleHandler(req: CallableRequest<unknown>) {
 export async function createMilestonesHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
+  await requireConfigFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
 
   const input = parseOrThrow(createMilestonesInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1505,7 +1485,7 @@ export async function createMilestonesHandler(req: CallableRequest<unknown>) {
 export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
+  await requireConfigFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
 
   const input = parseOrThrow(approveMilestoneInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1613,7 +1593,7 @@ export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
 export async function proposeChangeOrderHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
+  await requireConfigFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
 
   const input = parseOrThrow(proposeChangeOrderInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1640,7 +1620,7 @@ export async function proposeChangeOrderHandler(req: CallableRequest<unknown>) {
 export async function acceptChangeOrderHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
+  await requireConfigFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
 
   const input = parseOrThrow(acceptChangeOrderInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1718,7 +1698,7 @@ export async function acceptChangeOrderHandler(req: CallableRequest<unknown>) {
 export async function createBookingRequestHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
+  await requireConfigFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
 
   const input = parseOrThrow(createBookingRequestInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1781,7 +1761,7 @@ export async function createBookingRequestHandler(req: CallableRequest<unknown>)
 export async function respondBookingRequestHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor']);
-  await requireFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
+  await requireConfigFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
 
   const input = parseOrThrow(respondBookingRequestInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1830,7 +1810,7 @@ export async function respondBookingRequestHandler(req: CallableRequest<unknown>
 export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('recommendationsEnabled', 'Recommendations are disabled.');
+  await requireConfigFeatureFlag('recommendationsEnabled', 'Recommendations are disabled.');
 
   const input = parseOrThrow(getRecommendationsInputSchema, req.data ?? {});
   const limit = input.limit ?? 10;
@@ -1903,7 +1883,7 @@ export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
 export async function adminSetPromotionHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['admin']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(adminSetPromotionInputSchema, req.data);
   const now = nowIso();
@@ -1929,7 +1909,7 @@ export async function adminSetPromotionHandler(req: CallableRequest<unknown>) {
 export async function applyReferralCodeHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(applyReferralCodeInputSchema, req.data);
   const code = input.code.trim().toUpperCase();
@@ -1997,7 +1977,7 @@ export async function applyReferralCodeHandler(req: CallableRequest<unknown>) {
 export async function listFeaturedListingsHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(listFeaturedListingsInputSchema, req.data ?? {});
   const limit = input.limit ?? 20;

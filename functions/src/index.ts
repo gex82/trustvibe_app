@@ -1,64 +1,77 @@
 import { onCall } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
-  acceptChangeOrderHandler,
   acceptAgreementHandler,
-  adminSetPromotionHandler,
-  adminSetUserRoleHandler,
-  adminExecuteOutcomeHandler,
-  adminModerateReviewHandler,
-  adminSetConfigHandler,
-  applyReferralCodeHandler,
+  createProjectHandler,
+  getProjectHandler,
+  listProjectsHandler,
+  listQuotesHandler,
+  selectContractorHandler,
+  submitQuoteHandler,
+} from './http/projectHandlers';
+import { listMessagesHandler, sendMessageHandler } from './http/messageHandlers';
+import {
+  acceptChangeOrderHandler,
   approveMilestoneHandler,
   approveReleaseHandler,
   checkAutoReleaseHandler,
   createBookingRequestHandler,
   createMilestonesHandler,
-  createProjectHandler,
-  flagReviewHandler,
   fundHoldHandler,
-  getAdminSessionHandler,
-  getCurrentConfigHandler,
-  getRecommendationsHandler,
-  getProjectHandler,
-  listFeaturedListingsHandler,
-  listMessagesHandler,
-  listProjectsHandler,
-  listQuotesHandler,
   proposeChangeOrderHandler,
   proposeJointReleaseHandler,
   raiseIssueHoldHandler,
+  recordBookingAttendanceHandler,
   respondBookingRequestHandler,
   requestCompletionHandler,
-  selectContractorHandler,
-  sendMessageHandler,
   sendIssueRemindersHandler,
   signJointReleaseHandler,
-  submitQuoteHandler,
-  submitReviewHandler,
   uploadResolutionDocumentHandler,
-} from './http/handlers';
+} from './http/escrowHandlers';
+import {
+  adminExecuteOutcomeHandler,
+  adminModerateReviewHandler,
+  adminSetConfigHandler,
+  adminSetUserRoleHandler,
+  flagReviewHandler,
+  getAdminSessionHandler,
+  getCurrentConfigHandler,
+  submitReviewHandler,
+} from './http/adminHandlers';
+import {
+  adminSetPromotionHandler,
+  applyReferralCodeHandler,
+  getRecommendationsHandler,
+  listFeaturedListingsHandler,
+} from './http/growthHandlers';
 import {
   applyEstimateDepositToJobHandler,
-  assignConciergeManagerHandler,
-  cancelSubscriptionHandler,
   captureEstimateDepositHandler,
-  createConnectedPaymentAccountHandler,
   createEstimateDepositHandler,
-  createHighTicketCaseHandler,
-  createSubscriptionHandler,
+  markEstimateAttendanceHandler,
+  refundEstimateDepositHandler,
+} from './http/depositsHandlers';
+import {
+  createConnectedPaymentAccountHandler,
   getPaymentOnboardingLinkHandler,
   getReliabilityScoreHandler,
-  listInvoicesHandler,
-  markEstimateAttendanceHandler,
-  recordBookingAttendanceHandler,
   recomputeReliabilityScoresHandler,
-  refundEstimateDepositHandler,
-  submitConciergeBidHandler,
+} from './http/paymentsHandlers';
+import {
   submitCredentialForVerificationHandler,
-  updateSubscriptionHandler,
   verifyCredentialHandler,
-} from './http/productionHandlers';
+} from './http/verificationHandlers';
+import {
+  cancelSubscriptionHandler,
+  createSubscriptionHandler,
+  listInvoicesHandler,
+  updateSubscriptionHandler,
+} from './http/subscriptionsHandlers';
+import {
+  assignConciergeManagerHandler,
+  createHighTicketCaseHandler,
+  submitConciergeBidHandler,
+} from './http/conciergeHandlers';
 
 const callOptions = {
   region: 'us-central1' as const,

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type { CallableRequest, CallableResponse } from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 import { useCollectionData } from '../../../lib/useCollectionData';
 
@@ -15,7 +16,10 @@ export default function DepositsPage() {
     setMessage('');
     try {
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'refundEstimateDeposit');
+      const fn = httpsCallable<CallableRequest<'refundEstimateDeposit'>, CallableResponse<'refundEstimateDeposit'>>(
+        adminFunctions,
+        'refundEstimateDeposit'
+      );
       await fn({ depositId, reason: 'admin_override' });
       await refresh();
       setMessage(`Refund executed for ${depositId}.`);

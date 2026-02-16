@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type { CallableRequest, CallableResponse } from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 import { useCollectionData } from '../../../lib/useCollectionData';
 
@@ -15,7 +16,10 @@ export default function ConciergePage() {
     setMessage('');
     try {
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'assignConciergeManager');
+      const fn = httpsCallable<CallableRequest<'assignConciergeManager'>, CallableResponse<'assignConciergeManager'>>(
+        adminFunctions,
+        'assignConciergeManager'
+      );
       await fn({ caseId, adminUserId: 'admin-concierge-001' });
       await refresh();
       setMessage(`Assigned concierge manager for ${caseId}.`);

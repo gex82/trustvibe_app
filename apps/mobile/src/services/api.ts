@@ -10,7 +10,14 @@ import {
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import i18n from 'i18next';
-import { DEFAULT_FEATURE_FLAGS, type FeatureFlags, type Role } from '@trustvibe/shared';
+import {
+  DEFAULT_FEATURE_FLAGS,
+  type CallableName,
+  type CallableRequest,
+  type CallableResponse,
+  type FeatureFlags,
+  type Role,
+} from '@trustvibe/shared';
 import { auth, db, functions, maybeConnectEmulators } from './firebase';
 
 maybeConnectEmulators();
@@ -82,8 +89,11 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   };
 }
 
-async function call<TInput extends object, TOutput>(name: string, payload: TInput): Promise<TOutput> {
-  const fn = httpsCallable<TInput, TOutput>(functions, name);
+async function call<TName extends CallableName>(
+  name: TName,
+  payload: CallableRequest<TName>
+): Promise<CallableResponse<TName>> {
+  const fn = httpsCallable<CallableRequest<TName>, CallableResponse<TName>>(functions, name);
   const result = await fn(payload);
   return result.data;
 }
@@ -92,7 +102,7 @@ export async function getCurrentConfig(): Promise<{
   featureFlags: FeatureFlags;
 }> {
   try {
-    const result = await call<Record<string, never>, { featureFlags?: FeatureFlags }>('getCurrentConfig', {});
+    const result = await call('getCurrentConfig', {});
     return {
       featureFlags: result.featureFlags ?? DEFAULT_FEATURE_FLAGS,
     };
@@ -128,281 +138,236 @@ export function mapApiError(error: unknown): string {
   return message;
 }
 
-export function listProjects(payload: {
-  mineOnly?: boolean;
-  municipality?: string;
-  category?: string;
-  budgetMinCents?: number;
-  budgetMaxCents?: number;
-  limit?: number;
-}): Promise<{ projects: any[] }> {
+export function listProjects(
+  payload: CallableRequest<'listProjects'>
+): Promise<CallableResponse<'listProjects'>> {
   return call('listProjects', payload);
 }
 
-export function createProject(payload: {
-  category: string;
-  title: string;
-  description: string;
-  photos: string[];
-  municipality: string;
-  desiredTimeline: string;
-  budgetMinCents?: number;
-  budgetMaxCents?: number;
-}): Promise<{ project: any }> {
+export function createProject(
+  payload: CallableRequest<'createProject'>
+): Promise<CallableResponse<'createProject'>> {
   return call('createProject', payload);
 }
 
-export function getProject(payload: { projectId: string }): Promise<{ project: any; quotes: any[] }> {
+export function getProject(payload: CallableRequest<'getProject'>): Promise<CallableResponse<'getProject'>> {
   return call('getProject', payload);
 }
 
-export function submitQuote(payload: {
-  projectId: string;
-  priceCents: number;
-  timelineDays: number;
-  scopeNotes: string;
-}): Promise<{ quote: any }> {
+export function submitQuote(payload: CallableRequest<'submitQuote'>): Promise<CallableResponse<'submitQuote'>> {
   return call('submitQuote', payload);
 }
 
-export function selectContractor(payload: { projectId: string; quoteId: string }): Promise<{ agreementId: string }> {
+export function selectContractor(
+  payload: CallableRequest<'selectContractor'>
+): Promise<CallableResponse<'selectContractor'>> {
   return call('selectContractor', payload);
 }
 
-export function acceptAgreement(payload: { agreementId: string }): Promise<{ readyToFund: boolean }> {
+export function acceptAgreement(
+  payload: CallableRequest<'acceptAgreement'>
+): Promise<CallableResponse<'acceptAgreement'>> {
   return call('acceptAgreement', payload);
 }
 
-export function fundHold(payload: { projectId: string }): Promise<any> {
+export function fundHold(payload: CallableRequest<'fundHold'>): Promise<CallableResponse<'fundHold'>> {
   return call('fundHold', payload);
 }
 
-export function requestCompletion(payload: { projectId: string; proofPhotoUrls?: string[] }): Promise<any> {
+export function requestCompletion(
+  payload: CallableRequest<'requestCompletion'>
+): Promise<CallableResponse<'requestCompletion'>> {
   return call('requestCompletion', payload);
 }
 
-export function approveRelease(payload: { projectId: string }): Promise<any> {
+export function approveRelease(
+  payload: CallableRequest<'approveRelease'>
+): Promise<CallableResponse<'approveRelease'>> {
   return call('approveRelease', payload);
 }
 
-export function raiseIssueHold(payload: { projectId: string; reason: string }): Promise<any> {
+export function raiseIssueHold(
+  payload: CallableRequest<'raiseIssueHold'>
+): Promise<CallableResponse<'raiseIssueHold'>> {
   return call('raiseIssueHold', payload);
 }
 
-export function proposeJointRelease(payload: {
-  projectId: string;
-  releaseToContractorCents: number;
-  refundToCustomerCents: number;
-}): Promise<{ proposalId: string }> {
+export function proposeJointRelease(
+  payload: CallableRequest<'proposeJointRelease'>
+): Promise<CallableResponse<'proposeJointRelease'>> {
   return call('proposeJointRelease', payload);
 }
 
-export function signJointRelease(payload: { projectId: string; proposalId: string }): Promise<any> {
+export function signJointRelease(
+  payload: CallableRequest<'signJointRelease'>
+): Promise<CallableResponse<'signJointRelease'>> {
   return call('signJointRelease', payload);
 }
 
-export function uploadResolutionDocument(payload: {
-  projectId: string;
-  documentUrl: string;
-  resolutionType: 'court_order' | 'mediator_decision' | 'signed_settlement';
-  summary: string;
-}): Promise<any> {
+export function uploadResolutionDocument(
+  payload: CallableRequest<'uploadResolutionDocument'>
+): Promise<CallableResponse<'uploadResolutionDocument'>> {
   return call('uploadResolutionDocument', payload);
 }
 
-export function listMessages(payload: { projectId: string; limit?: number }): Promise<{ projectId: string; messages: any[] }> {
+export function listMessages(
+  payload: CallableRequest<'listMessages'>
+): Promise<CallableResponse<'listMessages'>> {
   return call('listMessages', payload);
 }
 
-export function sendMessage(payload: { projectId: string; body: string; attachments?: string[] }): Promise<{ message: any }> {
+export function sendMessage(payload: CallableRequest<'sendMessage'>): Promise<CallableResponse<'sendMessage'>> {
   return call('sendMessage', payload);
 }
 
-export function createMilestones(payload: {
-  projectId: string;
-  milestones: Array<{ title: string; amountCents: number; acceptanceCriteria: string; dueDate?: string }>;
-}): Promise<{ projectId: string; milestones: any[] }> {
+export function createMilestones(
+  payload: CallableRequest<'createMilestones'>
+): Promise<CallableResponse<'createMilestones'>> {
   return call('createMilestones', payload);
 }
 
-export function approveMilestone(payload: {
-  projectId: string;
-  milestoneId: string;
-}): Promise<{ projectId: string; milestoneId: string; releasedAmountCents: number }> {
+export function approveMilestone(
+  payload: CallableRequest<'approveMilestone'>
+): Promise<CallableResponse<'approveMilestone'>> {
   return call('approveMilestone', payload);
 }
 
-export function proposeChangeOrder(payload: {
-  projectId: string;
-  scopeSummary: string;
-  amountDeltaCents: number;
-  timelineDeltaDays: number;
-}): Promise<{ changeOrder: any }> {
+export function proposeChangeOrder(
+  payload: CallableRequest<'proposeChangeOrder'>
+): Promise<CallableResponse<'proposeChangeOrder'>> {
   return call('proposeChangeOrder', payload);
 }
 
-export function acceptChangeOrder(payload: {
-  projectId: string;
-  changeOrderId: string;
-  accept: boolean;
-}): Promise<{ changeOrderId: string; status: string }> {
+export function acceptChangeOrder(
+  payload: CallableRequest<'acceptChangeOrder'>
+): Promise<CallableResponse<'acceptChangeOrder'>> {
   return call('acceptChangeOrder', payload);
 }
 
-export function createBookingRequest(payload: {
-  projectId: string;
-  startAt: string;
-  endAt: string;
-  estimateDepositId?: string;
-  note?: string;
-}): Promise<{ bookingRequest: any }> {
+export function createBookingRequest(
+  payload: CallableRequest<'createBookingRequest'>
+): Promise<CallableResponse<'createBookingRequest'>> {
   return call('createBookingRequest', payload);
 }
 
-export function respondBookingRequest(payload: {
-  projectId: string;
-  bookingRequestId: string;
-  response: 'confirm' | 'decline';
-}): Promise<{ bookingRequestId: string; status: string }> {
+export function respondBookingRequest(
+  payload: CallableRequest<'respondBookingRequest'>
+): Promise<CallableResponse<'respondBookingRequest'>> {
   return call('respondBookingRequest', payload);
 }
 
-export function recordBookingAttendance(payload: {
-  projectId: string;
-  bookingRequestId: string;
-  attendeeRole: 'customer' | 'contractor';
-  attended: boolean;
-  note?: string;
-}): Promise<{ bookingRequestId: string; attended: boolean }> {
+export function recordBookingAttendance(
+  payload: CallableRequest<'recordBookingAttendance'>
+): Promise<CallableResponse<'recordBookingAttendance'>> {
   return call('recordBookingAttendance', payload);
 }
 
-export function createEstimateDeposit(payload: {
-  projectId: string;
-  category?: string;
-  appointmentStartAt?: string;
-}): Promise<{ deposit: any }> {
+export function createEstimateDeposit(
+  payload: CallableRequest<'createEstimateDeposit'>
+): Promise<CallableResponse<'createEstimateDeposit'>> {
   return call('createEstimateDeposit', payload);
 }
 
-export function captureEstimateDeposit(payload: { depositId: string; paymentMethodId?: string }): Promise<{ deposit: any }> {
+export function captureEstimateDeposit(
+  payload: CallableRequest<'captureEstimateDeposit'>
+): Promise<CallableResponse<'captureEstimateDeposit'>> {
   return call('captureEstimateDeposit', payload);
 }
 
-export function markEstimateAttendance(payload: {
-  depositId: string;
-  attendance: 'customer_present' | 'contractor_present' | 'customer_no_show' | 'contractor_no_show';
-  note?: string;
-}): Promise<{ deposit: any }> {
+export function markEstimateAttendance(
+  payload: CallableRequest<'markEstimateAttendance'>
+): Promise<CallableResponse<'markEstimateAttendance'>> {
   return call('markEstimateAttendance', payload);
 }
 
-export function refundEstimateDeposit(payload: { depositId: string; reason: string }): Promise<{ deposit: any }> {
+export function refundEstimateDeposit(
+  payload: CallableRequest<'refundEstimateDeposit'>
+): Promise<CallableResponse<'refundEstimateDeposit'>> {
   return call('refundEstimateDeposit', payload);
 }
 
-export function applyEstimateDepositToJob(payload: {
-  projectId: string;
-  depositId: string;
-}): Promise<{ projectId: string; creditedAmountCents: number }> {
+export function applyEstimateDepositToJob(
+  payload: CallableRequest<'applyEstimateDepositToJob'>
+): Promise<CallableResponse<'applyEstimateDepositToJob'>> {
   return call('applyEstimateDepositToJob', payload);
 }
 
-export function createConnectedPaymentAccount(payload: {
-  country?: string;
-  type?: 'express' | 'standard';
-}): Promise<{ paymentAccountId: string; providerAccountId: string }> {
+export function createConnectedPaymentAccount(
+  payload: CallableRequest<'createConnectedPaymentAccount'>
+): Promise<CallableResponse<'createConnectedPaymentAccount'>> {
   return call('createConnectedPaymentAccount', payload);
 }
 
-export function getPaymentOnboardingLink(payload: {
-  accountId?: string;
-  returnUrl?: string;
-  refreshUrl?: string;
-}): Promise<{ onboardingUrl: string }> {
+export function getPaymentOnboardingLink(
+  payload: CallableRequest<'getPaymentOnboardingLink'>
+): Promise<CallableResponse<'getPaymentOnboardingLink'>> {
   return call('getPaymentOnboardingLink', payload);
 }
 
-export function getReliabilityScore(payload: { contractorId?: string }): Promise<{ score: any }> {
+export function getReliabilityScore(
+  payload: CallableRequest<'getReliabilityScore'>
+): Promise<CallableResponse<'getReliabilityScore'>> {
   return call('getReliabilityScore', payload);
 }
 
-export function submitCredentialForVerification(payload: {
-  credentialType: 'daco_registration' | 'perito_license';
-  identifier: string;
-  documentUrl?: string;
-  expiresAt?: string;
-}): Promise<{ verification: any }> {
+export function submitCredentialForVerification(
+  payload: CallableRequest<'submitCredentialForVerification'>
+): Promise<CallableResponse<'submitCredentialForVerification'>> {
   return call('submitCredentialForVerification', payload);
 }
 
-export function createSubscription(payload: {
-  audience: 'contractor' | 'property_manager';
-  planId: string;
-  billingEmail?: string;
-  unitCount?: number;
-}): Promise<{ subscriptionId: string }> {
+export function createSubscription(
+  payload: CallableRequest<'createSubscription'>
+): Promise<CallableResponse<'createSubscription'>> {
   return call('createSubscription', payload);
 }
 
-export function updateSubscription(payload: {
-  subscriptionId: string;
-  planId?: string;
-  unitCount?: number;
-}): Promise<{ subscriptionId: string; updated: boolean }> {
+export function updateSubscription(
+  payload: CallableRequest<'updateSubscription'>
+): Promise<CallableResponse<'updateSubscription'>> {
   return call('updateSubscription', payload);
 }
 
-export function cancelSubscription(payload: {
-  subscriptionId: string;
-  cancelAtPeriodEnd?: boolean;
-}): Promise<{ subscriptionId: string; status: string }> {
+export function cancelSubscription(
+  payload: CallableRequest<'cancelSubscription'>
+): Promise<CallableResponse<'cancelSubscription'>> {
   return call('cancelSubscription', payload);
 }
 
-export function listInvoices(payload: { subscriptionId?: string; limit?: number }): Promise<{ invoices: any[] }> {
+export function listInvoices(payload: CallableRequest<'listInvoices'>): Promise<CallableResponse<'listInvoices'>> {
   return call('listInvoices', payload);
 }
 
-export function createHighTicketCase(payload: {
-  projectId: string;
-  intakeNotes: string;
-  preferredStartDate?: string;
-}): Promise<{ highTicketCase: any }> {
+export function createHighTicketCase(
+  payload: CallableRequest<'createHighTicketCase'>
+): Promise<CallableResponse<'createHighTicketCase'>> {
   return call('createHighTicketCase', payload);
 }
 
-export function submitConciergeBid(payload: {
-  caseId: string;
-  projectId: string;
-  amountCents: number;
-  milestoneTemplate?: Array<{ title: string; amountCents: number; acceptanceCriteria: string }>;
-}): Promise<{ caseId: string; bidId: string }> {
+export function submitConciergeBid(
+  payload: CallableRequest<'submitConciergeBid'>
+): Promise<CallableResponse<'submitConciergeBid'>> {
   return call('submitConciergeBid', payload);
 }
 
-export function getRecommendations(payload: {
-  target?: 'customer' | 'contractor';
-  municipality?: string;
-  category?: string;
-  limit?: number;
-}): Promise<{ target: string; recommendations: any[] }> {
+export function getRecommendations(
+  payload: CallableRequest<'getRecommendations'>
+): Promise<CallableResponse<'getRecommendations'>> {
   return call('getRecommendations', payload);
 }
 
-export function applyReferralCode(payload: { code: string; projectId?: string }): Promise<any> {
+export function applyReferralCode(
+  payload: CallableRequest<'applyReferralCode'>
+): Promise<CallableResponse<'applyReferralCode'>> {
   return call('applyReferralCode', payload);
 }
 
-export function listFeaturedListings(payload: { limit?: number }): Promise<{ featured: any[] }> {
+export function listFeaturedListings(
+  payload: CallableRequest<'listFeaturedListings'>
+): Promise<CallableResponse<'listFeaturedListings'>> {
   return call('listFeaturedListings', payload);
 }
 
-export function submitReview(payload: {
-  projectId: string;
-  rating: number;
-  feedback: string;
-  tags: Array<'quality' | 'communication' | 'timeliness'>;
-}): Promise<{ reviewId: string }> {
+export function submitReview(payload: CallableRequest<'submitReview'>): Promise<CallableResponse<'submitReview'>> {
   return call('submitReview', payload);
 }

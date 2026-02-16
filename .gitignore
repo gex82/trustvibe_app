@@ -3,6 +3,7 @@ node_modules
 .expo-shared
 dist
 coverage
+*.tsbuildinfo
 .firebase
 functions/lib
 apps/admin/.next

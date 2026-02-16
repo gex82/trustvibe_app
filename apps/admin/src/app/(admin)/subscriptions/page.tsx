@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type { CallableRequest, CallableResponse } from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 import { useCollectionData } from '../../../lib/useCollectionData';
 
@@ -16,7 +17,10 @@ export default function SubscriptionsPage() {
     setMessage('');
     try {
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'cancelSubscription');
+      const fn = httpsCallable<CallableRequest<'cancelSubscription'>, CallableResponse<'cancelSubscription'>>(
+        adminFunctions,
+        'cancelSubscription'
+      );
       await fn({ subscriptionId, cancelAtPeriodEnd: false });
       await subscriptions.refresh();
       setMessage(`Canceled subscription ${subscriptionId}.`);

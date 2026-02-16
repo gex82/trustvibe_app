@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { httpsCallable } from 'firebase/functions';
+import type { CallableRequest, CallableResponse, Role } from '@trustvibe/shared';
 import { adminFunctions, maybeConnectAdminEmulators } from '../../../lib/firebase';
 import { useCollectionData } from '../../../lib/useCollectionData';
 
@@ -10,12 +11,15 @@ export default function UsersPage() {
   const [savingId, setSavingId] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState('');
 
-  async function setRole(userId: string, role: 'customer' | 'contractor' | 'admin', disabled?: boolean) {
+  async function setRole(userId: string, role: Role, disabled?: boolean) {
     setSavingId(userId);
     setMessage('');
     try {
       maybeConnectAdminEmulators();
-      const fn = httpsCallable(adminFunctions, 'adminSetUserRole');
+      const fn = httpsCallable<CallableRequest<'adminSetUserRole'>, CallableResponse<'adminSetUserRole'>>(
+        adminFunctions,
+        'adminSetUserRole'
+      );
       await fn({ userId, role, disabled });
       await refresh();
       setMessage(`Updated user ${userId}.`);

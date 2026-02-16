@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import type { CallableResponse, ProjectRecord } from '@trustvibe/shared';
 import {
   acceptAgreement,
   applyEstimateDepositToJob,
@@ -41,6 +42,8 @@ import { getLocalizedProjectDescription, getLocalizedProjectTitle } from '../../
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ProjectDetail'>;
 type Translate = (key: string, options?: Record<string, unknown>) => string;
+type GetProjectResponse = CallableResponse<'getProject'>;
+type ProjectMilestone = NonNullable<ProjectRecord['milestones']>[number];
 
 type MilestoneItem = {
   id: string;
@@ -49,18 +52,23 @@ type MilestoneItem = {
   status: 'completed' | 'in_progress' | 'held';
 };
 
-function buildMilestones(project: any, t: Translate): MilestoneItem[] {
-  if (Array.isArray(project.milestones) && project.milestones.length) {
-    return project.milestones.map((milestone: any) => ({
+function toMilestoneStatus(status?: ProjectMilestone['status']): MilestoneItem['status'] {
+  if (status === 'APPROVED' || status === 'RELEASED') {
+    return 'completed';
+  }
+  if (status === 'COMPLETED_REQUESTED') {
+    return 'held';
+  }
+  return 'in_progress';
+}
+
+function buildMilestones(project: ProjectRecord, t: Translate): MilestoneItem[] {
+  if (Array.isArray(project.milestones) && project.milestones.length > 0) {
+    return project.milestones.map((milestone) => ({
       id: String(milestone.id),
       title: String(milestone.title),
       amountCents: Number(milestone.amountCents ?? 0),
-      status:
-        milestone.status === 'APPROVED'
-          ? 'completed'
-          : milestone.status === 'COMPLETED_REQUESTED'
-          ? 'held'
-          : 'in_progress',
+      status: toMilestoneStatus(milestone.status),
     }));
   }
 
@@ -90,7 +98,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
   const projectId = route.params.projectId;
   const [busy, setBusy] = React.useState(false);
 
-  const projectQuery = useQuery({
+  const projectQuery = useQuery<GetProjectResponse>({
     queryKey: ['project', projectId],
     queryFn: () => getProject({ projectId }),
   });

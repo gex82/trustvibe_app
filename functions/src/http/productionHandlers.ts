@@ -39,6 +39,12 @@ import { getPaymentProvider } from '../modules/paymentProviderFactory';
 import { resolveDepositAmountCents } from '../modules/pricing';
 import { getCredentialVerificationProvider } from '../modules/credentialVerificationProviderFactory';
 import { getReliabilityScore, updateReliabilityScore } from '../modules/reliability';
+import {
+  ensureProjectParty,
+  getProjectOrThrow,
+  nowIso,
+  requireFeatureFlag,
+} from './common';
 
 const PROJECTS = db.collection('projects');
 const ESTIMATE_DEPOSITS = db.collection('estimateDeposits');
@@ -48,38 +54,11 @@ const SUBSCRIPTIONS = db.collection('subscriptions');
 const BILLING_INVOICES = db.collection('billingInvoices');
 const HIGH_TICKET_CASES = db.collection('highTicketCases');
 
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-async function requireFeatureFlag<K extends keyof Awaited<ReturnType<typeof getFeatureFlags>>>(
+async function requireConfigFeatureFlag<K extends keyof Awaited<ReturnType<typeof getFeatureFlags>>>(
   key: K,
   message: string
 ): Promise<Awaited<ReturnType<typeof getFeatureFlags>>> {
-  const flags = await getFeatureFlags();
-  if (!flags[key]) {
-    throw new HttpsError('failed-precondition', message);
-  }
-  return flags;
-}
-
-async function getProjectOrThrow(projectId: string): Promise<any> {
-  const snap = await PROJECTS.doc(projectId).get();
-  if (!snap.exists) {
-    throw new HttpsError('not-found', 'Project not found.');
-  }
-  return snap.data();
-}
-
-function ensureProjectParty(project: any, actor: Actor): void {
-  if (actor.role === 'admin') {
-    return;
-  }
-  const isCustomer = project.customerId === actor.uid;
-  const isContractor = project.contractorId === actor.uid;
-  if (!isCustomer && !isContractor) {
-    throw new HttpsError('permission-denied', 'Project access denied.');
-  }
+  return requireFeatureFlag(getFeatureFlags, key, message);
 }
 
 async function getEstimateDepositOrThrow(depositId: string): Promise<EstimateDeposit> {
@@ -136,7 +115,7 @@ async function autoRefundEstimateDepositIfNeeded(input: {
 export async function createEstimateDepositHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
 
   const input = parseOrThrow(createEstimateDepositInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -199,7 +178,7 @@ export async function createEstimateDepositHandler(req: CallableRequest<unknown>
 export async function captureEstimateDepositHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
 
   const input = parseOrThrow(captureEstimateDepositInputSchema, req.data);
   const deposit = await getEstimateDepositOrThrow(input.depositId);
@@ -248,7 +227,7 @@ export async function captureEstimateDepositHandler(req: CallableRequest<unknown
 export async function markEstimateAttendanceHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
 
   const input = parseOrThrow(markEstimateAttendanceInputSchema, req.data);
   const deposit = await getEstimateDepositOrThrow(input.depositId);
@@ -318,7 +297,7 @@ export async function markEstimateAttendanceHandler(req: CallableRequest<unknown
 export async function refundEstimateDepositHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'admin']);
-  await requireFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
 
   const input = parseOrThrow(refundEstimateDepositInputSchema, req.data);
   const deposit = await getEstimateDepositOrThrow(input.depositId);
@@ -347,7 +326,7 @@ export async function refundEstimateDepositHandler(req: CallableRequest<unknown>
 export async function applyEstimateDepositToJobHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
 
   const input = parseOrThrow(applyEstimateDepositToJobInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -399,7 +378,7 @@ export async function applyEstimateDepositToJobHandler(req: CallableRequest<unkn
 export async function createConnectedPaymentAccountHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor', 'admin']);
-  await requireFeatureFlag('stripeConnectEnabled', 'Stripe Connect is disabled.');
+  await requireConfigFeatureFlag('stripeConnectEnabled', 'Stripe Connect is disabled.');
 
   const input = parseOrThrow(createConnectedPaymentAccountInputSchema, req.data ?? {});
   const provider = await getPaymentProvider();
@@ -442,7 +421,7 @@ export async function createConnectedPaymentAccountHandler(req: CallableRequest<
 export async function getPaymentOnboardingLinkHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor', 'admin']);
-  await requireFeatureFlag('stripeConnectEnabled', 'Stripe Connect is disabled.');
+  await requireConfigFeatureFlag('stripeConnectEnabled', 'Stripe Connect is disabled.');
 
   const input = parseOrThrow(getPaymentOnboardingLinkInputSchema, req.data ?? {});
   const accountId = input.accountId ?? actor.uid;
@@ -477,7 +456,7 @@ export async function getPaymentOnboardingLinkHandler(req: CallableRequest<unkno
 export async function recordBookingAttendanceHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
+  await requireConfigFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
 
   const input = parseOrThrow(recordBookingAttendanceInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -573,7 +552,7 @@ function mapVerificationStatus(status: CredentialVerification['status']): 'UNVER
 export async function submitCredentialForVerificationHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor']);
-  await requireFeatureFlag('credentialVerificationEnabled', 'Credential verification is disabled.');
+  await requireConfigFeatureFlag('credentialVerificationEnabled', 'Credential verification is disabled.');
 
   const input = parseOrThrow(submitCredentialForVerificationInputSchema, req.data);
   const profileRef = db.collection('contractorProfiles').doc(actor.uid);
@@ -648,7 +627,7 @@ export async function submitCredentialForVerificationHandler(req: CallableReques
 export async function verifyCredentialHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['admin']);
-  await requireFeatureFlag('credentialVerificationEnabled', 'Credential verification is disabled.');
+  await requireConfigFeatureFlag('credentialVerificationEnabled', 'Credential verification is disabled.');
 
   const input = parseOrThrow(verifyCredentialInputSchema, req.data);
   const verificationSnap = await CREDENTIAL_VERIFICATIONS.doc(input.verificationId).get();
@@ -705,7 +684,7 @@ export async function verifyCredentialHandler(req: CallableRequest<unknown>) {
 export async function createSubscriptionHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
+  await requireConfigFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
 
   const input = parseOrThrow(createSubscriptionInputSchema, req.data);
   if (actor.role === 'contractor' && input.audience !== 'contractor') {
@@ -778,7 +757,7 @@ export async function createSubscriptionHandler(req: CallableRequest<unknown>) {
 export async function updateSubscriptionHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
+  await requireConfigFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
 
   const input = parseOrThrow(updateSubscriptionInputSchema, req.data);
   const subRef = SUBSCRIPTIONS.doc(input.subscriptionId);
@@ -816,7 +795,7 @@ export async function updateSubscriptionHandler(req: CallableRequest<unknown>) {
 export async function cancelSubscriptionHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
+  await requireConfigFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
 
   const input = parseOrThrow(cancelSubscriptionInputSchema, req.data);
   const subRef = SUBSCRIPTIONS.doc(input.subscriptionId);
@@ -855,7 +834,7 @@ export async function cancelSubscriptionHandler(req: CallableRequest<unknown>) {
 export async function listInvoicesHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
+  await requireConfigFeatureFlag('subscriptionsEnabled', 'Subscriptions are disabled.');
 
   const input = parseOrThrow(listInvoicesInputSchema, req.data ?? {});
   const limit = input.limit ?? 30;
@@ -878,7 +857,7 @@ function resolveHighTicketAmount(project: any): number {
 export async function createHighTicketCaseHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
+  await requireConfigFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
 
   const input = parseOrThrow(createHighTicketCaseInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -937,7 +916,7 @@ export async function createHighTicketCaseHandler(req: CallableRequest<unknown>)
 export async function submitConciergeBidHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor', 'admin']);
-  await requireFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
+  await requireConfigFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
 
   const input = parseOrThrow(submitConciergeBidInputSchema, req.data);
   const caseRef = HIGH_TICKET_CASES.doc(input.caseId);
@@ -981,7 +960,7 @@ export async function submitConciergeBidHandler(req: CallableRequest<unknown>) {
 export async function assignConciergeManagerHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['admin']);
-  await requireFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
+  await requireConfigFeatureFlag('highTicketConciergeEnabled', 'High-ticket concierge is disabled.');
 
   const input = parseOrThrow(assignConciergeManagerInputSchema, req.data);
   const caseRef = HIGH_TICKET_CASES.doc(input.caseId);

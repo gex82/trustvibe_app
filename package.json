@@ -10,11 +10,13 @@
   ],
   "scripts": {
     "build": "npm run build -w @trustvibe/shared && npm run build -w @trustvibe/functions && npm run build -w @trustvibe/mobile && npm run build -w @trustvibe/admin",
-    "lint": "npm run lint -ws --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck -w @trustvibe/shared && npm run typecheck -w @trustvibe/functions && npm run typecheck -w @trustvibe/mobile && npm run typecheck -w @trustvibe/admin",
+    "deps:check": "npm outdated --workspaces || echo Dependencies out of date",
     "test": "jest",
     "test:unit": "jest packages/shared/src/__tests__ --runInBand",
     "test:integration": "jest functions/src/__tests__/integration --runInBand --detectOpenHandles",
-    "emulators": "firebase emulators:start --only auth,firestore,functions,storage --host 0.0.0.0 --import=.firebase/emulator-data --export-on-exit",
+    "emulators": "firebase emulators:start --only auth,firestore,functions,storage --import=.firebase/emulator-data --export-on-exit",
     "seed": "npm run seed -w @trustvibe/functions",
     "scenario:happy": "npm run scenario:happy -w @trustvibe/functions",
     "scenario:joint": "npm run scenario:joint -w @trustvibe/functions",
@@ -29,11 +31,20 @@
     "pass:web:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run_web_demo_pass.ps1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@next/eslint-plugin-next": "^14.2.25",
     "@playwright/test": "^1.41.2",
     "@types/jest": "^29.5.14",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "expo": "^54.0.33",
+    "globals": "^16.0.0",
     "jest": "^29.7.0",
+    "prettier": "^3.5.3",
     "ts-jest": "^29.2.5",
+    "typescript-eslint": "^8.26.1",
     "typescript": "^5.7.3"
   },
   "overrides": {
