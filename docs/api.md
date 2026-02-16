@@ -1,150 +1,126 @@
 # Cloud Functions API
 
-Last updated: 2026-02-11
+Last updated: 2026-02-11 (productionization pass)
 
-All endpoints are Firebase callable functions in region `us-central1`.
+All endpoints are Firebase callable functions in region `us-central1` unless noted.
 
-## Project + Quote
+## Core Marketplace
 
-- `createProject`
-  - role: `customer`
-  - input: `category,title,description,photos,municipality,desiredTimeline,budget*`
-- `listProjects`
-  - role: all
-  - input: filters + `limit`
-- `getProject`
-  - role: project-scoped or open-project contractor/admin
-  - input: `projectId`
-- `submitQuote`
-  - role: `contractor`
-  - input: `projectId,priceCents,timelineDays,scopeNotes,lineItems?`
-- `listQuotes`
-  - role: project-scoped
-  - input: `projectId`
-- `selectContractor`
-  - role: `customer` owner
-  - input: `projectId,quoteId`
+- `createProject` (customer)
+- `listProjects` (all roles)
+- `getProject` (project parties/open project contractor/admin)
+- `submitQuote` (contractor)
+- `listQuotes` (project-scoped)
+- `selectContractor` (customer owner)
+- `acceptAgreement` (customer/contractor)
 
-## Messaging (MVP)
+## Funds Hold and Resolution
 
-- `listMessages`
-  - role: project parties/admin
-  - input: `projectId,limit?`
-- `sendMessage`
-  - role: project parties/admin
-  - input: `projectId,body,attachments?`
+- `fundHold` (customer owner)
+  - applies estimate-deposit credit if present
+  - returns tiered fee preview
+- `requestCompletion` (selected contractor)
+- `approveRelease` (customer owner)
+- `raiseIssueHold` (customer owner)
+- `proposeJointRelease` (project parties)
+- `signJointRelease` (project parties)
+- `uploadResolutionDocument` (project parties)
+- `adminExecuteOutcome` (admin)
 
-## Agreement + Hold
+## Estimate Deposits (Feature Flag: `estimateDepositsEnabled`)
 
-- `acceptAgreement`
-  - role: customer/contractor party
-  - input: `agreementId`
-- `fundHold`
-  - role: `customer` owner
-  - input: `projectId,paymentMethodId?`
-- `requestCompletion`
-  - role: selected contractor
-  - input: `projectId,proofPhotoUrls?,note?`
-- `approveRelease`
-  - role: `customer` owner
-  - input: `projectId`
-- `raiseIssueHold`
-  - role: `customer` owner
-  - input: `projectId,reason`
+- `createEstimateDeposit` (customer owner)
+- `captureEstimateDeposit` (customer owner)
+- `markEstimateAttendance` (project parties/admin)
+- `refundEstimateDeposit` (customer owner/admin)
+- `applyEstimateDepositToJob` (customer owner)
 
-## Resolution Flows
+## Scheduling and Attendance (Feature Flag: `schedulingEnabled`)
 
-- `proposeJointRelease`
-  - role: project parties
-  - input: `projectId,releaseToContractorCents,refundToCustomerCents`
-- `signJointRelease`
-  - role: project parties
-  - input: `projectId,proposalId`
-- `uploadResolutionDocument`
-  - role: project parties
-  - input: `projectId,documentUrl,resolutionType,summary`
-- `adminExecuteOutcome`
-  - role: `admin`
-  - input: `projectId,caseId,outcomeType,release/refund amounts,docReference`
+- `createBookingRequest` (customer owner)
+- `respondBookingRequest` (selected contractor)
+- `recordBookingAttendance` (project parties/admin)
 
-## Reviews + Config
+## Milestones and Change Orders
 
-- `submitReview`
-  - role: customer owner after final state
-- `flagReview`
-  - role: authenticated user
-- `adminModerateReview`
-  - role: admin
-- `adminSetConfig`
-  - role: admin
-  - allows updating `platformFees`, `holdPolicy`, `featureFlags`
-- `getCurrentConfig`
-  - role: authenticated
-- `getAdminSession`
-  - role: `admin`
-  - verifies admin claim enforcement from token
-- `adminSetUserRole`
-  - role: `admin`
-  - input: `userId,role,disabled?`
-  - updates both `users/{id}` and Firebase custom claims
+- `createMilestones` (customer, `milestonePaymentsEnabled`)
+- `approveMilestone` (customer, `milestonePaymentsEnabled`)
+- `proposeChangeOrder` (project parties, `changeOrdersEnabled`)
+- `acceptChangeOrder` (opposite party, `changeOrdersEnabled`)
 
-## Phase 2 (Feature Flagged)
+## Messaging and Reviews
 
-- `createMilestones`
-  - role: customer owner
-  - flag: `milestonePaymentsEnabled`
-  - input: `projectId,milestones[]`
-- `approveMilestone`
-  - role: customer owner
-  - flag: `milestonePaymentsEnabled`
-  - input: `projectId,milestoneId`
-- `proposeChangeOrder`
-  - role: project parties
-  - flag: `changeOrdersEnabled`
-  - input: `projectId,scopeSummary,amountDeltaCents,timelineDeltaDays`
-- `acceptChangeOrder`
-  - role: opposite project party
-  - flag: `changeOrdersEnabled`
-  - input: `projectId,changeOrderId,accept`
-- `createBookingRequest`
-  - role: customer owner
-  - flag: `schedulingEnabled`
-  - input: `projectId,startAt,endAt,note?`
-- `respondBookingRequest`
-  - role: selected contractor
-  - flag: `schedulingEnabled`
-  - input: `projectId,bookingRequestId,response`
-- `getRecommendations`
-  - role: authenticated
-  - flag: `recommendationsEnabled`
-  - input: `target?,municipality?,category?,limit?`
-- `adminSetPromotion`
-  - role: admin
-  - flag: `growthEnabled`
-  - input: `code,type,discount/featured fields,active`
-- `applyReferralCode`
-  - role: customer/contractor
-  - flag: `growthEnabled`
-  - input: `code,projectId?`
-- `listFeaturedListings`
-  - role: authenticated
-  - flag: `growthEnabled`
-  - input: `limit?`
+- `listMessages` (project parties/admin)
+- `sendMessage` (project parties/admin)
+- `submitReview` (customer owner after final state)
+- `flagReview` (authenticated)
+- `adminModerateReview` (admin)
+
+## Payments and Accounts
+
+- `createConnectedPaymentAccount` (contractor/admin, `stripeConnectEnabled`)
+- `getPaymentOnboardingLink` (contractor/admin, `stripeConnectEnabled`)
+
+## Reliability
+
+- `getReliabilityScore` (authenticated)
+
+## Credential Verification (Feature Flag: `credentialVerificationEnabled`)
+
+- `submitCredentialForVerification` (contractor)
+- `verifyCredential` (admin)
+
+## Subscriptions and Billing (Feature Flag: `subscriptionsEnabled`)
+
+- `createSubscription` (customer/contractor/admin)
+- `updateSubscription` (owner/admin)
+- `cancelSubscription` (owner/admin)
+- `listInvoices` (owner/admin)
+
+## High-ticket Concierge (Feature Flag: `highTicketConciergeEnabled`)
+
+- `createHighTicketCase` (customer owner)
+- `submitConciergeBid` (contractor/admin)
+- `assignConciergeManager` (admin)
+
+## Recommendations and Growth
+
+- `getRecommendations` (`recommendationsEnabled`)
+- `adminSetPromotion` (`growthEnabled`, admin)
+- `applyReferralCode` (`growthEnabled`, customer/contractor)
+- `listFeaturedListings` (`growthEnabled`)
+
+## Config and Admin Session
+
+- `adminSetConfig` (admin)
+  - supports:
+    - `platformFees`
+    - `platformFeesV2`
+    - `depositPolicies`
+    - `subscriptionPlans`
+    - `reliabilityWeights`
+    - `highTicketPolicy`
+    - `holdPolicy`
+    - partial `featureFlags`
+- `getCurrentConfig` (authenticated)
+- `getAdminSession` (admin with verified claims)
+- `adminSetUserRole` (admin)
 
 ## Scheduled Jobs
 
-- `checkAutoRelease` (every 24 hours, America/Puerto_Rico)
-- `sendIssueReminders` (every 24 hours, America/Puerto_Rico)
+- `checkAutoRelease` (24h, America/Puerto_Rico)
+- `sendIssueReminders` (24h, America/Puerto_Rico)
+- `recomputeReliabilityScores` (24h, America/Puerto_Rico)
 
-## Validation + RBAC
+## Validation, RBAC, Audit
 
-- Input validation: zod schemas from `packages/shared/src/schemas.ts`.
-- Access control: role + project party checks.
-- Money actions: ledger and audit entries.
+- All callable payloads are validated with zod schemas from `packages/shared/src/schemas.ts`.
+- RBAC is enforced through auth token + profile role checks.
+- Money and case operations write ledger and/or audit entries.
 
 ## Error Model
 
-Functions throw `HttpsError` with canonical codes:
+Functions throw `HttpsError` codes:
 
 - `unauthenticated`
 - `permission-denied`

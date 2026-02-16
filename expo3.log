@@ -1,0 +1,37 @@
+
+> @trustvibe/mobile@0.1.0 dev
+> expo start --clear
+
+env: load .env.local
+env: export EXPO_PUBLIC_EMULATOR_HOST
+Starting project at C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS node_modules\expo\AppEntry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundling failed 1738ms node_modules\expo\AppEntry.js (1 module)
+Unable to resolve "../../App" from "node_modules\expo\AppEntry.js"
+[0m [90m 1 |[39m [36mimport[39m registerRootComponent [36mfrom[39m [32m'expo/src/launch/registerRootComponent'[39m[33m;[39m
+ [90m 2 |[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m [33mApp[39m [36mfrom[39m [32m'../../App'[39m[33m;[39m
+ [90m   |[39m                  [31m[1m^[22m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m registerRootComponent([33mApp[39m)[33m;[39m
+ [90m 6 |[39m[0m
+
+Import stack:
+
+ node_modules\expo\AppEntry.js
+ | import "../../App"
+
+ 
+ | import "./node_modules/expo/AppEntry"
+
+npm error Lifecycle script `dev` failed with error:
+npm error code 4294967295
+npm error path C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+npm error workspace @trustvibe/mobile@0.1.0
+npm error location C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c expo start --clear

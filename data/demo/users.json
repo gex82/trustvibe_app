@@ -1,470 +1,470 @@
 [
-    {
-        "id":  "customer-001",
-        "name":  "Customer 1",
-        "email":  "customer1@trustvibe.test",
-        "phone":  "+19392000001",
-        "role":  "customer",
-        "municipality":  "Bayamon"
-    },
-    {
-        "id":  "customer-002",
-        "name":  "Customer 2",
-        "email":  "customer2@trustvibe.test",
-        "phone":  "+19392000002",
-        "role":  "customer",
-        "municipality":  "Cabo Rojo"
-    },
-    {
-        "id":  "customer-003",
-        "name":  "Customer 3",
-        "email":  "customer3@trustvibe.test",
-        "phone":  "+19392000003",
-        "role":  "customer",
-        "municipality":  "Caguas"
-    },
-    {
-        "id":  "customer-004",
-        "name":  "Customer 4",
-        "email":  "customer4@trustvibe.test",
-        "phone":  "+19392000004",
-        "role":  "customer",
-        "municipality":  "Camuy"
-    },
-    {
-        "id":  "customer-005",
-        "name":  "Customer 5",
-        "email":  "customer5@trustvibe.test",
-        "phone":  "+19392000005",
-        "role":  "customer",
-        "municipality":  "Canovanas"
-    },
-    {
-        "id":  "customer-006",
-        "name":  "Customer 6",
-        "email":  "customer6@trustvibe.test",
-        "phone":  "+19392000006",
-        "role":  "customer",
-        "municipality":  "Carolina"
-    },
-    {
-        "id":  "customer-007",
-        "name":  "Customer 7",
-        "email":  "customer7@trustvibe.test",
-        "phone":  "+19392000007",
-        "role":  "customer",
-        "municipality":  "Catano"
-    },
-    {
-        "id":  "customer-008",
-        "name":  "Customer 8",
-        "email":  "customer8@trustvibe.test",
-        "phone":  "+19392000008",
-        "role":  "customer",
-        "municipality":  "Cayey"
-    },
-    {
-        "id":  "customer-009",
-        "name":  "Customer 9",
-        "email":  "customer9@trustvibe.test",
-        "phone":  "+19392000009",
-        "role":  "customer",
-        "municipality":  "Ceiba"
-    },
-    {
-        "id":  "customer-010",
-        "name":  "Customer 10",
-        "email":  "customer10@trustvibe.test",
-        "phone":  "+19392000010",
-        "role":  "customer",
-        "municipality":  "Ciales"
-    },
-    {
-        "id":  "customer-011",
-        "name":  "Customer 11",
-        "email":  "customer11@trustvibe.test",
-        "phone":  "+19392000011",
-        "role":  "customer",
-        "municipality":  "Cidra"
-    },
-    {
-        "id":  "customer-012",
-        "name":  "Customer 12",
-        "email":  "customer12@trustvibe.test",
-        "phone":  "+19392000012",
-        "role":  "customer",
-        "municipality":  "Coamo"
-    },
-    {
-        "id":  "customer-013",
-        "name":  "Customer 13",
-        "email":  "customer13@trustvibe.test",
-        "phone":  "+19392000013",
-        "role":  "customer",
-        "municipality":  "Comerio"
-    },
-    {
-        "id":  "customer-014",
-        "name":  "Customer 14",
-        "email":  "customer14@trustvibe.test",
-        "phone":  "+19392000014",
-        "role":  "customer",
-        "municipality":  "Corozal"
-    },
-    {
-        "id":  "customer-015",
-        "name":  "Customer 15",
-        "email":  "customer15@trustvibe.test",
-        "phone":  "+19392000015",
-        "role":  "customer",
-        "municipality":  "Culebra"
-    },
-    {
-        "id":  "customer-016",
-        "name":  "Customer 16",
-        "email":  "customer16@trustvibe.test",
-        "phone":  "+19392000016",
-        "role":  "customer",
-        "municipality":  "Dorado"
-    },
-    {
-        "id":  "customer-017",
-        "name":  "Customer 17",
-        "email":  "customer17@trustvibe.test",
-        "phone":  "+19392000017",
-        "role":  "customer",
-        "municipality":  "Fajardo"
-    },
-    {
-        "id":  "customer-018",
-        "name":  "Customer 18",
-        "email":  "customer18@trustvibe.test",
-        "phone":  "+19392000018",
-        "role":  "customer",
-        "municipality":  "Florida"
-    },
-    {
-        "id":  "customer-019",
-        "name":  "Customer 19",
-        "email":  "customer19@trustvibe.test",
-        "phone":  "+19392000019",
-        "role":  "customer",
-        "municipality":  "Guanica"
-    },
-    {
-        "id":  "customer-020",
-        "name":  "Customer 20",
-        "email":  "customer20@trustvibe.test",
-        "phone":  "+19392000020",
-        "role":  "customer",
-        "municipality":  "Guayama"
-    },
-    {
-        "id":  "contractor-001",
-        "name":  "Contractor 1",
-        "email":  "contractor1@trustvibe.test",
-        "phone":  "+17871000001",
-        "role":  "contractor",
-        "municipality":  "Adjuntas",
-        "skills":  [
-                       "plumbing",
-                       "painting"
-                   ],
-        "rating":  3.7,
-        "bioEn":  "Reliable contractor 1 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 1 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-002",
-        "name":  "Contractor 2",
-        "email":  "contractor2@trustvibe.test",
-        "phone":  "+17871000002",
-        "role":  "contractor",
-        "municipality":  "Aguada",
-        "skills":  [
-                       "electrical",
-                       "roofing"
-                   ],
-        "rating":  3.8,
-        "bioEn":  "Reliable contractor 2 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 2 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-003",
-        "name":  "Contractor 3",
-        "email":  "contractor3@trustvibe.test",
-        "phone":  "+17871000003",
-        "role":  "contractor",
-        "municipality":  "Aguadilla",
-        "skills":  [
-                       "painting",
-                       "carpentry"
-                   ],
-        "rating":  3.9,
-        "bioEn":  "Reliable contractor 3 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 3 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-004",
-        "name":  "Contractor 4",
-        "email":  "contractor4@trustvibe.test",
-        "phone":  "+17871000004",
-        "role":  "contractor",
-        "municipality":  "Aguas Buenas",
-        "skills":  [
-                       "roofing",
-                       "hvac"
-                   ],
-        "rating":  4,
-        "bioEn":  "Reliable contractor 4 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 4 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-005",
-        "name":  "Contractor 5",
-        "email":  "contractor5@trustvibe.test",
-        "phone":  "+17871000005",
-        "role":  "contractor",
-        "municipality":  "Aibonito",
-        "skills":  [
-                       "carpentry",
-                       "landscaping"
-                   ],
-        "rating":  4.1,
-        "bioEn":  "Reliable contractor 5 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 5 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-006",
-        "name":  "Contractor 6",
-        "email":  "contractor6@trustvibe.test",
-        "phone":  "+17871000006",
-        "role":  "contractor",
-        "municipality":  "Anasco",
-        "skills":  [
-                       "hvac",
-                       "cleaning"
-                   ],
-        "rating":  4.2,
-        "bioEn":  "Reliable contractor 6 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 6 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-007",
-        "name":  "Contractor 7",
-        "email":  "contractor7@trustvibe.test",
-        "phone":  "+17871000007",
-        "role":  "contractor",
-        "municipality":  "Arecibo",
-        "skills":  [
-                       "landscaping",
-                       "general"
-                   ],
-        "rating":  4.3,
-        "bioEn":  "Reliable contractor 7 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 7 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-008",
-        "name":  "Contractor 8",
-        "email":  "contractor8@trustvibe.test",
-        "phone":  "+17871000008",
-        "role":  "contractor",
-        "municipality":  "Arroyo",
-        "skills":  [
-                       "cleaning",
-                       "plumbing"
-                   ],
-        "rating":  4.4,
-        "bioEn":  "Reliable contractor 8 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 8 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-009",
-        "name":  "Contractor 9",
-        "email":  "contractor9@trustvibe.test",
-        "phone":  "+17871000009",
-        "role":  "contractor",
-        "municipality":  "Barceloneta",
-        "skills":  [
-                       "general",
-                       "electrical"
-                   ],
-        "rating":  4.5,
-        "bioEn":  "Reliable contractor 9 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 9 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-010",
-        "name":  "Contractor 10",
-        "email":  "contractor10@trustvibe.test",
-        "phone":  "+17871000010",
-        "role":  "contractor",
-        "municipality":  "Barranquitas",
-        "skills":  [
-                       "plumbing",
-                       "painting"
-                   ],
-        "rating":  4.6,
-        "bioEn":  "Reliable contractor 10 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 10 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-011",
-        "name":  "Contractor 11",
-        "email":  "contractor11@trustvibe.test",
-        "phone":  "+17871000011",
-        "role":  "contractor",
-        "municipality":  "Bayamon",
-        "skills":  [
-                       "electrical",
-                       "roofing"
-                   ],
-        "rating":  4.7,
-        "bioEn":  "Reliable contractor 11 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 11 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-012",
-        "name":  "Contractor 12",
-        "email":  "contractor12@trustvibe.test",
-        "phone":  "+17871000012",
-        "role":  "contractor",
-        "municipality":  "Cabo Rojo",
-        "skills":  [
-                       "painting",
-                       "carpentry"
-                   ],
-        "rating":  4.8,
-        "bioEn":  "Reliable contractor 12 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 12 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-013",
-        "name":  "Contractor 13",
-        "email":  "contractor13@trustvibe.test",
-        "phone":  "+17871000013",
-        "role":  "contractor",
-        "municipality":  "Caguas",
-        "skills":  [
-                       "roofing",
-                       "hvac"
-                   ],
-        "rating":  4.9,
-        "bioEn":  "Reliable contractor 13 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 13 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-014",
-        "name":  "Contractor 14",
-        "email":  "contractor14@trustvibe.test",
-        "phone":  "+17871000014",
-        "role":  "contractor",
-        "municipality":  "Camuy",
-        "skills":  [
-                       "carpentry",
-                       "landscaping"
-                   ],
-        "rating":  3.6,
-        "bioEn":  "Reliable contractor 14 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 14 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-015",
-        "name":  "Contractor 15",
-        "email":  "contractor15@trustvibe.test",
-        "phone":  "+17871000015",
-        "role":  "contractor",
-        "municipality":  "Canovanas",
-        "skills":  [
-                       "hvac",
-                       "cleaning"
-                   ],
-        "rating":  3.7,
-        "bioEn":  "Reliable contractor 15 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 15 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-016",
-        "name":  "Contractor 16",
-        "email":  "contractor16@trustvibe.test",
-        "phone":  "+17871000016",
-        "role":  "contractor",
-        "municipality":  "Carolina",
-        "skills":  [
-                       "landscaping",
-                       "general"
-                   ],
-        "rating":  3.8,
-        "bioEn":  "Reliable contractor 16 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 16 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-017",
-        "name":  "Contractor 17",
-        "email":  "contractor17@trustvibe.test",
-        "phone":  "+17871000017",
-        "role":  "contractor",
-        "municipality":  "Catano",
-        "skills":  [
-                       "cleaning",
-                       "plumbing"
-                   ],
-        "rating":  3.9,
-        "bioEn":  "Reliable contractor 17 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 17 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-018",
-        "name":  "Contractor 18",
-        "email":  "contractor18@trustvibe.test",
-        "phone":  "+17871000018",
-        "role":  "contractor",
-        "municipality":  "Cayey",
-        "skills":  [
-                       "general",
-                       "electrical"
-                   ],
-        "rating":  4,
-        "bioEn":  "Reliable contractor 18 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 18 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-019",
-        "name":  "Contractor 19",
-        "email":  "contractor19@trustvibe.test",
-        "phone":  "+17871000019",
-        "role":  "contractor",
-        "municipality":  "Ceiba",
-        "skills":  [
-                       "plumbing",
-                       "painting"
-                   ],
-        "rating":  4.1,
-        "bioEn":  "Reliable contractor 19 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 19 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "contractor-020",
-        "name":  "Contractor 20",
-        "email":  "contractor20@trustvibe.test",
-        "phone":  "+17871000020",
-        "role":  "contractor",
-        "municipality":  "Ciales",
-        "skills":  [
-                       "electrical",
-                       "roofing"
-                   ],
-        "rating":  4.2,
-        "bioEn":  "Reliable contractor 20 for home services in Puerto Rico.",
-        "bioEs":  "Contratista confiable 20 para servicios del hogar en Puerto Rico."
-    },
-    {
-        "id":  "admin-001",
-        "name":  "Admin One",
-        "email":  "admin@trustvibe.test",
-        "phone":  "+17871234567",
-        "role":  "admin",
-        "municipality":  "San Juan"
-    }
+  {
+    "id": "customer-001",
+    "name": "Maria Rodriguez",
+    "email": "maria.rodriguez@trustvibe.test",
+    "phone": "+19392000111",
+    "role": "customer",
+    "municipality": "San Juan"
+  },
+  {
+    "id": "customer-002",
+    "name": "Customer 2",
+    "email": "customer2@trustvibe.test",
+    "phone": "+19392000002",
+    "role": "customer",
+    "municipality": "Cabo Rojo"
+  },
+  {
+    "id": "customer-003",
+    "name": "Customer 3",
+    "email": "customer3@trustvibe.test",
+    "phone": "+19392000003",
+    "role": "customer",
+    "municipality": "Caguas"
+  },
+  {
+    "id": "customer-004",
+    "name": "Customer 4",
+    "email": "customer4@trustvibe.test",
+    "phone": "+19392000004",
+    "role": "customer",
+    "municipality": "Camuy"
+  },
+  {
+    "id": "customer-005",
+    "name": "Customer 5",
+    "email": "customer5@trustvibe.test",
+    "phone": "+19392000005",
+    "role": "customer",
+    "municipality": "Canovanas"
+  },
+  {
+    "id": "customer-006",
+    "name": "Customer 6",
+    "email": "customer6@trustvibe.test",
+    "phone": "+19392000006",
+    "role": "customer",
+    "municipality": "Carolina"
+  },
+  {
+    "id": "customer-007",
+    "name": "Customer 7",
+    "email": "customer7@trustvibe.test",
+    "phone": "+19392000007",
+    "role": "customer",
+    "municipality": "Catano"
+  },
+  {
+    "id": "customer-008",
+    "name": "Customer 8",
+    "email": "customer8@trustvibe.test",
+    "phone": "+19392000008",
+    "role": "customer",
+    "municipality": "Cayey"
+  },
+  {
+    "id": "customer-009",
+    "name": "Customer 9",
+    "email": "customer9@trustvibe.test",
+    "phone": "+19392000009",
+    "role": "customer",
+    "municipality": "Ceiba"
+  },
+  {
+    "id": "customer-010",
+    "name": "Customer 10",
+    "email": "customer10@trustvibe.test",
+    "phone": "+19392000010",
+    "role": "customer",
+    "municipality": "Ciales"
+  },
+  {
+    "id": "customer-011",
+    "name": "Customer 11",
+    "email": "customer11@trustvibe.test",
+    "phone": "+19392000011",
+    "role": "customer",
+    "municipality": "Cidra"
+  },
+  {
+    "id": "customer-012",
+    "name": "Customer 12",
+    "email": "customer12@trustvibe.test",
+    "phone": "+19392000012",
+    "role": "customer",
+    "municipality": "Coamo"
+  },
+  {
+    "id": "customer-013",
+    "name": "Customer 13",
+    "email": "customer13@trustvibe.test",
+    "phone": "+19392000013",
+    "role": "customer",
+    "municipality": "Comerio"
+  },
+  {
+    "id": "customer-014",
+    "name": "Customer 14",
+    "email": "customer14@trustvibe.test",
+    "phone": "+19392000014",
+    "role": "customer",
+    "municipality": "Corozal"
+  },
+  {
+    "id": "customer-015",
+    "name": "Customer 15",
+    "email": "customer15@trustvibe.test",
+    "phone": "+19392000015",
+    "role": "customer",
+    "municipality": "Culebra"
+  },
+  {
+    "id": "customer-016",
+    "name": "Customer 16",
+    "email": "customer16@trustvibe.test",
+    "phone": "+19392000016",
+    "role": "customer",
+    "municipality": "Dorado"
+  },
+  {
+    "id": "customer-017",
+    "name": "Customer 17",
+    "email": "customer17@trustvibe.test",
+    "phone": "+19392000017",
+    "role": "customer",
+    "municipality": "Fajardo"
+  },
+  {
+    "id": "customer-018",
+    "name": "Customer 18",
+    "email": "customer18@trustvibe.test",
+    "phone": "+19392000018",
+    "role": "customer",
+    "municipality": "Florida"
+  },
+  {
+    "id": "customer-019",
+    "name": "Customer 19",
+    "email": "customer19@trustvibe.test",
+    "phone": "+19392000019",
+    "role": "customer",
+    "municipality": "Guanica"
+  },
+  {
+    "id": "customer-020",
+    "name": "Customer 20",
+    "email": "customer20@trustvibe.test",
+    "phone": "+19392000020",
+    "role": "customer",
+    "municipality": "Guayama"
+  },
+  {
+    "id": "contractor-001",
+    "name": "Juan's Services",
+    "email": "juan.services@trustvibe.test",
+    "phone": "+17871000111",
+    "role": "contractor",
+    "municipality": "San Juan",
+    "skills": [
+      "plumbing",
+      "general"
+    ],
+    "rating": 4.9,
+    "bioEn": "Verified remodeling specialist serving San Juan and nearby municipalities.",
+    "bioEs": "Especialista verificado en remodelaciones para San Juan y municipios cercanos."
+  },
+  {
+    "id": "contractor-002",
+    "name": "Contractor 2",
+    "email": "contractor2@trustvibe.test",
+    "phone": "+17871000002",
+    "role": "contractor",
+    "municipality": "Aguada",
+    "skills": [
+      "electrical",
+      "roofing"
+    ],
+    "rating": 3.8,
+    "bioEn": "Reliable contractor 2 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 2 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-003",
+    "name": "Contractor 3",
+    "email": "contractor3@trustvibe.test",
+    "phone": "+17871000003",
+    "role": "contractor",
+    "municipality": "Aguadilla",
+    "skills": [
+      "painting",
+      "carpentry"
+    ],
+    "rating": 3.9,
+    "bioEn": "Reliable contractor 3 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 3 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-004",
+    "name": "Contractor 4",
+    "email": "contractor4@trustvibe.test",
+    "phone": "+17871000004",
+    "role": "contractor",
+    "municipality": "Aguas Buenas",
+    "skills": [
+      "roofing",
+      "hvac"
+    ],
+    "rating": 4,
+    "bioEn": "Reliable contractor 4 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 4 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-005",
+    "name": "Contractor 5",
+    "email": "contractor5@trustvibe.test",
+    "phone": "+17871000005",
+    "role": "contractor",
+    "municipality": "Aibonito",
+    "skills": [
+      "carpentry",
+      "landscaping"
+    ],
+    "rating": 4.1,
+    "bioEn": "Reliable contractor 5 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 5 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-006",
+    "name": "Contractor 6",
+    "email": "contractor6@trustvibe.test",
+    "phone": "+17871000006",
+    "role": "contractor",
+    "municipality": "Anasco",
+    "skills": [
+      "hvac",
+      "cleaning"
+    ],
+    "rating": 4.2,
+    "bioEn": "Reliable contractor 6 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 6 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-007",
+    "name": "Contractor 7",
+    "email": "contractor7@trustvibe.test",
+    "phone": "+17871000007",
+    "role": "contractor",
+    "municipality": "Arecibo",
+    "skills": [
+      "landscaping",
+      "general"
+    ],
+    "rating": 4.3,
+    "bioEn": "Reliable contractor 7 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 7 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-008",
+    "name": "Contractor 8",
+    "email": "contractor8@trustvibe.test",
+    "phone": "+17871000008",
+    "role": "contractor",
+    "municipality": "Arroyo",
+    "skills": [
+      "cleaning",
+      "plumbing"
+    ],
+    "rating": 4.4,
+    "bioEn": "Reliable contractor 8 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 8 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-009",
+    "name": "Contractor 9",
+    "email": "contractor9@trustvibe.test",
+    "phone": "+17871000009",
+    "role": "contractor",
+    "municipality": "Barceloneta",
+    "skills": [
+      "general",
+      "electrical"
+    ],
+    "rating": 4.5,
+    "bioEn": "Reliable contractor 9 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 9 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-010",
+    "name": "Contractor 10",
+    "email": "contractor10@trustvibe.test",
+    "phone": "+17871000010",
+    "role": "contractor",
+    "municipality": "Barranquitas",
+    "skills": [
+      "plumbing",
+      "painting"
+    ],
+    "rating": 4.6,
+    "bioEn": "Reliable contractor 10 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 10 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-011",
+    "name": "Contractor 11",
+    "email": "contractor11@trustvibe.test",
+    "phone": "+17871000011",
+    "role": "contractor",
+    "municipality": "Bayamon",
+    "skills": [
+      "electrical",
+      "roofing"
+    ],
+    "rating": 4.7,
+    "bioEn": "Reliable contractor 11 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 11 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-012",
+    "name": "Contractor 12",
+    "email": "contractor12@trustvibe.test",
+    "phone": "+17871000012",
+    "role": "contractor",
+    "municipality": "Cabo Rojo",
+    "skills": [
+      "painting",
+      "carpentry"
+    ],
+    "rating": 4.8,
+    "bioEn": "Reliable contractor 12 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 12 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-013",
+    "name": "Contractor 13",
+    "email": "contractor13@trustvibe.test",
+    "phone": "+17871000013",
+    "role": "contractor",
+    "municipality": "Caguas",
+    "skills": [
+      "roofing",
+      "hvac"
+    ],
+    "rating": 4.9,
+    "bioEn": "Reliable contractor 13 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 13 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-014",
+    "name": "Contractor 14",
+    "email": "contractor14@trustvibe.test",
+    "phone": "+17871000014",
+    "role": "contractor",
+    "municipality": "Camuy",
+    "skills": [
+      "carpentry",
+      "landscaping"
+    ],
+    "rating": 3.6,
+    "bioEn": "Reliable contractor 14 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 14 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-015",
+    "name": "Contractor 15",
+    "email": "contractor15@trustvibe.test",
+    "phone": "+17871000015",
+    "role": "contractor",
+    "municipality": "Canovanas",
+    "skills": [
+      "hvac",
+      "cleaning"
+    ],
+    "rating": 3.7,
+    "bioEn": "Reliable contractor 15 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 15 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-016",
+    "name": "Contractor 16",
+    "email": "contractor16@trustvibe.test",
+    "phone": "+17871000016",
+    "role": "contractor",
+    "municipality": "Carolina",
+    "skills": [
+      "landscaping",
+      "general"
+    ],
+    "rating": 3.8,
+    "bioEn": "Reliable contractor 16 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 16 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-017",
+    "name": "Contractor 17",
+    "email": "contractor17@trustvibe.test",
+    "phone": "+17871000017",
+    "role": "contractor",
+    "municipality": "Catano",
+    "skills": [
+      "cleaning",
+      "plumbing"
+    ],
+    "rating": 3.9,
+    "bioEn": "Reliable contractor 17 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 17 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-018",
+    "name": "Contractor 18",
+    "email": "contractor18@trustvibe.test",
+    "phone": "+17871000018",
+    "role": "contractor",
+    "municipality": "Cayey",
+    "skills": [
+      "general",
+      "electrical"
+    ],
+    "rating": 4,
+    "bioEn": "Reliable contractor 18 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 18 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-019",
+    "name": "Contractor 19",
+    "email": "contractor19@trustvibe.test",
+    "phone": "+17871000019",
+    "role": "contractor",
+    "municipality": "Ceiba",
+    "skills": [
+      "plumbing",
+      "painting"
+    ],
+    "rating": 4.1,
+    "bioEn": "Reliable contractor 19 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 19 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "contractor-020",
+    "name": "Contractor 20",
+    "email": "contractor20@trustvibe.test",
+    "phone": "+17871000020",
+    "role": "contractor",
+    "municipality": "Ciales",
+    "skills": [
+      "electrical",
+      "roofing"
+    ],
+    "rating": 4.2,
+    "bioEn": "Reliable contractor 20 for home services in Puerto Rico.",
+    "bioEs": "Contratista confiable 20 para servicios del hogar en Puerto Rico."
+  },
+  {
+    "id": "admin-001",
+    "name": "Admin One",
+    "email": "admin@trustvibe.test",
+    "phone": "+17871234567",
+    "role": "admin",
+    "municipality": "San Juan"
+  }
 ]

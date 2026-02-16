@@ -1,0 +1,15 @@
+node_modules
+.next
+.expo
+dist
+coverage
+.firebase
+functions/lib
+apps/admin/.next
+apps/mobile/.expo
+apps/mobile/dist
+artifacts
+logs
+firebase-export-*
+test-results
+playwright-report

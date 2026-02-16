@@ -9,6 +9,10 @@ const nav = [
   { href: '/users', label: 'Users' },
   { href: '/projects', label: 'Projects' },
   { href: '/cases', label: 'Cases' },
+  { href: '/deposits', label: 'Deposits' },
+  { href: '/reliability', label: 'Reliability' },
+  { href: '/subscriptions', label: 'Subscriptions' },
+  { href: '/concierge', label: 'Concierge' },
   { href: '/reviews', label: 'Reviews' },
   { href: '/config', label: 'Config' },
 ];
@@ -49,7 +53,7 @@ export default function AdminLayout({ children }: { children: any }) {
         <strong>TrustVibe Admin Console</strong>
         <nav style={{ marginTop: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {nav.map((item) => (
-            <Link key={item.href} href={item.href} className="muted">
+            <Link key={item.href} href={item.href} className="muted" data-testid={`admin-nav-${item.label.toLowerCase()}`}>
               {item.label}
             </Link>
           ))}

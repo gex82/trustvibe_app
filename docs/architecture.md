@@ -1,107 +1,137 @@
 # TrustVibe Architecture
 
-Last updated: 2026-02-11
+Last updated: 2026-02-11 (productionization pass)
 
 ## Product Boundary
 
-TrustVibe is neutral infrastructure for held funds execution.
-TrustVibe does not mediate, arbitrate, or evaluate workmanship quality.
-Execution only occurs when one of these applies:
+TrustVibe is neutral payment-hold infrastructure. It does not judge quality or arbitrate disputes.
 
-1. Customer approves completion in-app.
-2. Both parties sign a joint release instruction in-app.
-3. Admin receives final external resolution document and executes exactly that outcome.
+Funds execution is allowed only by:
 
-## Monorepo
+1. Customer approval in-app.
+2. Fully signed joint release instruction.
+3. External final resolution document with explicit outcome, executed by admin.
 
-- `apps/mobile`: Expo React Native app (iOS-first).
-- `apps/admin`: Next.js admin operations console.
-- `functions`: Firebase Cloud Functions (callable + schedulers).
-- `packages/shared`: shared types, zod schemas, state machine, i18n resources.
-- `scripts`: seeding and deterministic scenario scripts.
-- `data/demo`: deterministic Puerto Rico demo datasets.
+## Monorepo Layout
 
-## Runtime Architecture
+- `apps/mobile`: Expo React Native client (iOS-first, Windows-friendly workflow).
+- `apps/admin`: Next.js admin console.
+- `functions`: Firebase callable/scheduled backend.
+- `packages/shared`: shared domain types, zod schemas, fee/reliability/deposit utilities, i18n.
+- `scripts`: emulator seeding + deterministic scenarios.
+- `data/demo`: deterministic PR sample data.
+- `docs`: runbooks, architecture/API/state machine/policy docs.
 
-### Mobile
+## Runtime Components
 
-- React Native + Expo + TypeScript.
-- React Navigation (auth flow + tab flow).
-- React Query for server state.
-- Zustand for app state (role/language/auth projection).
-- i18next resources from `@trustvibe/shared`.
-- Firebase Auth + callable Functions + Firestore listeners.
+### Mobile App
 
-### Admin Web
+- React Native + Expo + TypeScript
+- React Navigation + React Query + Zustand
+- i18next with shared EN/ES keys
+- Firebase Auth + callable Cloud Functions
 
-- Next.js App Router + Firebase client SDK.
-- Admin pages for users, projects, cases, reviews, and config.
-- Outcome execution via callable `adminExecuteOutcome`.
+### Admin Console
+
+- Next.js App Router + Firebase Auth
+- Admin guarded routes with claim verification
+- Operations views for users/projects/cases/reviews/config plus deposits/reliability/subscriptions/concierge
 
 ### Backend
 
-- Firebase Auth for identity.
-- Firestore for domain data.
-- Cloud Functions with zod payload validation.
-- PaymentProvider abstraction:
-  - `MockPaymentProvider` active for MVP.
-  - `StripeConnectProvider` still stubbed behind feature flag.
-- Ledger events at `ledgers/{projectId}/events/{eventId}` as money-source-of-truth.
-- Scheduled jobs:
-  - `checkAutoRelease` for approval timeout auto-release policy.
-  - `sendIssueReminders` for admin-attention threshold tracking.
-- Phase 2 callable modules (flag-gated):
-  - milestones and partial milestone release.
-  - change orders with agreement version bumping.
-  - scheduling requests/confirmations.
-  - rules-based recommendations.
-  - growth endpoints for promotions/referrals/featured listings.
+- Firebase Auth for identity + roles
+- Firestore for domain records
+- Cloud Functions for callable APIs + schedulers
+- Payment provider abstraction:
+  - `StripeConnectProvider` (live + simulation mode)
+  - `MockPaymentProvider` (local prototyping)
+  - `AthMovilProvider` stub adapter (`not enabled`)
+- Credential verification provider abstraction:
+  - deterministic PR mock provider for DACO/perito
+- Reliability scoring engine:
+  - event-driven updates
+  - scheduled recomputation
+  - eligibility gating
 
 ## Data Model
 
-Top-level collections:
+Core collections:
 
 - `users/{id}`
-- `contractorProfiles/{id}`
 - `customerProfiles/{id}`
+- `contractorProfiles/{id}`
 - `projects/{projectId}`
 - `projects/{projectId}/quotes/{quoteId}`
+- `projects/{projectId}/bookingRequests/{bookingRequestId}`
 - `agreements/{agreementId}`
+- `agreements/{agreementId}/milestones/{milestoneId}`
 - `ledgers/{projectId}/events/{eventId}`
 - `messages/{projectId}/items/{messageId}`
 - `cases/{caseId}`
-- `cases/{caseId}/jointReleaseProposals/{proposalId}`
 - `reviews/{reviewId}`
-- `config/platformFees`
-- `config/holdPolicy`
-- `config/featureFlags`
 - `audit/adminActions/items/{actionId}`
 
-## Security Model
+Productionization additions:
 
-- Role gates in callable handlers (`customer`, `contractor`, `admin`).
-- Firestore Rules baseline least-privilege by user/project scope.
-- Storage Rules scoped by user/project/resolution paths.
-- Audit records for money/config moderation operations.
+- `estimateDeposits/{depositId}`
+- `paymentAccounts/{userId}`
+- `credentialVerifications/{verificationId}`
+- `reliabilityScores/{contractorId}`
+- `reliabilityScores/{contractorId}/history/{historyId}`
+- `subscriptions/{subscriptionId}`
+- `billingInvoices/{invoiceId}`
+- `highTicketCases/{caseId}`
+- `highTicketCases/{caseId}/bids/{bidId}`
+- `referralCredits/{creditId}`
 
-## Escrow Hold Policy
+Config docs:
 
-- `N` (default 7 days): Customer response window after completion request.
-- `M` (default 30 days): case age threshold for `ADMIN_ATTENTION_REQUIRED` marker.
-- Auto-release executes only when enabled in config.
+- `config/platformFees`
+- `config/platformFeesV2`
+- `config/depositPolicies`
+- `config/subscriptionPlans`
+- `config/reliabilityWeights`
+- `config/highTicketPolicy`
+- `config/holdPolicy`
+- `config/featureFlags`
 
-## Feature Flags (Phase 2)
+## Policy and Pricing Control
 
-`config/featureFlags`:
+- No fee/deposit logic is hardcoded in client business flow.
+- Tiered fee evaluation uses `platformFeesV2` and optional plan overrides.
+- Deposit amount is category-driven from `depositPolicies`.
+- High-ticket concierge threshold/fees are driven by `highTicketPolicy`.
 
-- `stripeConnectEnabled`
-- `milestonePaymentsEnabled`
-- `changeOrdersEnabled`
-- `credentialVerificationEnabled`
-- `schedulingEnabled`
-- `recommendationsEnabled`
-- `growthEnabled`
+## Reliability Model
 
-## Important Internal Disclaimer
+Score inputs:
 
-MVP uses mock payments only. Production payment operations require payment-provider compliance review and legal counsel (including money transmission analysis).
+- show-up rate
+- response-time score
+- dispute frequency
+- proof completeness
+- on-time completion
+
+Outputs:
+
+- search/recommendation ranking weight
+- auto-release eligibility
+- large-job eligibility
+- high-ticket eligibility
+
+## Security and Audit
+
+- Callable handlers enforce RBAC and project-party checks.
+- Firestore Rules provide least-privilege read boundaries.
+- Money/case/config/moderation actions write audit logs.
+- Ledger is the money event timeline of record.
+
+## Schedulers
+
+- `checkAutoRelease`: applies hold-policy deadlines and reliability eligibility.
+- `sendIssueReminders`: escalates unresolved issue cases to admin attention.
+- `recomputeReliabilityScores`: periodic score refresh from accumulated counters.
+
+## Internal Disclaimer
+
+Live payment handling (including held-funds operations) requires provider compliance review and legal counsel before production enablement.

@@ -11,7 +11,6 @@ import {
   type BookingRequest,
   type ChangeOrder,
   type EscrowState,
-  type FeatureFlags,
   type HoldPolicyConfig,
   type MessageItem,
   type Milestone,
@@ -20,7 +19,6 @@ import {
   createBookingRequestInputSchema,
   createMilestonesInputSchema,
   acceptAgreementInputSchema,
-  calculateFee,
   createProjectInputSchema,
   flagReviewInputSchema,
   fundHoldInputSchema,
@@ -49,10 +47,27 @@ import { getAuth } from 'firebase-admin/auth';
 import { db } from '../utils/firebase';
 import { getActor, requireRole, type Actor } from '../utils/auth';
 import { parseOrThrow } from '../utils/validation';
-import { getFeatureFlags, getHoldPolicyConfig, getPlatformFeeConfig } from '../modules/config';
+import {
+  getDepositPolicyConfig,
+  getFeatureFlags,
+  getHighTicketPolicyConfig,
+  getHoldPolicyConfig,
+  getPlatformFeeConfig,
+  getPlatformFeeConfigV2,
+  getReliabilityWeightsConfig,
+  getSubscriptionPlansConfig,
+} from '../modules/config';
 import { getPaymentProvider } from '../modules/paymentProviderFactory';
 import { writeLedgerEvent } from '../modules/ledger';
 import { writeAuditLog } from '../modules/audit';
+import { resolveTieredFee } from '../modules/pricing';
+import { updateReliabilityScore } from '../modules/reliability';
+import {
+  ensureProjectParty,
+  getProjectOrThrow,
+  nowIso,
+  requireFeatureFlag,
+} from './common';
 
 const PROJECTS = db.collection('projects');
 const AGREEMENTS = db.collection('agreements');
@@ -61,32 +76,15 @@ const REVIEWS = db.collection('reviews');
 const MESSAGES = db.collection('messages');
 const PROMOTIONS = db.collection('promotions');
 
-function nowIso(): string {
-  return new Date().toISOString();
-}
-
-function ensureProjectParty(project: any, actor: Actor): void {
-  if (actor.role === 'admin') {
-    return;
-  }
-
-  const isCustomer = project.customerId === actor.uid;
-  const isContractor = project.contractorId && project.contractorId === actor.uid;
-  if (!isCustomer && !isContractor) {
-    throw new HttpsError('permission-denied', 'Project access denied.');
-  }
-}
-
 function getHeldAmountCents(project: any): number {
   return Number(project.heldAmountCents ?? 0);
 }
 
-async function requireFeatureFlag<K extends keyof FeatureFlags>(key: K, message: string): Promise<FeatureFlags> {
-  const flags = await getFeatureFlags();
-  if (!flags[key]) {
-    throw new HttpsError('failed-precondition', message);
-  }
-  return flags;
+async function requireConfigFeatureFlag<K extends keyof Awaited<ReturnType<typeof getFeatureFlags>>>(
+  key: K,
+  message: string
+) {
+  return requireFeatureFlag(getFeatureFlags, key, message);
 }
 
 function parseVersion(version: string | undefined): number {
@@ -115,14 +113,6 @@ function assertFinalProjectStateForReview(escrowState: EscrowState): void {
   }
 }
 
-async function getProjectOrThrow(projectId: string): Promise<any> {
-  const projectSnap = await PROJECTS.doc(projectId).get();
-  if (!projectSnap.exists) {
-    throw new HttpsError('not-found', 'Project not found.');
-  }
-  return projectSnap.data();
-}
-
 async function getSelectedQuoteOrThrow(project: any): Promise<any> {
   if (!project.selectedQuoteId) {
     throw new HttpsError('failed-precondition', 'Selected quote is required.');
@@ -132,6 +122,23 @@ async function getSelectedQuoteOrThrow(project: any): Promise<any> {
     throw new HttpsError('failed-precondition', 'Selected quote not found.');
   }
   return quoteSnap.data();
+}
+
+async function getActiveSubscriptionPlanIdForAccount(accountId: string | undefined): Promise<string | undefined> {
+  if (!accountId) {
+    return undefined;
+  }
+  const snap = await db
+    .collection('subscriptions')
+    .where('accountId', '==', accountId)
+    .where('status', 'in', ['active', 'trialing'])
+    .limit(1)
+    .get();
+  if (snap.empty) {
+    return undefined;
+  }
+  const record = snap.docs[0].data() as any;
+  return typeof record.planId === 'string' ? record.planId : undefined;
 }
 
 function computeOutcomeState(releaseToContractorCents: number, refundToCustomerCents: number, heldAmountCents: number): EscrowState {
@@ -172,15 +179,20 @@ async function executeOutcome(input: {
     throw new HttpsError('invalid-argument', 'Outcome amounts cannot exceed held amount.');
   }
 
-  const feeConfig = await getPlatformFeeConfig();
+  const subscriptionPlanId = await getActiveSubscriptionPlanIdForAccount(input.project.contractorId);
   const feeSummary =
     input.releaseToContractorCents > 0
-      ? calculateFee({
+      ? await resolveTieredFee({
           amountCents: input.releaseToContractorCents,
-          percentBps: feeConfig.percentBps,
-          fixedFeeCents: feeConfig.fixedFeeCents,
+          subscriptionPlanId,
         })
-      : { grossAmountCents: 0, feeCents: 0, netPayoutCents: 0 };
+      : {
+          tierId: 'none',
+          feeCents: 0,
+          netPayoutCents: 0,
+          appliedPercentBps: 0,
+          appliedFixedFeeCents: 0,
+        };
 
   const paymentProvider = await getPaymentProvider();
   const holdId = input.project.providerHoldId as string;
@@ -221,6 +233,9 @@ async function executeOutcome(input: {
       releaseToContractorCents: input.releaseToContractorCents,
       refundToCustomerCents: input.refundToCustomerCents,
       reason: input.reason,
+      tierId: feeSummary.tierId,
+      appliedPercentBps: feeSummary.appliedPercentBps,
+      appliedFixedFeeCents: feeSummary.appliedFixedFeeCents,
     },
     supportingDocRefs: input.docRefs,
   });
@@ -257,6 +272,9 @@ export async function createProjectHandler(req: CallableRequest<unknown>) {
   const payload = parseOrThrow(createProjectInputSchema, req.data);
   const now = nowIso();
   const ref = PROJECTS.doc();
+  const highTicketPolicy = await getHighTicketPolicyConfig();
+  const budgetForThreshold = Math.max(Number(payload.budgetMaxCents ?? 0), Number(payload.budgetMinCents ?? 0));
+  const highTicket = budgetForThreshold >= highTicketPolicy.thresholdCents;
 
   const project: Project = {
     id: ref.id,
@@ -269,6 +287,7 @@ export async function createProjectHandler(req: CallableRequest<unknown>) {
     desiredTimeline: payload.desiredTimeline,
     budgetMinCents: payload.budgetMinCents,
     budgetMaxCents: payload.budgetMaxCents,
+    highTicket,
     escrowState: 'OPEN_FOR_QUOTES',
     createdAt: now,
     updatedAt: now,
@@ -483,6 +502,8 @@ export async function selectContractorHandler(req: CallableRequest<unknown>) {
   await PROJECTS.doc(project.id).update({
     contractorId: quote.contractorId,
     selectedQuoteId: quote.id,
+    selectedQuotePriceCents: quote.priceCents,
+    highTicket: Boolean(project.highTicket) || quote.priceCents >= (await getHighTicketPolicyConfig()).thresholdCents,
     escrowState: 'CONTRACTOR_SELECTED',
     updatedAt: now,
   });
@@ -583,19 +604,38 @@ export async function fundHoldHandler(req: CallableRequest<unknown>) {
   }
 
   const quote = await getSelectedQuoteOrThrow(project);
-  const provider = await getPaymentProvider();
+  const grossAmountCents = Number(quote.priceCents);
+  const estimateCreditCents = Math.max(0, Number(project.estimateDepositCreditCents ?? 0));
+  const amountToHoldCents = Math.max(0, grossAmountCents - estimateCreditCents);
 
-  const holdResult = await provider.createHold({
-    projectId: project.id,
-    customerId: project.customerId,
-    contractorId: project.contractorId,
-    amountCents: quote.priceCents,
-    metadata: { paymentMethodId: input.paymentMethodId ?? 'mock_default' },
-  });
+  if (project.highTicket) {
+    const policy = await getHighTicketPolicyConfig();
+    if (grossAmountCents < policy.thresholdCents) {
+      throw new HttpsError('failed-precondition', 'High-ticket project amount does not meet concierge threshold.');
+    }
+    const caseSnap = await db.collection('highTicketCases').where('projectId', '==', project.id).limit(1).get();
+    if (caseSnap.empty) {
+      throw new HttpsError('failed-precondition', 'High-ticket case intake is required before funding.');
+    }
+  }
+
+  const provider = await getPaymentProvider();
+  const holdResult =
+    amountToHoldCents > 0
+      ? await provider.createHold({
+          projectId: project.id,
+          customerId: project.customerId,
+          contractorId: project.contractorId,
+          amountCents: amountToHoldCents,
+          metadata: { paymentMethodId: input.paymentMethodId ?? 'mock_default', estimateCreditCents },
+        })
+      : { providerHoldId: 'no_hold_required', status: 'HELD' as const };
 
   await PROJECTS.doc(project.id).update({
     escrowState: 'FUNDED_HELD',
-    heldAmountCents: quote.priceCents,
+    heldAmountCents: amountToHoldCents,
+    grossContractAmountCents: grossAmountCents,
+    estimateDepositCreditCents: estimateCreditCents,
     providerHoldId: holdResult.providerHoldId,
     updatedAt: nowIso(),
   });
@@ -605,8 +645,13 @@ export async function fundHoldHandler(req: CallableRequest<unknown>) {
     type: 'HOLD_CREATED',
     actorId: actor.uid,
     actorRole: actor.role,
-    amountCents: quote.priceCents,
-    metadata: { provider: provider.providerName, providerHoldId: holdResult.providerHoldId },
+    amountCents: amountToHoldCents,
+    metadata: {
+      provider: provider.providerName,
+      providerHoldId: holdResult.providerHoldId,
+      grossAmountCents,
+      estimateCreditCents,
+    },
   });
 
   await writeAuditLog({
@@ -615,20 +660,22 @@ export async function fundHoldHandler(req: CallableRequest<unknown>) {
     action: 'fundHold',
     targetType: 'project',
     targetId: project.id,
-    details: { amountCents: quote.priceCents, provider: provider.providerName },
+    details: { amountCents: amountToHoldCents, grossAmountCents, estimateCreditCents, provider: provider.providerName },
   });
 
-  const feeConfig = await getPlatformFeeConfig();
-  const fees = calculateFee({
-    amountCents: quote.priceCents,
-    percentBps: feeConfig.percentBps,
-    fixedFeeCents: feeConfig.fixedFeeCents,
+  const subscriptionPlanId = await getActiveSubscriptionPlanIdForAccount(project.contractorId);
+  const fees = await resolveTieredFee({
+    amountCents: amountToHoldCents,
+    subscriptionPlanId,
   });
 
   return {
     projectId: project.id,
     holdStatus: holdResult.status,
     providerHoldId: holdResult.providerHoldId,
+    grossAmountCents,
+    estimateCreditCents,
+    amountHeldCents: amountToHoldCents,
     feePreview: fees,
   };
 }
@@ -658,6 +705,20 @@ export async function requestCompletionHandler(req: CallableRequest<unknown>) {
     updatedAt: now,
   });
 
+  if (project.contractorId) {
+    const weights = await getReliabilityWeightsConfig();
+    const proofUrls = input.proofPhotoUrls ?? [];
+    await updateReliabilityScore({
+      contractorId: project.contractorId,
+      weights,
+      updatedBy: actor.uid,
+      delta: {
+        proofSubmissionsTotal: 1,
+        proofSubmissionsComplete: proofUrls.length >= 3 ? 1 : 0,
+      },
+    });
+  }
+
   return {
     projectId: project.id,
     escrowState: 'COMPLETION_REQUESTED',
@@ -685,11 +746,10 @@ export async function approveReleaseHandler(req: CallableRequest<unknown>) {
     throw new HttpsError('failed-precondition', 'Held amount missing.');
   }
 
-  const feeConfig = await getPlatformFeeConfig();
-  const feeSummary = calculateFee({
+  const subscriptionPlanId = await getActiveSubscriptionPlanIdForAccount(project.contractorId);
+  const feeSummary = await resolveTieredFee({
     amountCents: heldAmountCents,
-    percentBps: feeConfig.percentBps,
-    fixedFeeCents: feeConfig.fixedFeeCents,
+    subscriptionPlanId,
   });
 
   const provider = await getPaymentProvider();
@@ -714,7 +774,12 @@ export async function approveReleaseHandler(req: CallableRequest<unknown>) {
     actorRole: actor.role,
     amountCents: heldAmountCents,
     feeCents: feeSummary.feeCents,
-    metadata: { netPayoutCents: feeSummary.netPayoutCents },
+    metadata: {
+      netPayoutCents: feeSummary.netPayoutCents,
+      tierId: feeSummary.tierId,
+      appliedPercentBps: feeSummary.appliedPercentBps,
+      appliedFixedFeeCents: feeSummary.appliedFixedFeeCents,
+    },
   });
 
   await writeLedgerEvent({
@@ -734,6 +799,26 @@ export async function approveReleaseHandler(req: CallableRequest<unknown>) {
     targetId: project.id,
     details: { grossAmountCents: heldAmountCents, feeCents: feeSummary.feeCents },
   });
+
+  if (project.contractorId) {
+    const weights = await getReliabilityWeightsConfig();
+    const completionRequestedAt = project.completionRequestedAt ? new Date(project.completionRequestedAt).getTime() : Date.now();
+    let timelineDays = Number(project.timelineDays ?? 0);
+    if (!timelineDays) {
+      const selectedQuote = await getSelectedQuoteOrThrow(project).catch(() => null);
+      timelineDays = Number(selectedQuote?.timelineDays ?? 0);
+    }
+    const deadline = completionRequestedAt + Math.max(1, timelineDays) * 24 * 60 * 60 * 1000;
+    await updateReliabilityScore({
+      contractorId: project.contractorId,
+      weights,
+      updatedBy: actor.uid,
+      delta: {
+        completionsTotal: 1,
+        completionsOnTime: Date.now() <= deadline ? 1 : 0,
+      },
+    });
+  }
 
   return {
     projectId: project.id,
@@ -789,6 +874,18 @@ export async function raiseIssueHoldHandler(req: CallableRequest<unknown>) {
     targetId: project.id,
     details: { reason: input.reason },
   });
+
+  if (project.contractorId) {
+    const weights = await getReliabilityWeightsConfig();
+    await updateReliabilityScore({
+      contractorId: project.contractorId,
+      weights,
+      updatedBy: actor.uid,
+      delta: {
+        disputesTotal: 1,
+      },
+    });
+  }
 
   return {
     caseId: project.id,
@@ -1152,6 +1249,46 @@ export async function adminSetConfigHandler(req: CallableRequest<unknown>) {
     });
   }
 
+  if (input.platformFeesV2) {
+    await db.collection('config').doc('platformFeesV2').set({
+      ...input.platformFeesV2,
+      updatedAt: now,
+      updatedBy: actor.uid,
+    });
+  }
+
+  if (input.depositPolicies) {
+    await db.collection('config').doc('depositPolicies').set({
+      ...input.depositPolicies,
+      updatedAt: now,
+      updatedBy: actor.uid,
+    });
+  }
+
+  if (input.subscriptionPlans) {
+    await db.collection('config').doc('subscriptionPlans').set({
+      ...input.subscriptionPlans,
+      updatedAt: now,
+      updatedBy: actor.uid,
+    });
+  }
+
+  if (input.reliabilityWeights) {
+    await db.collection('config').doc('reliabilityWeights').set({
+      ...input.reliabilityWeights,
+      updatedAt: now,
+      updatedBy: actor.uid,
+    });
+  }
+
+  if (input.highTicketPolicy) {
+    await db.collection('config').doc('highTicketPolicy').set({
+      ...input.highTicketPolicy,
+      updatedAt: now,
+      updatedBy: actor.uid,
+    });
+  }
+
   if (input.holdPolicy) {
     await db.collection('config').doc('holdPolicy').set({
       ...input.holdPolicy,
@@ -1161,7 +1298,9 @@ export async function adminSetConfigHandler(req: CallableRequest<unknown>) {
   }
 
   if (input.featureFlags) {
+    const existing = await getFeatureFlags();
     await db.collection('config').doc('featureFlags').set({
+      ...existing,
       ...input.featureFlags,
       updatedAt: now,
       updatedBy: actor.uid,
@@ -1212,7 +1351,14 @@ export async function adminSetUserRoleHandler(req: CallableRequest<unknown>) {
     try {
       await authClient.getUser(input.userId);
     } catch (error) {
-      if (!String(error).includes('auth/user-not-found')) {
+      const code = (error as { code?: string } | null | undefined)?.code ?? '';
+      const message = String(error);
+      const isUserNotFound =
+        code === 'auth/user-not-found' ||
+        message.includes('auth/user-not-found') ||
+        message.includes('There is no user record corresponding to the provided identifier.');
+
+      if (!isUserNotFound) {
         throw error;
       }
       const seededUser = (await db.collection('users').doc(input.userId).get()).data() as any;
@@ -1265,7 +1411,7 @@ export async function adminSetUserRoleHandler(req: CallableRequest<unknown>) {
 export async function createMilestonesHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
+  await requireConfigFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
 
   const input = parseOrThrow(createMilestonesInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1274,6 +1420,13 @@ export async function createMilestonesHandler(req: CallableRequest<unknown>) {
   }
   if (!project.contractorId) {
     throw new HttpsError('failed-precondition', 'Contractor must be selected before creating milestones.');
+  }
+
+  const totalMilestoneCents = input.milestones.reduce((sum, item) => sum + item.amountCents, 0);
+  const selectedQuote = await getSelectedQuoteOrThrow(project);
+  const quoteAmountCents = Number(selectedQuote.priceCents ?? 0) + Number(project.changeOrderDeltaCents ?? 0);
+  if (totalMilestoneCents > quoteAmountCents) {
+    throw new HttpsError('invalid-argument', 'Milestone total cannot exceed agreed contract value.');
   }
 
   const now = nowIso();
@@ -1295,6 +1448,17 @@ export async function createMilestonesHandler(req: CallableRequest<unknown>) {
     };
     await ref.set(item);
     created.push(item);
+    await writeLedgerEvent({
+      projectId: project.id,
+      type: 'MILESTONE_DEFINED',
+      actorId: actor.uid,
+      actorRole: actor.role,
+      amountCents: milestone.amountCents,
+      metadata: {
+        milestoneId: ref.id,
+        title: milestone.title,
+      },
+    });
   }
 
   await AGREEMENTS.doc(project.id).set(
@@ -1321,7 +1485,7 @@ export async function createMilestonesHandler(req: CallableRequest<unknown>) {
 export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
+  await requireConfigFeatureFlag('milestonePaymentsEnabled', 'Milestone payments are disabled.');
 
   const input = parseOrThrow(approveMilestoneInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1346,11 +1510,10 @@ export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
   }
 
   const releaseAmountCents = Math.min(milestone.amountCents, heldAmountCents);
-  const feeConfig = await getPlatformFeeConfig();
-  const feeSummary = calculateFee({
+  const subscriptionPlanId = await getActiveSubscriptionPlanIdForAccount(project.contractorId);
+  const feeSummary = await resolveTieredFee({
     amountCents: releaseAmountCents,
-    percentBps: feeConfig.percentBps,
-    fixedFeeCents: feeConfig.fixedFeeCents,
+    subscriptionPlanId,
   });
 
   const provider = await getPaymentProvider();
@@ -1388,6 +1551,9 @@ export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
       title: milestone.title,
       netPayoutCents: feeSummary.netPayoutCents,
       remainingCents,
+      tierId: feeSummary.tierId,
+      appliedPercentBps: feeSummary.appliedPercentBps,
+      appliedFixedFeeCents: feeSummary.appliedFixedFeeCents,
     },
   });
 
@@ -1399,6 +1565,19 @@ export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
       actorRole: actor.role,
       amountCents: feeSummary.feeCents,
       metadata: { source: 'approveMilestone', milestoneId: milestone.id },
+    });
+  }
+
+  if (project.contractorId) {
+    const weights = await getReliabilityWeightsConfig();
+    await updateReliabilityScore({
+      contractorId: project.contractorId,
+      weights,
+      updatedBy: actor.uid,
+      delta: {
+        completionsTotal: remainingCents <= 0 ? 1 : 0,
+        completionsOnTime: remainingCents <= 0 ? 1 : 0,
+      },
     });
   }
 
@@ -1414,7 +1593,7 @@ export async function approveMilestoneHandler(req: CallableRequest<unknown>) {
 export async function proposeChangeOrderHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
+  await requireConfigFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
 
   const input = parseOrThrow(proposeChangeOrderInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1441,7 +1620,7 @@ export async function proposeChangeOrderHandler(req: CallableRequest<unknown>) {
 export async function acceptChangeOrderHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
+  await requireConfigFeatureFlag('changeOrdersEnabled', 'Change orders are disabled.');
 
   const input = parseOrThrow(acceptChangeOrderInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1519,7 +1698,7 @@ export async function acceptChangeOrderHandler(req: CallableRequest<unknown>) {
 export async function createBookingRequestHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer']);
-  await requireFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
+  await requireConfigFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
 
   const input = parseOrThrow(createBookingRequestInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1528,6 +1707,19 @@ export async function createBookingRequestHandler(req: CallableRequest<unknown>)
   }
   if (!project.contractorId) {
     throw new HttpsError('failed-precondition', 'Contractor must be selected before booking.');
+  }
+  if (input.estimateDepositId) {
+    const depositSnap = await db.collection('estimateDeposits').doc(input.estimateDepositId).get();
+    if (!depositSnap.exists) {
+      throw new HttpsError('not-found', 'Estimate deposit not found.');
+    }
+    const deposit = depositSnap.data() as any;
+    if (deposit.projectId !== project.id) {
+      throw new HttpsError('invalid-argument', 'Estimate deposit does not belong to this project.');
+    }
+    if (!['CAPTURED', 'CONTRACTOR_ATTENDED', 'CUSTOMER_ATTENDED'].includes(deposit.status)) {
+      throw new HttpsError('failed-precondition', 'Estimate deposit must be captured before booking.');
+    }
   }
   if (new Date(input.startAt).getTime() >= new Date(input.endAt).getTime()) {
     throw new HttpsError('invalid-argument', 'startAt must be before endAt.');
@@ -1542,6 +1734,7 @@ export async function createBookingRequestHandler(req: CallableRequest<unknown>)
     contractorId: project.contractorId,
     startAt: input.startAt,
     endAt: input.endAt,
+    estimateDepositId: input.estimateDepositId ?? project.estimateDepositId,
     note: input.note,
     status: 'PENDING',
     createdAt: now,
@@ -1549,13 +1742,26 @@ export async function createBookingRequestHandler(req: CallableRequest<unknown>)
   };
   await ref.set(bookingRequest);
 
+  await writeLedgerEvent({
+    projectId: project.id,
+    type: 'BOOKING_CREATED',
+    actorId: actor.uid,
+    actorRole: actor.role,
+    metadata: {
+      bookingRequestId: bookingRequest.id,
+      startAt: bookingRequest.startAt,
+      endAt: bookingRequest.endAt,
+      estimateDepositId: bookingRequest.estimateDepositId ?? null,
+    },
+  });
+
   return { bookingRequest };
 }
 
 export async function respondBookingRequestHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['contractor']);
-  await requireFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
+  await requireConfigFeatureFlag('schedulingEnabled', 'Scheduling is disabled.');
 
   const input = parseOrThrow(respondBookingRequestInputSchema, req.data);
   const project = await getProjectOrThrow(input.projectId);
@@ -1574,12 +1780,29 @@ export async function respondBookingRequestHandler(req: CallableRequest<unknown>
   }
 
   const status = input.response === 'confirm' ? 'CONFIRMED' : 'DECLINED';
+  const respondedAt = nowIso();
   await ref.update({
     status,
     respondedByUserId: actor.uid,
-    respondedAt: nowIso(),
-    updatedAt: nowIso(),
+    respondedAt,
+    updatedAt: respondedAt,
   });
+
+  if (project.contractorId) {
+    const createdAtMillis = new Date(booking.createdAt).getTime();
+    const respondedMillis = new Date(respondedAt).getTime();
+    const responseMinutes = Math.max(1, Math.round((respondedMillis - createdAtMillis) / (60 * 1000)));
+    const weights = await getReliabilityWeightsConfig();
+    await updateReliabilityScore({
+      contractorId: project.contractorId,
+      weights,
+      updatedBy: actor.uid,
+      delta: {
+        responseSamples: 1,
+        responseMedianMinutes: responseMinutes,
+      },
+    });
+  }
 
   return { bookingRequestId: booking.id, status };
 }
@@ -1587,7 +1810,7 @@ export async function respondBookingRequestHandler(req: CallableRequest<unknown>
 export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('recommendationsEnabled', 'Recommendations are disabled.');
+  await requireConfigFeatureFlag('recommendationsEnabled', 'Recommendations are disabled.');
 
   const input = parseOrThrow(getRecommendationsInputSchema, req.data ?? {});
   const limit = input.limit ?? 10;
@@ -1595,7 +1818,7 @@ export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
 
   if (target === 'customer') {
     const contractorSnap = await db.collection('contractorProfiles').limit(100).get();
-    const contractors = contractorSnap.docs
+    const contractorsBase = contractorSnap.docs
       .map((d) => d.data() as any)
       .filter((c) => {
         if (input.municipality && !(c.serviceMunicipalities ?? []).includes(input.municipality)) {
@@ -1605,15 +1828,29 @@ export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
           return false;
         }
         return true;
+      });
+
+    const contractorsWithReliability = await Promise.all(
+      contractorsBase.map(async (contractor) => {
+        const scoreSnap = await db.collection('reliabilityScores').doc(contractor.userId).get();
+        const reliabilityScore = scoreSnap.exists ? Number(scoreSnap.data()?.score ?? 50) : 50;
+        return {
+          ...contractor,
+          reliabilityScore,
+          rankScore: Number(contractor.ratingAvg ?? 0) * 20 + reliabilityScore,
+        };
       })
-      .sort((a, b) => Number(b.ratingAvg ?? 0) - Number(a.ratingAvg ?? 0))
+    );
+
+    const contractors = contractorsWithReliability
+      .sort((a, b) => Number(b.rankScore ?? 0) - Number(a.rankScore ?? 0))
       .slice(0, limit)
       .map((c) => ({
         id: c.userId,
         type: 'contractor' as const,
         contractorId: c.userId,
-        score: Number(c.ratingAvg ?? 0),
-        reason: 'Matched by municipality/skills/rating.',
+        score: Number(c.rankScore ?? 0),
+        reason: `Matched by municipality/skills/rating/reliability (${c.reliabilityScore}).`,
       }));
 
     return { target: 'customer', recommendations: contractors };
@@ -1646,7 +1883,7 @@ export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
 export async function adminSetPromotionHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['admin']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(adminSetPromotionInputSchema, req.data);
   const now = nowIso();
@@ -1672,7 +1909,7 @@ export async function adminSetPromotionHandler(req: CallableRequest<unknown>) {
 export async function applyReferralCodeHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(applyReferralCodeInputSchema, req.data);
   const code = input.code.trim().toUpperCase();
@@ -1701,19 +1938,46 @@ export async function applyReferralCodeHandler(req: CallableRequest<unknown>) {
     { merge: true }
   );
 
+  let creditStatus: 'PENDING_COMPLETION' | 'POSTED' | 'REVERSED' = 'PENDING_COMPLETION';
+  let projectEscrowState: string | null = null;
+  if (input.projectId) {
+    const projectSnap = await PROJECTS.doc(input.projectId).get();
+    const project = projectSnap.exists ? (projectSnap.data() as any) : null;
+    projectEscrowState = project?.escrowState ?? null;
+    if (
+      project &&
+      ['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_RELEASE_PARTIAL', 'CLOSED'].includes(String(project.escrowState))
+    ) {
+      creditStatus = 'POSTED';
+    }
+  }
+
+  await db.collection('referralCredits').add({
+    code,
+    userId: actor.uid,
+    projectId: input.projectId ?? null,
+    status: creditStatus,
+    percentOffBps: promo.percentOffBps ?? 0,
+    amountOffCents: promo.amountOffCents ?? 0,
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+    projectEscrowState,
+  });
+
   return {
     code,
     type: promo.type,
     percentOffBps: promo.percentOffBps ?? 0,
     amountOffCents: promo.amountOffCents ?? 0,
     projectId: input.projectId ?? null,
+    creditStatus,
   };
 }
 
 export async function listFeaturedListingsHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['customer', 'contractor', 'admin']);
-  await requireFeatureFlag('growthEnabled', 'Growth features are disabled.');
+  await requireConfigFeatureFlag('growthEnabled', 'Growth features are disabled.');
 
   const input = parseOrThrow(listFeaturedListingsInputSchema, req.data ?? {});
   const limit = input.limit ?? 20;
@@ -1742,6 +2006,16 @@ async function executeAutoReleaseForProject(project: any, holdPolicy: HoldPolicy
   const shouldAutoRelease = isApprovalDeadlinePassed(nowIso(), project.completionRequestedAt, holdPolicy.approvalWindowDays);
   if (!shouldAutoRelease) {
     return;
+  }
+
+  if (project.contractorId) {
+    const scoreSnap = await db.collection('reliabilityScores').doc(project.contractorId).get();
+    if (scoreSnap.exists) {
+      const score = scoreSnap.data() as any;
+      if (score?.eligibility?.autoRelease === false) {
+        return;
+      }
+    }
   }
 
   const actor: Actor = { uid: 'system-auto-release', role: 'admin', adminVerified: true };
@@ -1829,7 +2103,17 @@ export async function getCurrentConfigHandler(req: CallableRequest<unknown>) {
   const actor = await getActor(req.auth);
   requireRole(actor, ['admin', 'customer', 'contractor']);
 
-  const [fees, holdPolicy, featureFlags] = await Promise.all([getPlatformFeeConfig(), getHoldPolicyConfig(), getFeatureFlags()]);
+  const [fees, feesV2, holdPolicy, featureFlags, depositPolicies, subscriptionPlans, reliabilityWeights, highTicketPolicy] =
+    await Promise.all([
+      getPlatformFeeConfig(),
+      getPlatformFeeConfigV2(),
+      getHoldPolicyConfig(),
+      getFeatureFlags(),
+      getDepositPolicyConfig(),
+      getSubscriptionPlansConfig(),
+      getReliabilityWeightsConfig(),
+      getHighTicketPolicyConfig(),
+    ]);
 
-  return { fees, holdPolicy, featureFlags };
+  return { fees, feesV2, holdPolicy, featureFlags, depositPolicies, subscriptionPlans, reliabilityWeights, highTicketPolicy };
 }

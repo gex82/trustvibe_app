@@ -22,8 +22,15 @@ Bilingual (EN/ES) iOS-first marketplace for Puerto Rico with escrow-style hold f
 
 ## Status
 
-This repo implements MVP core backend flow with mock payments, plus Phase 2 callable features behind flags
-(milestones, change orders, scheduling, recommendations, growth tooling).
+This repo implements MVP + productionization scaffolding:
+
+- estimate deposits with booking/no-show hooks
+- tiered fees and subscription pricing config
+- reliability scoring and eligibility gating
+- credential verification workflow (PR mock provider)
+- Stripe-first payment-provider abstraction with onboarding/subscriptions
+- high-ticket concierge workflows
+- admin operations pages for deposits/reliability/subscriptions/concierge
 
 See docs:
 - `docs/architecture.md`

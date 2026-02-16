@@ -22,6 +22,19 @@ export const adminFunctions = getFunctions(app, 'us-central1');
 
 let connected = false;
 
+function resolveEmulatorHost(): string {
+  const configured = (process.env.NEXT_PUBLIC_EMULATOR_HOST ?? '').trim();
+
+  if (typeof window !== 'undefined') {
+    const browserHost = window.location.hostname?.trim();
+    if (browserHost) {
+      return browserHost;
+    }
+  }
+
+  return configured || '127.0.0.1';
+}
+
 export function maybeConnectAdminEmulators(): void {
   if (connected) {
     return;
@@ -32,7 +45,7 @@ export function maybeConnectAdminEmulators(): void {
     return;
   }
 
-  const host = process.env.NEXT_PUBLIC_EMULATOR_HOST ?? '127.0.0.1';
+  const host = resolveEmulatorHost();
   connectAuthEmulator(adminAuth, `http://${host}:9099`, { disableWarnings: true });
   connectFirestoreEmulator(adminDb, host, 8080);
   connectFunctionsEmulator(adminFunctions, host, 5001);

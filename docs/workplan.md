@@ -1,6 +1,6 @@
 # TrustVibe Workplan
 
-Last updated: 2026-02-11
+Last updated: 2026-02-11 (productionization pass)
 
 ## Scope Strategy
 
@@ -24,8 +24,8 @@ Phase 2 modules stay behind feature flags to avoid destabilizing MVP.
 
 ### In progress
 
-- Mobile UX polish pass (copy consistency + i18n completeness + visual refinements).
-- Add CI quality gates for lint/type checks once lint rules are enabled.
+- Final pass on bilingual UX copy consistency for newly added productionization flows.
+- Emulator-enabled integration validation in this environment (CLI currently reports no startable emulators).
 
 ## Build Sequence (Execution)
 
@@ -39,26 +39,20 @@ Phase 2 modules stay behind feature flags to avoid destabilizing MVP.
 
 ## Near-Term Iterations
 
-### Iteration A (stabilize MVP)
+### Iteration A (stabilize productionization changes)
 
-- Push/email trigger hooks for message/review notifications.
-- Add stricter lint and typed API response contracts.
-- Add admin case execution presets for partial outcomes.
+- Execute emulator-backed integration runs for new deposit/subscription/concierge/credential paths.
+- Add webhook reconciliation persistence for Stripe event replay hardening.
+- Add referral-credit settlement job for post-close posting/reversal automation.
 
 ### Iteration B (release readiness)
 
-- CI test pipeline and rule tests.
-- FCM/APNs setup and notification template parity EN/ES.
+- FCM/APNs + email template parity for new lifecycle events.
 - TestFlight dry run via EAS preview then production profile.
-
-### Iteration C (Phase 2 activation prep)
-
-- Stripe Connect live implementation under `stripeConnectEnabled`.
-- Promotion analytics and referral attribution reporting.
-- Scheduling reminders and notification fan-out.
+- Add municipality-by-municipality progressive rollout KPI dashboard.
 
 ## Risks to Track
 
 - Emulator-to-physical-device network misconfiguration on Windows.
 - Role-claim drift between auth token and `users` fallback data.
-- Legal/compliance dependency before real payments.
+- Legal/compliance dependency before real payments and held-funds operation at scale.
