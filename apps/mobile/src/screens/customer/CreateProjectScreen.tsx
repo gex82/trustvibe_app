@@ -14,21 +14,6 @@ import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
 import municipalitiesData from '../../../../../data/demo/municipalities.json';
 
-const CUSTOM_OPTION_VALUE = 'other';
-const DEFAULT_FORM_VALUES: FormValue = {
-  category: 'plumbing',
-  title: '',
-  description: '',
-  municipality: 'San Juan',
-  desiredTimeline: 'within2Weeks',
-};
-const CATEGORY_OPTION_KEYS = ['plumbing', 'electrical', 'painting', 'carpentry', 'roofing', 'general'] as const;
-const TIMELINE_OPTION_KEYS = ['immediately', 'within1Week', 'within2Weeks', 'within1Month', 'flexible'] as const;
-
-function resolveSelectedLabel(value: string, options: PickerOption[]): string {
-  return options.find((item) => item.value === value)?.label ?? value;
-}
-
 const schema = z.object({
   category: z.string().min(2),
   title: z.string().min(3),
@@ -45,11 +30,13 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const categoryOptions = React.useMemo<PickerOption[]>(
     () => [
-      ...CATEGORY_OPTION_KEYS.map((key) => ({
-        value: key,
-        label: t(`project.category.${key}`),
-      })),
-      { value: CUSTOM_OPTION_VALUE, label: t('common.other') },
+      { value: 'plumbing', label: t('project.category.plumbing') },
+      { value: 'electrical', label: t('project.category.electrical') },
+      { value: 'painting', label: t('project.category.painting') },
+      { value: 'carpentry', label: t('project.category.carpentry') },
+      { value: 'roofing', label: t('project.category.roofing') },
+      { value: 'general', label: t('project.category.general') },
+      { value: 'other', label: t('common.other') },
     ],
     [t]
   );
@@ -59,24 +46,31 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
         value: item.name,
         label: item.name,
       })),
-      { value: CUSTOM_OPTION_VALUE, label: t('common.other') },
+      { value: 'other', label: t('common.other') },
     ],
     [t]
   );
   const timelineOptions = React.useMemo<PickerOption[]>(
     () => [
-      ...TIMELINE_OPTION_KEYS.map((key) => ({
-        value: key,
-        label: t(`project.timeline.${key}`),
-      })),
-      { value: CUSTOM_OPTION_VALUE, label: t('common.other') },
+      { value: 'immediately', label: t('project.timeline.immediately') },
+      { value: 'within1Week', label: t('project.timeline.within1Week') },
+      { value: 'within2Weeks', label: t('project.timeline.within2Weeks') },
+      { value: 'within1Month', label: t('project.timeline.within1Month') },
+      { value: 'flexible', label: t('project.timeline.flexible') },
+      { value: 'other', label: t('common.other') },
     ],
     [t]
   );
 
   const { control, handleSubmit, formState } = useForm<FormValue>({
     resolver: zodResolver(schema),
-    defaultValues: DEFAULT_FORM_VALUES,
+    defaultValues: {
+      category: 'plumbing',
+      title: '',
+      description: '',
+      municipality: 'San Juan',
+      desiredTimeline: 'within2Weeks',
+    },
   });
 
   return (
@@ -168,8 +162,8 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
           try {
             const result = await createProject({
               ...values,
-              category: resolveSelectedLabel(values.category, categoryOptions),
-              desiredTimeline: resolveSelectedLabel(values.desiredTimeline, timelineOptions),
+              category: categoryOptions.find((item) => item.value === values.category)?.label ?? values.category,
+              desiredTimeline: timelineOptions.find((item) => item.value === values.desiredTimeline)?.label ?? values.desiredTimeline,
               photos: [],
             });
             navigation.replace('ProjectDetail', { projectId: result.project.id });

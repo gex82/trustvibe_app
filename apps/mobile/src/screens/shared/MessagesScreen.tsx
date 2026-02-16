@@ -28,14 +28,11 @@ export function MessagesScreen(): React.JSX.Element {
     }
   }, [projectId, projectsQuery.data?.projects]);
 
-  const projects = projectsQuery.data?.projects ?? [];
-
   const messagesQuery = useQuery({
     queryKey: ['project-messages', projectId],
     queryFn: () => listMessages({ projectId: projectId as string, limit: 100 }),
     enabled: Boolean(projectId),
   });
-  const messages = messagesQuery.data?.messages ?? [];
 
   const sendMutation = useMutation({
     mutationFn: (payload: { projectId: string; body: string }) => sendMessage(payload),
@@ -48,21 +45,6 @@ export function MessagesScreen(): React.JSX.Element {
     },
   });
 
-  const handleSelectProject = React.useCallback((nextProjectId: string) => {
-    setProjectId(nextProjectId);
-  }, []);
-
-  const handleSendMessage = React.useCallback(() => {
-    if (!projectId) {
-      return;
-    }
-    const trimmedBody = body.trim();
-    if (!trimmedBody) {
-      return;
-    }
-    void sendMutation.mutateAsync({ projectId, body: trimmedBody });
-  }, [body, projectId, sendMutation]);
-
   return (
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('messaging.title')}</Text>
@@ -70,7 +52,7 @@ export function MessagesScreen(): React.JSX.Element {
 
       <FlatList
         horizontal
-        data={projects}
+        data={projectsQuery.data?.projects ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.projects}
         renderItem={({ item }) => (
@@ -80,7 +62,7 @@ export function MessagesScreen(): React.JSX.Element {
               styles.projectCard,
               projectId === item.id ? styles.projectCardActive : null,
             ]}
-            onPress={() => handleSelectProject(item.id)}
+            onPress={() => setProjectId(item.id)}
           >
             <Text numberOfLines={2} style={[styles.projectCardLabel, projectId === item.id ? styles.projectCardLabelActive : null]}>
               {getLocalizedProjectTitle(item, language)}
@@ -91,7 +73,7 @@ export function MessagesScreen(): React.JSX.Element {
       />
 
       <FlatList
-        data={messages}
+        data={messagesQuery.data?.messages ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messages}
         renderItem={({ item }) => (
@@ -123,7 +105,12 @@ export function MessagesScreen(): React.JSX.Element {
         testID="messages-send"
         label={t('common.submit')}
         disabled={!projectId || !body.trim() || sendMutation.isPending}
-        onPress={handleSendMessage}
+        onPress={() => {
+          if (!projectId) {
+            return;
+          }
+          void sendMutation.mutateAsync({ projectId, body: body.trim() });
+        }}
       />
     </ScreenContainer>
   );
