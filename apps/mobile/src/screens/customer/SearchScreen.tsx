@@ -12,6 +12,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { SectionHeader } from '../../components/SectionHeader';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
+import { getFeaturedBusinessName, resolveContractorDisplayName } from '../../utils/contractorDisplay';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Search'>;
 
@@ -34,9 +35,14 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
   });
 
   const recommendationItems = recommendationsQuery.data?.recommendations ?? [];
-  const filteredRecommendationItems = recommendationItems.filter((item) =>
-    !query.trim() ? true : String(item.contractorId ?? item.id).toLowerCase().includes(query.trim().toLowerCase())
-  );
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredRecommendationItems = recommendationItems.filter((item) => {
+    if (!normalizedQuery) {
+      return true;
+    }
+    const searchable = [item.contractorName, item.contractorId, item.reason, item.id].filter(Boolean).join(' ').toLowerCase();
+    return searchable.includes(normalizedQuery);
+  });
 
   return (
     <ScreenContainer style={styles.wrap}>
@@ -63,9 +69,10 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
             renderItem={({ item }) => (
               <ContractorCard
                 testID={`search-recommended-contractor-${item.id}`}
-                name={String(item.contractorId ?? 'Contractor')}
-                rating={4.8}
+                name={resolveContractorDisplayName(item.contractorName, item.contractorId ?? item.id, t)}
+                rating={item.contractorRatingAvg ?? 4.8}
                 municipality={item.reason}
+                avatarUri={item.contractorAvatarUrl ?? null}
                 onPress={() => navigation.navigate('ContractorProfile', { contractorId: item.contractorId ?? item.id })}
               />
             )}
@@ -98,15 +105,19 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
             data={featuredQuery.data?.featured ?? []}
             keyExtractor={(item) => item.code}
             contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
+            renderItem={({ item }) => {
+              const featuredContractorId = typeof item.contractorId === 'string' ? item.contractorId : undefined;
+              const featuredProfileName = getFeaturedBusinessName(item.contractorProfile);
+              return (
               <ContractorCard
                 testID={`search-featured-contractor-${item.code}`}
-                name={String(item.contractorId ?? item.code)}
+                name={resolveContractorDisplayName(featuredProfileName, featuredContractorId, t)}
                 rating={4.9}
                 municipality={item.code}
-                onPress={() => navigation.navigate('ContractorProfile', { contractorId: item.contractorId ?? undefined })}
+                onPress={featuredContractorId ? () => navigation.navigate('ContractorProfile', { contractorId: featuredContractorId }) : undefined}
               />
-            )}
+              );
+            }}
             ListEmptyComponent={<EmptyState title={t('common.noData')} description={t('search.noFeaturedListings')} />}
           />
         )}
