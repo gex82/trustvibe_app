@@ -293,6 +293,11 @@ export interface RecommendationItem {
   reason: string;
   contractorId?: string;
   projectId?: string;
+  contractorName?: string;
+  contractorAvatarUrl?: string;
+  contractorRatingAvg?: number;
+  contractorReviewCount?: number;
+  projectTitle?: string;
 }
 
 export interface Promotion {

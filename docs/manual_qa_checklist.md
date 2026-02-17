@@ -1,6 +1,6 @@
 # Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-13
+Last updated: 2026-02-17
 
 ## Environment + Startup
 
@@ -83,6 +83,16 @@ Last updated: 2026-02-13
 - [ ] Booking request action is disabled until deposit is captured, with inline reason shown.
 - [ ] Project detail contractor identity shows friendly name/fallback, not raw ID alone.
 - [ ] Workflow and advanced actions display contextual status/error guidance (no black-box generic flow).
+
+## Batch 3 UX Interaction + Feedback (iPad / iPhone)
+
+- [ ] Messages input and send controls remain visible above iPad keyboard.
+- [ ] Home Recent Activity rows are tappable and open the correct project detail.
+- [ ] Search recommendation cards show press feedback and open contractor profile.
+- [ ] Recommendations rows are tappable and route by item type (contractor -> profile, project -> detail).
+- [ ] Recommendation rows with no destination show disabled reason instead of silent no-op.
+- [ ] Contractor Profile request-quote action opens Create Project without status popup.
+- [ ] Contractor Profile shows explicit unavailable banner when selected contractor profile data is missing.
 
 ## Automation Parity
 

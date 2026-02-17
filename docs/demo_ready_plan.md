@@ -4,6 +4,7 @@
 - Align with the target outcome: customer/contractor demos that are reliable, visually polished, and operationally believable.
 - Correct current `docs/demo_ready_plan.md` details that are inaccurate before execution.
 - Batch 2 UX transparency workstream is tracked separately in `docs/batch2_ux_fixes.md`.
+- Batch 3 UX interaction and feedback workstream is tracked separately in `docs/batch3_ux_fixes.md`.
 - This plan is optimized for:
   - Demo-critical first
   - Feature-flag UI gating
