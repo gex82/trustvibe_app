@@ -16,8 +16,14 @@ type Props = {
 };
 
 export function ContractorCard({ name, rating, municipality, avatarUri, onPress, testID }: Props): React.JSX.Element {
+  const formattedRating = Number.isFinite(rating) ? rating.toFixed(1) : '0.0';
+
   return (
-    <Pressable testID={testID} onPress={onPress}>
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      style={({ pressed }) => [styles.pressable, pressed ? styles.pressablePressed : null]}
+    >
       <Card>
         <View style={styles.row}>
           <Avatar name={name} uri={avatarUri} size={52} />
@@ -28,7 +34,7 @@ export function ContractorCard({ name, rating, municipality, avatarUri, onPress,
             </View>
             <View style={styles.metaRow}>
               <Ionicons name="star" size={15} color={colors.warning} />
-              <Text style={styles.meta}>{rating.toFixed(1)}</Text>
+              <Text style={styles.meta}>{formattedRating}</Text>
               {municipality ? <Text style={styles.meta}>{municipality}</Text> : null}
             </View>
           </View>
@@ -39,6 +45,12 @@ export function ContractorCard({ name, rating, municipality, avatarUri, onPress,
 }
 
 const styles = StyleSheet.create({
+  pressable: {
+    borderRadius: 14,
+  },
+  pressablePressed: {
+    opacity: 0.75,
+  },
   row: {
     flexDirection: 'row',
     gap: spacing.md,

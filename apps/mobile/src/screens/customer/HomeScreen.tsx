@@ -47,9 +47,27 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     queryFn: () => listProjects({ limit: 20 }),
   });
 
-  const projects = projectsQuery.data?.projects ?? [];
-  const activeProjects = projects.filter((item) => !['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL'].includes(String(item.escrowState)));
-  const escrowTotalCents = activeProjects.reduce((sum, item) => sum + Number(item.heldAmountCents ?? item.selectedQuotePriceCents ?? 0), 0);
+  const projects = React.useMemo(
+    () => projectsQuery.data?.projects ?? [],
+    [projectsQuery.data?.projects]
+  );
+  const activeProjects = React.useMemo(
+    () => projects.filter((item) => !['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL'].includes(String(item.escrowState))),
+    [projects]
+  );
+  const escrowTotalCents = React.useMemo(
+    () => activeProjects.reduce((sum, item) => sum + Number(item.heldAmountCents ?? item.selectedQuotePriceCents ?? 0), 0),
+    [activeProjects]
+  );
+
+  const navigateToTab = React.useCallback((tabName: 'SearchTab' | 'ProjectsTab') => {
+    navigation.getParent()?.navigate(tabName);
+  }, [navigation]);
+
+  const handleActivityPress = React.useCallback(
+    (projectId: string) => navigation.navigate('ProjectDetail', { projectId }),
+    [navigation]
+  );
 
   async function performLogout(): Promise<void> {
     try {
@@ -97,8 +115,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         value=""
         editable={false}
         placeholder={t('home.searchPlaceholder')}
-        onFocus={() => navigation.getParent()?.navigate('SearchTab')}
-        onPressIn={() => navigation.getParent()?.navigate('SearchTab')}
+        onFocus={() => navigateToTab('SearchTab')}
+        onPressIn={() => navigateToTab('SearchTab')}
       />
 
       <View>
@@ -107,7 +125,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       </View>
 
       <View style={styles.projectsSection}>
-        <SectionHeader title={t('home.activeProjects')} actionLabel={t('home.seeAll')} onPressAction={() => navigation.getParent()?.navigate('ProjectsTab')} />
+        <SectionHeader title={t('home.activeProjects')} actionLabel={t('home.seeAll')} onPressAction={() => navigateToTab('ProjectsTab')} />
         <FlatList
           horizontal
           data={activeProjects}
@@ -141,10 +159,15 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       <View style={styles.activitySection}>
         <SectionHeader title={t('home.recentActivity')} />
         {activeProjects.slice(0, 3).map((item) => (
-          <View key={item.id} style={styles.activityRow}>
+          <Pressable
+            key={item.id}
+            testID={`home-activity-${item.id}`}
+            onPress={() => handleActivityPress(item.id)}
+            style={({ pressed }) => [styles.activityRow, pressed ? styles.activityRowPressed : null]}
+          >
             <Text style={styles.activityTitle}>{getLocalizedProjectTitle(item, language)}</Text>
             <Text style={styles.activityMeta}>{getEscrowStateLabel(t, String(item.escrowState))}</Text>
-          </View>
+          </Pressable>
         ))}
         {!activeProjects.length && !projectsQuery.isLoading ? (
           <Text style={styles.meta}>{t('common.noData')}</Text>
@@ -195,6 +218,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: spacing.sm,
     backgroundColor: colors.surface,
+  },
+  activityRowPressed: {
+    opacity: 0.75,
   },
   activityTitle: {
     color: colors.textPrimary,
