@@ -1901,65 +1901,125 @@ export async function getRecommendationsHandler(req: CallableRequest<unknown>) {
   if (target === 'customer') {
     const contractorSnap = await db.collection('contractorProfiles').limit(100).get();
     const contractorsBase = contractorSnap.docs
-      .map((d) => d.data() as any)
-      .filter((c) => {
-        if (input.municipality && !(c.serviceMunicipalities ?? []).includes(input.municipality)) {
-          return false;
-        }
-        if (input.category && !String(c.skills ?? '').toLowerCase().includes(String(input.category).toLowerCase())) {
-          return false;
-        }
-        return true;
-      });
+      .map((d) => d.data() as ContractorRecommendationSource)
+      .filter((contractor) => contractorMatchesFilters(contractor, input));
 
     const contractorsWithReliability = await Promise.all(
-      contractorsBase.map(async (contractor) => {
-        const scoreSnap = await db.collection('reliabilityScores').doc(contractor.userId).get();
-        const reliabilityScore = scoreSnap.exists ? Number(scoreSnap.data()?.score ?? 50) : 50;
-        return {
-          ...contractor,
-          reliabilityScore,
-          rankScore: Number(contractor.ratingAvg ?? 0) * 20 + reliabilityScore,
-        };
-      })
+      contractorsBase.map(async (contractor) => enrichContractorRecommendation(contractor))
     );
 
     const contractors = contractorsWithReliability
       .sort((a, b) => Number(b.rankScore ?? 0) - Number(a.rankScore ?? 0))
       .slice(0, limit)
-      .map((c) => ({
-        id: c.userId,
-        type: 'contractor' as const,
-        contractorId: c.userId,
-        score: Number(c.rankScore ?? 0),
-        reason: `Matched by municipality/skills/rating/reliability (${c.reliabilityScore}).`,
-      }));
+      .map((contractor) => toContractorRecommendation(contractor));
 
     return { target: 'customer', recommendations: contractors };
   }
 
   const openSnap = await PROJECTS.where('escrowState', '==', 'OPEN_FOR_QUOTES').limit(200).get();
   const projects = openSnap.docs
-    .map((d) => d.data() as any)
-    .filter((p) => {
-      if (input.municipality && p.municipality !== input.municipality) {
-        return false;
-      }
-      if (input.category && p.category !== input.category) {
-        return false;
-      }
-      return true;
-    })
+    .map((d) => d.data() as OpenProjectRecommendationSource)
+    .filter((project) => projectMatchesFilters(project, input))
     .slice(0, limit)
-    .map((p) => ({
-      id: p.id,
+    .map((project) => ({
+      id: project.id,
       type: 'project' as const,
-      projectId: p.id,
+      projectId: project.id,
       score: 1,
       reason: 'Open project matching current filters.',
+      projectTitle: project.title,
     }));
 
   return { target: 'contractor', recommendations: projects };
+}
+
+type RecommendationsFilterInput = {
+  municipality?: string;
+  category?: string;
+};
+
+type ContractorRecommendationSource = {
+  userId: string;
+  serviceMunicipalities?: string[];
+  skills?: string[] | string;
+  ratingAvg?: number;
+  reviewCount?: number;
+};
+
+type EnrichedContractorRecommendation = ContractorRecommendationSource & {
+  reliabilityScore: number;
+  rankScore: number;
+  contractorName?: string;
+  contractorAvatarUrl?: string;
+  contractorRatingAvg?: number;
+  contractorReviewCount?: number;
+};
+
+type OpenProjectRecommendationSource = {
+  id: string;
+  municipality?: string;
+  category?: string;
+  title?: string;
+};
+
+function contractorMatchesFilters(contractor: ContractorRecommendationSource, input: RecommendationsFilterInput): boolean {
+  if (input.municipality && !(contractor.serviceMunicipalities ?? []).includes(input.municipality)) {
+    return false;
+  }
+  if (input.category && !String(contractor.skills ?? '').toLowerCase().includes(String(input.category).toLowerCase())) {
+    return false;
+  }
+  return true;
+}
+
+function projectMatchesFilters(project: OpenProjectRecommendationSource, input: RecommendationsFilterInput): boolean {
+  if (input.municipality && project.municipality !== input.municipality) {
+    return false;
+  }
+  if (input.category && project.category !== input.category) {
+    return false;
+  }
+  return true;
+}
+
+async function enrichContractorRecommendation(
+  contractor: ContractorRecommendationSource
+): Promise<EnrichedContractorRecommendation> {
+  const [scoreSnap, userSnap] = await Promise.all([
+    db.collection('reliabilityScores').doc(contractor.userId).get(),
+    db.collection('users').doc(contractor.userId).get(),
+  ]);
+  const reliabilityScore = scoreSnap.exists ? Number(scoreSnap.data()?.score ?? 50) : 50;
+  const userData = userSnap.exists ? (userSnap.data() as Record<string, unknown>) : null;
+  const contractorName = typeof userData?.name === 'string' ? userData.name : undefined;
+  const contractorAvatarUrl = typeof userData?.avatarUrl === 'string' ? userData.avatarUrl : undefined;
+  const contractorRatingAvg = Number(contractor.ratingAvg ?? 0);
+  const contractorReviewCount = Number(contractor.reviewCount ?? 0);
+
+  return {
+    ...contractor,
+    reliabilityScore,
+    rankScore: Number(contractor.ratingAvg ?? 0) * 20 + reliabilityScore,
+    contractorName,
+    contractorAvatarUrl,
+    contractorRatingAvg: Number.isFinite(contractorRatingAvg) && contractorRatingAvg > 0 ? contractorRatingAvg : undefined,
+    contractorReviewCount:
+      Number.isFinite(contractorReviewCount) && contractorReviewCount > 0 ? contractorReviewCount : undefined,
+  };
+}
+
+function toContractorRecommendation(contractor: EnrichedContractorRecommendation) {
+  return {
+    id: contractor.userId,
+    type: 'contractor' as const,
+    contractorId: contractor.userId,
+    score: Number(contractor.rankScore ?? 0),
+    reason: `Matched by municipality/skills/rating/reliability (${contractor.reliabilityScore}).`,
+    contractorName: contractor.contractorName,
+    contractorAvatarUrl: contractor.contractorAvatarUrl,
+    contractorRatingAvg: contractor.contractorRatingAvg,
+    contractorReviewCount: contractor.contractorReviewCount,
+  };
 }
 
 export async function adminSetPromotionHandler(req: CallableRequest<unknown>) {
