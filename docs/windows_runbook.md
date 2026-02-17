@@ -171,6 +171,12 @@ $env:GCLOUD_PROJECT='trustvibe-dev'
 npm run test:integration
 ```
 
+One-command local run (preflight + env + integration tests):
+
+```powershell
+npm run test:integration:local
+```
+
 Run deterministic demo flows:
 
 ```powershell
