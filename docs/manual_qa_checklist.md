@@ -74,6 +74,16 @@ Last updated: 2026-02-13
 - [ ] Picker "Other (custom)" flow works and submits successfully.
 - [ ] Handled auth failures show friendly messages without raw debug payload bars.
 
+## Batch 2 UX Transparency (iPad / iPhone)
+
+- [ ] Project detail `Select contractor` routes to `QuotesCompare` (no auto-select).
+- [ ] Quote cards show contractor identity, price, timeline, and scope notes.
+- [ ] Agreement acceptance happens from `AgreementReview`, with visible scope/policy/fee details.
+- [ ] Estimate deposit creation shows amount/rationale confirmation before execution.
+- [ ] Booking request action is disabled until deposit is captured, with inline reason shown.
+- [ ] Project detail contractor identity shows friendly name/fallback, not raw ID alone.
+- [ ] Workflow and advanced actions display contextual status/error guidance (no black-box generic flow).
+
 ## Automation Parity
 
 - [x] `npm run test:unit` passes.

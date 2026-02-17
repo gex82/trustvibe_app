@@ -31,18 +31,28 @@ Last updated: 2026-02-13
 12. Tap top-left back arrow.
 13. Tap bottom tab `Projects`.
 14. Tap `Bathroom Remodel`.
-15. Show milestone/ledger state and the primary CTA.
-16. Tap bottom tab `Profile`.
-17. Tap `Documents`.
-18. Tap `Upload Document`.
-19. Pick a demo file and confirm upload.
-20. Navigate back to `Home`.
-21. In the Home top row, tap the small `Log out` action (next to language switch).
-22. In confirmation alert, tap `Log out`.
-23. End recording on role-selection screen.
+15. Tap primary CTA `Select contractor` to open quote comparison.
+16. In `Compare quotes`, pick one quote card and tap `Select this contractor`.
+17. On `Agreement snapshot`, highlight contractor, price, scope, policy, and fee sections.
+18. Tap `Accept agreement`.
+19. Confirm the flow advances to escrow funding step.
+20. Navigate back to project detail and open `Developer actions`.
+21. Tap `Create estimate deposit`, review amount/rationale dialog, then confirm.
+22. Show inline `Deposit Details` card and status update.
+23. Tap bottom tab `Profile`.
+24. Tap `Documents`.
+25. Tap `Upload Document`.
+26. Pick a demo file and confirm upload.
+27. Navigate back to `Home`.
+28. In the Home top row, tap the small `Log out` action (next to language switch).
+29. In confirmation alert, tap `Log out`.
+30. End recording on role-selection screen.
 
 ## Expected checkpoints
 
 1. Language switch is visible on Home and works immediately.
 2. No hardcoded English remains on Home/Profile/role entry while in Spanish mode.
-3. Quick logout from Home returns to unauthenticated entry flow.
+3. Contractor selection is deliberate (quote compare), not auto-selected.
+4. Agreement acceptance is transparent with visible policy and fee details.
+5. Deposit flow shows amount/rationale before create and details after create.
+6. Quick logout from Home returns to unauthenticated entry flow.

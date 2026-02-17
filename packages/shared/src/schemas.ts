@@ -69,6 +69,7 @@ export const selectContractorInputSchema = z.object({
 
 export const acceptAgreementInputSchema = z.object({
   agreementId: z.string().min(1),
+  demoAutoAdvance: z.boolean().optional(),
 });
 
 export const fundHoldInputSchema = z.object({
@@ -362,6 +363,11 @@ export const createEstimateDepositInputSchema = z.object({
   projectId: z.string().min(1),
   category: projectCategorySchema.optional(),
   appointmentStartAt: z.string().datetime().optional(),
+});
+
+export const previewEstimateDepositInputSchema = z.object({
+  projectId: z.string().min(1),
+  category: projectCategorySchema.optional(),
 });
 
 export const captureEstimateDepositInputSchema = z.object({

@@ -14,6 +14,7 @@ import {
   recordBookingAttendanceInputSchema,
   submitConciergeBidInputSchema,
   submitCredentialForVerificationInputSchema,
+  previewEstimateDepositInputSchema,
   createEstimateDepositInputSchema,
   updateSubscriptionInputSchema,
   verifyCredentialInputSchema,
@@ -173,6 +174,31 @@ export async function createEstimateDepositHandler(req: CallableRequest<unknown>
   });
 
   return { deposit };
+}
+
+export async function previewEstimateDepositHandler(req: CallableRequest<unknown>) {
+  const actor = await getActor(req.auth);
+  requireRole(actor, ['customer']);
+  await requireConfigFeatureFlag('estimateDepositsEnabled', 'Estimate deposits are disabled.');
+
+  const input = parseOrThrow(previewEstimateDepositInputSchema, req.data);
+  const project = await getProjectOrThrow(input.projectId);
+  if (project.customerId !== actor.uid) {
+    throw new HttpsError('permission-denied', 'Only customer can preview estimate deposit.');
+  }
+  if (!project.contractorId) {
+    throw new HttpsError('failed-precondition', 'Contractor must be selected for estimate deposit.');
+  }
+
+  const category = input.category ?? project.category;
+  const amountCents = await resolveDepositAmountCents(category);
+
+  return {
+    amountCents,
+    currency: 'USD' as const,
+    category,
+    rationale: `Estimate visit fee for ${project.contractorId}. Amount is based on policy for ${category}.`,
+  };
 }
 
 export async function captureEstimateDepositHandler(req: CallableRequest<unknown>) {

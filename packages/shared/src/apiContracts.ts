@@ -1,4 +1,5 @@
 import type {
+  AgreementSnapshot,
   BookingRequest,
   ChangeOrder,
   CredentialVerification,
@@ -34,6 +35,13 @@ export interface ProjectRecord extends Project {
       status?: Milestone['status'] | 'APPROVED' | 'COMPLETED_REQUESTED';
     }
   >;
+}
+
+export interface ProjectQuoteRecord extends Quote {
+  contractorName?: string;
+  contractorAvatarUrl?: string;
+  contractorRatingAvg?: number;
+  contractorReviewCount?: number;
 }
 
 export type CallableContract<Request, Response> = {
@@ -100,7 +108,15 @@ export interface CallableContracts {
     },
     { project: ProjectRecord }
   >;
-  getProject: CallableContract<{ projectId: string }, { project: ProjectRecord; quotes: Quote[] }>;
+  getProject: CallableContract<
+    { projectId: string },
+    {
+      project: ProjectRecord;
+      quotes: ProjectQuoteRecord[];
+      agreement?: AgreementSnapshot;
+      estimateDeposit?: EstimateDeposit;
+    }
+  >;
   submitQuote: CallableContract<
     {
       projectId: string;
@@ -112,7 +128,7 @@ export interface CallableContracts {
     { quote: Quote }
   >;
   selectContractor: CallableContract<{ projectId: string; quoteId: string }, { agreementId: string }>;
-  acceptAgreement: CallableContract<{ agreementId: string }, { readyToFund: boolean }>;
+  acceptAgreement: CallableContract<{ agreementId: string; demoAutoAdvance?: boolean }, { readyToFund: boolean }>;
   fundHold: CallableContract<{ projectId: string; paymentMethodId?: string }, JsonRecord>;
   requestCompletion: CallableContract<{ projectId: string; proofPhotoUrls?: string[]; note?: string }, JsonRecord>;
   approveRelease: CallableContract<{ projectId: string }, JsonRecord>;
@@ -210,6 +226,10 @@ export interface CallableContracts {
       appointmentStartAt?: string;
     },
     { deposit: EstimateDeposit }
+  >;
+  previewEstimateDeposit: CallableContract<
+    { projectId: string; category?: string },
+    { amountCents: number; currency: 'USD'; category: string; rationale: string }
   >;
   captureEstimateDeposit: CallableContract<{ depositId: string; paymentMethodId?: string }, { deposit: EstimateDeposit }>;
   markEstimateAttendance: CallableContract<

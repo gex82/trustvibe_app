@@ -268,6 +268,12 @@ export function createEstimateDeposit(
   return call('createEstimateDeposit', payload);
 }
 
+export function previewEstimateDeposit(
+  payload: CallableRequest<'previewEstimateDeposit'>
+): Promise<CallableResponse<'previewEstimateDeposit'>> {
+  return call('previewEstimateDeposit', payload);
+}
+
 export function captureEstimateDeposit(
   payload: CallableRequest<'captureEstimateDeposit'>
 ): Promise<CallableResponse<'captureEstimateDeposit'>> {

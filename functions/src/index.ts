@@ -48,6 +48,7 @@ import {
   applyEstimateDepositToJobHandler,
   captureEstimateDepositHandler,
   createEstimateDepositHandler,
+  previewEstimateDepositHandler,
   markEstimateAttendanceHandler,
   refundEstimateDepositHandler,
 } from './http/depositsHandlers';
@@ -122,6 +123,7 @@ export const adminSetPromotion = onCall(callOptions, adminSetPromotionHandler);
 export const applyReferralCode = onCall(callOptions, applyReferralCodeHandler);
 export const listFeaturedListings = onCall(callOptions, listFeaturedListingsHandler);
 export const createEstimateDeposit = onCall(callOptions, createEstimateDepositHandler);
+export const previewEstimateDeposit = onCall(callOptions, previewEstimateDepositHandler);
 export const captureEstimateDeposit = onCall(callOptions, captureEstimateDepositHandler);
 export const markEstimateAttendance = onCall(callOptions, markEstimateAttendanceHandler);
 export const refundEstimateDeposit = onCall(callOptions, refundEstimateDepositHandler);

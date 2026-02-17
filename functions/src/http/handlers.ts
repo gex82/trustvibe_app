@@ -1,4 +1,5 @@
 import {
+  type AgreementSnapshot,
   acceptChangeOrderInputSchema,
   adminExecuteOutcomeInputSchema,
   adminModerateReviewInputSchema,
@@ -15,7 +16,9 @@ import {
   type MessageItem,
   type Milestone,
   type Project,
+  type ProjectQuoteRecord,
   type Quote,
+  type EstimateDeposit,
   createBookingRequestInputSchema,
   createMilestonesInputSchema,
   acceptAgreementInputSchema,
@@ -75,6 +78,17 @@ const CASES = db.collection('cases');
 const REVIEWS = db.collection('reviews');
 const MESSAGES = db.collection('messages');
 const PROMOTIONS = db.collection('promotions');
+const ESTIMATE_DEPOSITS = db.collection('estimateDeposits');
+const USERS = db.collection('users');
+const CONTRACTOR_PROFILES = db.collection('contractorProfiles');
+
+function isDemoEmulatorRuntime(): boolean {
+  return (
+    process.env.FUNCTIONS_EMULATOR === 'true' ||
+    Boolean(process.env.FIRESTORE_EMULATOR_HOST) ||
+    Boolean(process.env.FIREBASE_AUTH_EMULATOR_HOST)
+  );
+}
 
 function getHeldAmountCents(project: any): number {
   return Number(project.heldAmountCents ?? 0);
@@ -365,9 +379,71 @@ export async function getProjectHandler(req: CallableRequest<unknown>) {
   }
 
   const quotesSnap = await PROJECTS.doc(project.id).collection('quotes').get();
-  const quotes = quotesSnap.docs.map((d) => d.data());
+  const rawQuotes = quotesSnap.docs.map((d) => d.data() as Quote);
+  const contractorIds = Array.from(
+    new Set(rawQuotes.map((quote) => quote.contractorId).filter((value): value is string => Boolean(value)))
+  );
 
-  return { project, quotes };
+  const [agreementSnap, estimateDepositSnap, userDocs, profileDocs] = await Promise.all([
+    AGREEMENTS.doc(project.id).get(),
+    project.estimateDepositId ? ESTIMATE_DEPOSITS.doc(project.estimateDepositId).get() : Promise.resolve(null),
+    Promise.all(contractorIds.map((contractorId) => USERS.doc(contractorId).get())),
+    Promise.all(contractorIds.map((contractorId) => CONTRACTOR_PROFILES.doc(contractorId).get())),
+  ]);
+
+  const userById = new Map(
+    userDocs
+      .filter((snap) => snap.exists)
+      .map((snap) => {
+        const data = snap.data() as Record<string, unknown>;
+        const id = String(data.id ?? snap.id);
+        return [id, data] as const;
+      })
+  );
+  const profileById = new Map(
+    profileDocs
+      .filter((snap) => snap.exists)
+      .map((snap) => {
+        const data = snap.data() as Record<string, unknown>;
+        const id = String(data.userId ?? snap.id);
+        return [id, data] as const;
+      })
+  );
+
+  const quotes: ProjectQuoteRecord[] = rawQuotes.map((quote) => {
+    const user = userById.get(quote.contractorId);
+    const profile = profileById.get(quote.contractorId);
+    return {
+      ...quote,
+      contractorName: typeof user?.name === 'string' ? user.name : undefined,
+      contractorAvatarUrl:
+        typeof user?.avatarUrl === 'string'
+          ? user.avatarUrl
+          : typeof user?.profilePhotoUrl === 'string'
+          ? user.profilePhotoUrl
+          : undefined,
+      contractorRatingAvg:
+        typeof profile?.ratingAvg === 'number'
+          ? profile.ratingAvg
+          : typeof user?.ratingAvg === 'number'
+          ? user.ratingAvg
+          : undefined,
+      contractorReviewCount:
+        typeof profile?.reviewCount === 'number'
+          ? profile.reviewCount
+          : typeof user?.reviewCount === 'number'
+          ? user.reviewCount
+          : undefined,
+    };
+  });
+
+  const agreement = agreementSnap.exists ? (agreementSnap.data() as AgreementSnapshot) : undefined;
+  const estimateDeposit =
+    estimateDepositSnap && estimateDepositSnap.exists
+      ? (estimateDepositSnap.data() as EstimateDeposit)
+      : undefined;
+
+  return { project, quotes, agreement, estimateDeposit };
 }
 
 export async function listMessagesHandler(req: CallableRequest<unknown>) {
@@ -561,11 +637,17 @@ export async function acceptAgreementHandler(req: CallableRequest<unknown>) {
   const now = nowIso();
   const updates: Record<string, unknown> = {};
 
-  if (actor.uid === agreement.customerId) {
+  const demoAutoAdvanceEnabled = Boolean(input.demoAutoAdvance) && isDemoEmulatorRuntime();
+  if (demoAutoAdvanceEnabled) {
     updates.acceptedByCustomerAt = agreement.acceptedByCustomerAt ?? now;
-  }
-  if (actor.uid === agreement.contractorId) {
     updates.acceptedByContractorAt = agreement.acceptedByContractorAt ?? now;
+  } else {
+    if (actor.uid === agreement.customerId) {
+      updates.acceptedByCustomerAt = agreement.acceptedByCustomerAt ?? now;
+    }
+    if (actor.uid === agreement.contractorId) {
+      updates.acceptedByContractorAt = agreement.acceptedByContractorAt ?? now;
+    }
   }
 
   await agreementRef.update(updates);
