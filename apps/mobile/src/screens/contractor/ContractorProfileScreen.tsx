@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { getDoc, doc } from 'firebase/firestore';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -57,14 +57,44 @@ const fallbackProfile: ContractorView = {
   portfolio: demoProjectPhotos,
 };
 
+function buildMissingProfile(contractorId: string): ContractorView {
+  return {
+    ...fallbackProfile,
+    contractorId,
+    name: contractorId,
+  };
+}
+
+function buildHydratedProfile(contractorId: string, userData: Record<string, unknown>, contractorData: Record<string, unknown>): ContractorView {
+  const portfolio = Array.isArray(contractorData.portfolio)
+    ? contractorData.portfolio
+        .map((item) => resolvePortfolioAsset(String((item as Record<string, unknown>).imageUrl ?? '')))
+        .filter(Boolean)
+    : [];
+
+  return {
+    contractorId,
+    name: String(userData.name ?? fallbackProfile.name),
+    rating: Number(contractorData.ratingAvg ?? fallbackProfile.rating),
+    projects: `${Number(contractorData.reviewCount ?? 50)}+`,
+    license: 'DACO #12345',
+    avatarUrl: typeof userData.avatarUrl === 'string' ? userData.avatarUrl : undefined,
+    avatarSource: contractorId === 'contractor-001' ? demoAvatars.juan : undefined,
+    portfolio: portfolio.length ? portfolio : fallbackProfile.portfolio,
+  };
+}
+
 export function ContractorProfileScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const [profile, setProfile] = React.useState<ContractorView>(fallbackProfile);
   const [loading, setLoading] = React.useState(true);
+  const [missingProfileId, setMissingProfileId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const contractorId = route.params?.contractorId;
     if (!contractorId) {
+      setProfile(fallbackProfile);
+      setMissingProfileId(null);
       setLoading(false);
       return;
     }
@@ -76,28 +106,22 @@ export function ContractorProfileScreen({ route, navigation }: Props): React.JSX
           getDoc(doc(db, 'contractorProfiles', contractorId)),
         ]);
         if (!userSnap.exists() || !contractorSnap.exists()) {
+          setProfile(buildMissingProfile(contractorId));
+          setMissingProfileId(contractorId);
           setLoading(false);
           return;
         }
-        const userData = userSnap.data() as any;
-        const contractorData = contractorSnap.data() as any;
-        const portfolio = Array.isArray(contractorData.portfolio)
-          ? contractorData.portfolio
-              .map((item: any) => resolvePortfolioAsset(String(item.imageUrl ?? '')))
-              .filter(Boolean)
-          : [];
-        setProfile({
-          contractorId,
-          name: String(userData.name ?? fallbackProfile.name),
-          rating: Number(contractorData.ratingAvg ?? fallbackProfile.rating),
-          projects: `${Number(contractorData.reviewCount ?? 50)}+`,
-          license: 'DACO #12345',
-          avatarUrl: typeof userData.avatarUrl === 'string' ? userData.avatarUrl : undefined,
-          avatarSource: contractorId === 'contractor-001' ? demoAvatars.juan : undefined,
-          portfolio: portfolio.length ? portfolio : fallbackProfile.portfolio,
-        });
+        setProfile(
+          buildHydratedProfile(
+            contractorId,
+            userSnap.data() as Record<string, unknown>,
+            contractorSnap.data() as Record<string, unknown>
+          )
+        );
+        setMissingProfileId(null);
       } catch {
-        setProfile(fallbackProfile);
+        setProfile(buildMissingProfile(contractorId));
+        setMissingProfileId(contractorId);
       } finally {
         setLoading(false);
       }
@@ -108,6 +132,12 @@ export function ContractorProfileScreen({ route, navigation }: Props): React.JSX
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.wrap}>
         <Text testID="contractor-profile-title" style={styles.screenTitle}>{t('contractor.verifiedPortfolio')}</Text>
+        {missingProfileId ? (
+          <Card style={styles.profileMissingCard}>
+            <Text style={styles.profileMissingTitle}>{t('contractor.profileUnavailableTitle')}</Text>
+            <Text style={styles.profileMissingBody}>{t('contractor.profileUnavailableDescription', { contractorId: missingProfileId })}</Text>
+          </Card>
+        ) : null}
         <Card>
           <View style={styles.header}>
             <Avatar name={profile.name} uri={profile.avatarUrl} source={profile.avatarSource} size={84} />
@@ -142,10 +172,7 @@ export function ContractorProfileScreen({ route, navigation }: Props): React.JSX
         <CTAButton
           testID="contractor-profile-request-quote"
           label={loading ? t('common.loading') : t('contractor.requestQuote')}
-          onPress={() => {
-            Alert.alert(t('common.status'), t('contractor.requestQuoteHint'));
-            navigation.navigate('CreateProject');
-          }}
+          onPress={() => navigation.navigate('CreateProject')}
           disabled={loading}
         />
       </ScrollView>
@@ -162,6 +189,17 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: 30,
     fontWeight: '800',
+  },
+  profileMissingCard: {
+    borderColor: colors.warning,
+  },
+  profileMissingTitle: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
+  },
+  profileMissingBody: {
+    color: colors.textSecondary,
   },
   header: {
     flexDirection: 'row',
