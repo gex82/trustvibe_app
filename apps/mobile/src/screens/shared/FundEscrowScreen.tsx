@@ -8,6 +8,7 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { Card } from '../../components/Card';
 import { CTAButton } from '../../components/CTAButton';
 import { EmptyState } from '../../components/EmptyState';
+import { TrustCallout } from '../../components/TrustCallout';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
 import type { HomeStackParamList } from '../../navigation/types';
@@ -24,6 +25,16 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
   const projectId = route.params.projectId;
   const [busy, setBusy] = React.useState(false);
   const [statusBanner, setStatusBanner] = React.useState<BannerState>(null);
+  const navigateTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (navigateTimerRef.current) {
+        clearTimeout(navigateTimerRef.current);
+        navigateTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId, 'fund'],
@@ -58,6 +69,11 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
         <Text style={styles.meta}>{t('escrow.hold.policy')}</Text>
       </Card>
 
+      <TrustCallout
+        title={t('escrow.trustTitle')}
+        bullets={[t('escrow.trustBullet1'), t('escrow.trustBullet2'), t('escrow.trustBullet3')]}
+      />
+
       {statusBanner ? (
         <View style={[styles.banner, statusBanner.kind === 'success' ? styles.bannerSuccess : styles.bannerError]}>
           <Text style={[styles.bannerText, statusBanner.kind === 'success' ? styles.bannerTextSuccess : styles.bannerTextError]}>
@@ -73,7 +89,10 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
           setBusy(true);
           try {
             await fundHold({ projectId });
-            navigation.replace('ProjectDetail', { projectId });
+            setStatusBanner({ kind: 'success', message: t('escrow.fundSuccessDetailed') });
+            navigateTimerRef.current = setTimeout(() => {
+              navigation.replace('ProjectDetail', { projectId });
+            }, 900);
           } catch (error) {
             Alert.alert(t('common.error'), mapApiError(error));
           } finally {

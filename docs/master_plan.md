@@ -1,6 +1,6 @@
 # TrustVibe Master Plan — Final Demo Closure (Dual-Lane)
 
-Last updated: 2026-02-17
+Last updated: 2026-02-19
 Purpose: Single source of truth for finishing demo signoff with both physical-device and laptop-browser validation.
 
 ---
@@ -15,6 +15,7 @@ Purpose: Single source of truth for finishing demo signoff with both physical-de
 | Batch 2 UX | Implemented | Guided project workflow, quote clarity, agreement transparency, deposit preview/confirm |
 | Batch 3 UX | Implemented | Keyboard-aware messages, tappable activity/recommendation rows, profile fallback clarity |
 | Batch 4 UX | Implemented | Contractor quote submit UI, message sender names, release->review handoff, role-aware home guidance |
+| Batch 5 UX | In progress | Demo polish stream: project stepper, trust callouts, star ratings, search filters, microcopy pass |
 | Backend callable surface | Implemented | Includes agreement/demo auto-advance and deposit preview path |
 | Shared contracts/i18n | Implemented | Additive fields and EN/ES coverage for batch flows |
 | Automated tests | Passing baseline | Unit + integration are green in local emulator lane |
@@ -82,7 +83,8 @@ Exit criteria:
 ### Phase 0 — Reconciliation
 1. Keep this file as orchestration source of truth.
 2. Keep `docs/batch1_ux_fixes.md`, `docs/batch2_ux_fixes.md`, `docs/batch3_ux_fixes.md`, `docs/batch4_demo_gaps.md` as implementation detail streams.
-3. Keep scripts/checklist as runtime signoff gates.
+3. Keep `docs/batch5_demo_ux_polish.md` as implementation detail stream for demo polish + MVP hooks.
+4. Keep scripts/checklist as runtime signoff gates.
 
 ### Phase 1 — Baseline Gate
 1. `npm run test:unit`
@@ -149,6 +151,7 @@ Demo is complete only when all are true:
 | `docs/batch2_ux_fixes.md` | batch 2 implementation details |
 | `docs/batch3_ux_fixes.md` | batch 3 implementation details |
 | `docs/batch4_demo_gaps.md` | batch 4 implementation details |
+| `docs/batch5_demo_ux_polish.md` | batch 5 implementation details |
 | `docs/manual_qa_checklist.md` | pass/fail checklist for device and QA rows |
 | `docs/demo_script_customer.md` | customer recording script |
 | `docs/demo_script_contractor.md` | contractor recording script |

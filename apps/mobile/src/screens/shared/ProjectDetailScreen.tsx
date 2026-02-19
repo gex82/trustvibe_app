@@ -34,6 +34,7 @@ import { MilestoneRow } from '../../components/MilestoneRow';
 import { CTAButton } from '../../components/CTAButton';
 import { EmptyState } from '../../components/EmptyState';
 import { PhotoGallery } from '../../components/PhotoGallery';
+import { ProjectStepper } from '../../components/ProjectStepper';
 import { useAppStore } from '../../store/appStore';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
@@ -59,6 +60,21 @@ type MilestoneItem = {
   amountCents: number;
   status: 'completed' | 'in_progress' | 'held';
 };
+
+const ISSUE_FLOW_STATES = new Set([
+  'ISSUE_RAISED_HOLD',
+  'JOINT_RELEASE_PROPOSED',
+  'JOINT_RELEASE_SIGNED',
+  'EXTERNAL_RESOLUTION_SUBMITTED',
+]);
+
+const COMPLETE_FLOW_STATES = new Set([
+  'RELEASED_PAID',
+  'EXECUTED_RELEASE_FULL',
+  'EXECUTED_RELEASE_PARTIAL',
+  'EXECUTED_REFUND_FULL',
+  'EXECUTED_REFUND_PARTIAL',
+]);
 
 function formatUsd(cents: number): string {
   return `$${(cents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -186,6 +202,35 @@ function agreementStatusLabel(payload: GetProjectResponse, t: Translate): string
   return t('project.agreementPendingAcceptance');
 }
 
+function getProjectHintKey(escrowState: string, role: 'customer' | 'contractor' | 'admin' | null, quoteCount: number): string {
+  const roleKey = role === 'contractor' ? 'contractor' : 'customer';
+  if (ISSUE_FLOW_STATES.has(escrowState)) {
+    return `project.hint.issue.${roleKey}`;
+  }
+  if (COMPLETE_FLOW_STATES.has(escrowState)) {
+    return `project.hint.released.${roleKey}`;
+  }
+  if (escrowState === 'OPEN_FOR_QUOTES') {
+    if (quoteCount > 0) {
+      return `project.hint.openForQuotesWithQuotes.${roleKey}`;
+    }
+    return `project.hint.openForQuotesNoQuotes.${roleKey}`;
+  }
+  if (escrowState === 'CONTRACTOR_SELECTED') {
+    return `project.hint.contractorSelected.${roleKey}`;
+  }
+  if (escrowState === 'AGREEMENT_ACCEPTED') {
+    return `project.hint.agreementAccepted.${roleKey}`;
+  }
+  if (escrowState === 'FUNDED_HELD') {
+    return `project.hint.fundedHeld.${roleKey}`;
+  }
+  if (escrowState === 'COMPLETION_REQUESTED') {
+    return `project.hint.completionRequested.${roleKey}`;
+  }
+  return `project.hint.default.${roleKey}`;
+}
+
 export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const role = useAppStore((s) => s.role);
@@ -261,6 +306,10 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
     : !isDepositCaptured(estimateDeposit)
     ? t('project.disabledNeedsCapturedDeposit')
     : null;
+  const projectHint = t(getProjectHintKey(String(project.escrowState), role, quotes.length), {
+    count: quotes.length,
+    contractor: contractorName,
+  });
 
   async function previewAndConfirmEstimateDeposit(): Promise<void> {
     if (!project.contractorId) {
@@ -332,6 +381,11 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
             <PhotoGallery photos={projectGalleryPhotos} />
           </View>
         ) : null}
+
+        <ProjectStepper escrowState={project.escrowState} />
+        <Text testID="project-detail-hint" style={styles.hintText}>
+          {projectHint}
+        </Text>
 
         <Card testID="project-detail-workflow-card">
           <Text style={styles.sectionMeta}>{t('project.workflowStatusTitle')}</Text>
@@ -761,6 +815,11 @@ const styles = StyleSheet.create({
   },
   meta: {
     color: colors.textSecondary,
+  },
+  hintText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontStyle: 'italic',
   },
   galleryWrap: {
     gap: spacing.xs,

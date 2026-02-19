@@ -1,12 +1,13 @@
 # Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-17
+Last updated: 2026-02-19
 
 Batch streams:
 - Batch 1: `docs/batch1_ux_fixes.md`
 - Batch 2: `docs/batch2_ux_fixes.md`
 - Batch 3: `docs/batch3_ux_fixes.md`
 - Batch 4: `docs/batch4_demo_gaps.md`
+- Batch 5: `docs/batch5_demo_ux_polish.md`
 
 ## Environment + Startup
 
@@ -111,6 +112,18 @@ Batch streams:
 - [ ] First-use guidance card appears when user has no actionable project state.
 - [ ] FundEscrow milestone creation uses inline status feedback, not blocking success alert.
 - [ ] Contractor badge label is localized in EN/ES on search/recommendation cards.
+
+## Batch 5 UX Demo Polish (iPad / iPhone)
+
+- [ ] Project detail shows progress stepper with correct step label for each escrow state.
+- [ ] Project detail contextual hint changes by escrow state and role (customer vs contractor).
+- [ ] Fund Escrow shows trust callout card with 3 protection bullets.
+- [ ] Fund Escrow success message uses trust-focused inline copy before navigation.
+- [ ] Review submission uses star rating component (no numeric button row).
+- [ ] Review submission success uses inline banner (no blocking success alert).
+- [ ] Search shows category/municipality/min-rating filter chips.
+- [ ] Search `Clear filters` resets chip state and restores list.
+- [ ] Batch 5 strings are fully localized in EN/ES.
 
 ## Laptop Browser Spot-Check (Chrome + Edge)
 
