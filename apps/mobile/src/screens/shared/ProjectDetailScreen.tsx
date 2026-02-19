@@ -148,6 +148,7 @@ function agreementStatusLabel(payload: GetProjectResponse, t: Translate): string
 export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const role = useAppStore((s) => s.role);
+  const user = useAppStore((s) => s.user);
   const language = useAppStore((s) => s.language);
   const featureFlags = useAppStore((s) => s.featureFlags);
   const projectId = route.params.projectId;
@@ -198,6 +199,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
 
   const milestones = buildMilestones(project, t);
   const selectedQuote = quotes.find((quote) => quote.id === project.selectedQuoteId);
+  const contractorOwnQuote = quotes.find((quote) => quote.contractorId === user?.uid);
   const contractorName = getContractorDisplayName(project, selectedQuote, t);
   const quoteAmount = Number(selectedQuote?.priceCents ?? project.selectedQuotePriceCents ?? project.heldAmountCents ?? 0);
   const nextMilestone = milestones.find((item) => item.status !== 'completed');
@@ -249,6 +251,19 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
       );
     } catch (error) {
       setStatusBanner({ kind: 'error', message: resolveActionError('createEstimateDeposit', error, t) });
+      setBusy(false);
+    }
+  }
+
+  async function approveReleaseAndOpenReview(): Promise<void> {
+    setBusy(true);
+    try {
+      await approveRelease({ projectId });
+      await projectQuery.refetch();
+      navigation.navigate('ReviewSubmission', { projectId });
+    } catch (error) {
+      setStatusBanner({ kind: 'error', message: resolveActionError('generic', error, t) });
+    } finally {
       setBusy(false);
     }
   }
@@ -343,6 +358,25 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
             />
           ) : null}
 
+          {role === 'contractor' && project.escrowState === 'OPEN_FOR_QUOTES' ? (
+            <View style={styles.actionGroup}>
+              <CTAButton
+                testID="project-detail-submit-quote"
+                label={contractorOwnQuote ? t('quote.viewSubmitted') : t('quote.submit')}
+                onPress={() => navigation.navigate('SubmitQuote', { projectId })}
+                disabled={busy}
+              />
+              {contractorOwnQuote ? (
+                <Text style={styles.disabledReason}>
+                  {t('project.quoteAlreadySubmittedSummary', {
+                    amount: formatUsd(contractorOwnQuote.priceCents),
+                    days: contractorOwnQuote.timelineDays,
+                  })}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
           {role === 'customer' && project.escrowState === 'CONTRACTOR_SELECTED' ? (
             <CTAButton
               testID="project-detail-review-agreement"
@@ -375,7 +409,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
               testID="project-detail-review-release"
               label={t('project.reviewAndRelease', { amount: formatUsd(nextMilestone.amountCents) })}
               iconName="lock-closed-outline"
-              onPress={() => void runAction(() => approveRelease({ projectId }), 'generic', t('project.fundsReleased'))}
+              onPress={() => void approveReleaseAndOpenReview()}
               disabled={busy}
             />
           ) : null}

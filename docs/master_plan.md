@@ -14,6 +14,7 @@ Purpose: Single source of truth for finishing demo signoff with both physical-de
 | Batch 1 UX | Implemented | Password toggle, T&C modal acceptance, picker UX, auth logging cleanup |
 | Batch 2 UX | Implemented | Guided project workflow, quote clarity, agreement transparency, deposit preview/confirm |
 | Batch 3 UX | Implemented | Keyboard-aware messages, tappable activity/recommendation rows, profile fallback clarity |
+| Batch 4 UX | Implemented | Contractor quote submit UI, message sender names, release->review handoff, role-aware home guidance |
 | Backend callable surface | Implemented | Includes agreement/demo auto-advance and deposit preview path |
 | Shared contracts/i18n | Implemented | Additive fields and EN/ES coverage for batch flows |
 | Automated tests | Passing baseline | Unit + integration are green in local emulator lane |
@@ -80,7 +81,7 @@ Exit criteria:
 
 ### Phase 0 — Reconciliation
 1. Keep this file as orchestration source of truth.
-2. Keep `docs/batch1_ux_fixes.md`, `docs/batch2_ux_fixes.md`, `docs/batch3_ux_fixes.md` as implementation detail streams.
+2. Keep `docs/batch1_ux_fixes.md`, `docs/batch2_ux_fixes.md`, `docs/batch3_ux_fixes.md`, `docs/batch4_demo_gaps.md` as implementation detail streams.
 3. Keep scripts/checklist as runtime signoff gates.
 
 ### Phase 1 — Baseline Gate
@@ -147,6 +148,7 @@ Demo is complete only when all are true:
 | `docs/batch1_ux_fixes.md` | batch 1 implementation details |
 | `docs/batch2_ux_fixes.md` | batch 2 implementation details |
 | `docs/batch3_ux_fixes.md` | batch 3 implementation details |
+| `docs/batch4_demo_gaps.md` | batch 4 implementation details |
 | `docs/manual_qa_checklist.md` | pass/fail checklist for device and QA rows |
 | `docs/demo_script_customer.md` | customer recording script |
 | `docs/demo_script_contractor.md` | contractor recording script |

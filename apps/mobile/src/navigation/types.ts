@@ -16,6 +16,7 @@ export type HomeStackParamList = {
   PaymentMethods: undefined;
   CreateProject: undefined;
   ProjectDetail: { projectId: string };
+  SubmitQuote: { projectId: string };
   QuotesCompare: { projectId: string };
   AgreementReview: { projectId: string };
   FundEscrow: { projectId: string };

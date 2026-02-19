@@ -2,12 +2,12 @@ import { expect, type Page } from '@playwright/test';
 
 export async function expectHomeSpanish(page: Page): Promise<void> {
   await expect(page.getByText(/Resumen financiero/i)).toBeVisible();
-  await expect(page.getByText(/Proyectos activos/i)).toBeVisible();
+  await expect(page.getByText('Proyectos activos', { exact: true })).toBeVisible();
 }
 
 export async function expectHomeEnglish(page: Page): Promise<void> {
   await expect(page.getByText(/Financial Overview/i)).toBeVisible();
-  await expect(page.getByText(/Active Projects/i)).toBeVisible();
+  await expect(page.getByText('Active Projects', { exact: true })).toBeVisible();
 }
 
 export async function expectSearchDisabledStates(page: Page): Promise<void> {

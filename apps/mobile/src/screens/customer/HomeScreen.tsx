@@ -5,12 +5,14 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { listProjects, logout, mapApiError } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { Card } from '../../components/Card';
 import { SearchBar } from '../../components/SearchBar';
 import { FinancialCard } from '../../components/FinancialCard';
 import { ProjectCard } from '../../components/ProjectCard';
 import { SectionHeader } from '../../components/SectionHeader';
 import { EmptyState } from '../../components/EmptyState';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
+import { PrimaryButton } from '../../components/PrimaryButton';
 import type { HomeStackParamList } from '../../navigation/types';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
@@ -18,6 +20,11 @@ import { getEscrowStateLabel } from '../../utils/escrowState';
 import { getLocalizedProjectTitle } from '../../utils/localizedProject';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Home'>;
+const FINAL_ESCROW_STATES = new Set(['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL']);
+
+function isFinalEscrowState(escrowState: string): boolean {
+  return FINAL_ESCROW_STATES.has(escrowState);
+}
 
 function deriveProgress(escrowState: string): number {
   switch (escrowState) {
@@ -40,6 +47,8 @@ function deriveProgress(escrowState: string): number {
 
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const role = useAppStore((s) => s.role) ?? 'customer';
+  const user = useAppStore((s) => s.user);
   const profile = useAppStore((s) => s.profile);
   const language = useAppStore((s) => s.language);
   const projectsQuery = useQuery({
@@ -52,9 +61,22 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     [projectsQuery.data?.projects]
   );
   const activeProjects = React.useMemo(
-    () => projects.filter((item) => !['RELEASED_PAID', 'EXECUTED_RELEASE_FULL', 'EXECUTED_REFUND_FULL'].includes(String(item.escrowState))),
+    () => projects.filter((item) => !isFinalEscrowState(String(item.escrowState))),
     [projects]
   );
+  const contractorAssignedProjects = React.useMemo(
+    () =>
+      projects.filter(
+        (item) => item.contractorId === user?.uid && !isFinalEscrowState(String(item.escrowState))
+      ).length,
+    [projects, user?.uid]
+  );
+  const contractorOpenProjects = React.useMemo(
+    () => projects.filter((item) => String(item.escrowState) === 'OPEN_FOR_QUOTES').length,
+    [projects]
+  );
+  const showFirstUseGuidance =
+    role === 'customer' ? activeProjects.length === 0 : contractorAssignedProjects === 0;
   const escrowTotalCents = React.useMemo(
     () => activeProjects.reduce((sum, item) => sum + Number(item.heldAmountCents ?? item.selectedQuotePriceCents ?? 0), 0),
     [activeProjects]
@@ -118,6 +140,43 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         onFocus={() => navigateToTab('SearchTab')}
         onPressIn={() => navigateToTab('SearchTab')}
       />
+
+      <Card testID="home-role-summary-card" style={styles.summaryCard}>
+        <Text style={styles.summaryTitle}>
+          {role === 'contractor' ? t('home.contractorSummaryTitle') : t('home.customerSummaryTitle')}
+        </Text>
+        <Text style={styles.summaryBody}>
+          {role === 'contractor'
+            ? t('home.contractorSummaryBody', { open: contractorOpenProjects, assigned: contractorAssignedProjects })
+            : t('home.customerSummaryBody', { count: activeProjects.length })}
+        </Text>
+        <PrimaryButton
+          testID="home-role-summary-action"
+          label={role === 'contractor' ? t('home.contractorPrimaryCta') : t('home.customerPrimaryCta')}
+          variant="secondary"
+          onPress={() =>
+            role === 'contractor' ? navigateToTab('ProjectsTab') : navigation.navigate('CreateProject')
+          }
+        />
+      </Card>
+
+      {showFirstUseGuidance ? (
+        <Card testID="home-first-use-guidance-card" style={styles.guidanceCard}>
+          <Text style={styles.guidanceTitle}>
+            {role === 'contractor' ? t('home.contractorGuidanceTitle') : t('home.customerGuidanceTitle')}
+          </Text>
+          <Text style={styles.guidanceBody}>
+            {role === 'contractor' ? t('home.contractorGuidanceBody') : t('home.customerGuidanceBody')}
+          </Text>
+          <PrimaryButton
+            testID="home-first-use-guidance-action"
+            label={role === 'contractor' ? t('home.contractorGuidanceCta') : t('home.customerGuidanceCta')}
+            onPress={() =>
+              role === 'contractor' ? navigateToTab('ProjectsTab') : navigation.navigate('CreateProject')
+            }
+          />
+        </Card>
+      ) : null}
 
       <View>
         <SectionHeader title={t('home.financialOverview')} />
@@ -202,6 +261,29 @@ const styles = StyleSheet.create({
     color: colors.danger,
     fontSize: 12,
     fontWeight: '700',
+  },
+  summaryCard: {
+    gap: spacing.sm,
+  },
+  summaryTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  summaryBody: {
+    color: colors.textSecondary,
+  },
+  guidanceCard: {
+    gap: spacing.sm,
+    borderColor: colors.navyLight,
+  },
+  guidanceTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  guidanceBody: {
+    color: colors.textSecondary,
   },
   projectsSection: {
     gap: spacing.xs,

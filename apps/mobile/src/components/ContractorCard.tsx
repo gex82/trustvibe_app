@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Avatar } from './Avatar';
 import { Badge } from './Badge';
 import { Card } from './Card';
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function ContractorCard({ name, rating, municipality, avatarUri, onPress, testID }: Props): React.JSX.Element {
+  const { t } = useTranslation();
   const formattedRating = Number.isFinite(rating) ? rating.toFixed(1) : '0.0';
 
   return (
@@ -30,7 +32,7 @@ export function ContractorCard({ name, rating, municipality, avatarUri, onPress,
           <View style={styles.main}>
             <View style={styles.nameRow}>
               <Text style={styles.name}>{name}</Text>
-              <Badge label="Verified Pro" />
+              <Badge label={t('contractor.verifiedPro')} />
             </View>
             <View style={styles.metaRow}>
               <Ionicons name="star" size={15} color={colors.warning} />

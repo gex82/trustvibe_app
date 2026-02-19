@@ -456,9 +456,21 @@ export async function listMessagesHandler(req: CallableRequest<unknown>) {
 
   const limit = input.limit ?? 100;
   const snap = await MESSAGES.doc(project.id).collection('items').orderBy('createdAt', 'asc').limit(limit).get();
-  const messages = snap.docs.map((d) => d.data());
+  const messages = snap.docs.map((d) => d.data() as MessageItem);
+  const senderIds = Array.from(new Set(messages.map((message) => message.senderId).filter(Boolean)));
+  const senderDocs = await Promise.all(senderIds.map((senderId) => USERS.doc(senderId).get()));
+  const senderNameById = new Map(
+    senderDocs
+      .filter((docSnap) => docSnap.exists)
+      .map((docSnap) => [docSnap.id, String((docSnap.data() as Record<string, unknown>).name ?? '').trim()] as const)
+      .filter((entry) => Boolean(entry[1]))
+  );
+  const enrichedMessages = messages.map((message) => ({
+    ...message,
+    senderName: senderNameById.get(message.senderId),
+  }));
 
-  return { projectId: project.id, messages };
+  return { projectId: project.id, messages: enrichedMessages };
 }
 
 export async function sendMessageHandler(req: CallableRequest<unknown>) {

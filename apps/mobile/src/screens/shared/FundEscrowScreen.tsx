@@ -13,12 +13,17 @@ import { colors, spacing } from '../../theme/tokens';
 import type { HomeStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'FundEscrow'>;
+type BannerState = {
+  kind: 'success' | 'error';
+  message: string;
+} | null;
 
 export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const featureFlags = useAppStore((s) => s.featureFlags);
   const projectId = route.params.projectId;
   const [busy, setBusy] = React.useState(false);
+  const [statusBanner, setStatusBanner] = React.useState<BannerState>(null);
 
   const projectQuery = useQuery({
     queryKey: ['project', projectId, 'fund'],
@@ -53,6 +58,14 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
         <Text style={styles.meta}>{t('escrow.hold.policy')}</Text>
       </Card>
 
+      {statusBanner ? (
+        <View style={[styles.banner, statusBanner.kind === 'success' ? styles.bannerSuccess : styles.bannerError]}>
+          <Text style={[styles.bannerText, statusBanner.kind === 'success' ? styles.bannerTextSuccess : styles.bannerTextError]}>
+            {statusBanner.message}
+          </Text>
+        </View>
+      ) : null}
+
       <CTAButton
         label={t('escrow.fund')}
         disabled={busy}
@@ -83,9 +96,9 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
                   { title: t('fundEscrow.milestone2Title'), amountCents: Math.ceil(total * 0.5), acceptanceCriteria: t('fundEscrow.milestone2Criteria') },
                 ],
               });
-              Alert.alert(t('common.status'), t('phase2.milestonesCreated'));
+              setStatusBanner({ kind: 'success', message: t('phase2.milestonesCreated') });
             } catch (error) {
-              Alert.alert(t('common.error'), mapApiError(error));
+              setStatusBanner({ kind: 'error', message: mapApiError(error) });
             } finally {
               setBusy(false);
             }
@@ -118,6 +131,28 @@ const styles = StyleSheet.create({
   },
   meta: {
     color: colors.textSecondary,
+  },
+  banner: {
+    borderRadius: 10,
+    padding: spacing.sm,
+    borderWidth: 1,
+  },
+  bannerSuccess: {
+    borderColor: '#5AA86A',
+    backgroundColor: '#EEF9F1',
+  },
+  bannerError: {
+    borderColor: colors.danger,
+    backgroundColor: '#FDF0F0',
+  },
+  bannerText: {
+    fontWeight: '600',
+  },
+  bannerTextSuccess: {
+    color: '#1F6F35',
+  },
+  bannerTextError: {
+    color: colors.danger,
   },
   flagBox: {
     borderWidth: 1,

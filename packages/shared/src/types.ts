@@ -234,6 +234,7 @@ export interface MessageItem {
   id: string;
   projectId: string;
   senderId: string;
+  senderName?: string;
   body: string;
   bodyEn?: string;
   bodyEs?: string;

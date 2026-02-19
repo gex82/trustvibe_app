@@ -15,6 +15,27 @@ import { getLocalizedField, getLocalizedProjectTitle } from '../../utils/localiz
 const PROJECTS_LIMIT = 50;
 const MESSAGES_LIMIT = 100;
 
+function formatSenderFallback(senderId: string, t: (key: string, options?: Record<string, unknown>) => string): string {
+  const suffix = senderId.match(/(\d+)$/)?.[1];
+  if (senderId.startsWith('contractor-') || senderId.startsWith('cont_')) {
+    return t('messaging.senderFallbackContractor', { id: suffix ?? senderId });
+  }
+  if (senderId.startsWith('customer-') || senderId.startsWith('cust_')) {
+    return t('messaging.senderFallbackCustomer', { id: suffix ?? senderId });
+  }
+  return t('messaging.senderFallbackGeneric', { id: suffix ?? senderId });
+}
+
+function resolveSenderName(
+  message: { senderId: string; senderName?: string },
+  t: (key: string, options?: Record<string, unknown>) => string
+): string {
+  if (typeof message.senderName === 'string' && message.senderName.trim().length > 0) {
+    return message.senderName;
+  }
+  return formatSenderFallback(message.senderId, t);
+}
+
 export function MessagesScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const language = useAppStore((s) => s.language);
@@ -92,12 +113,12 @@ export function MessagesScreen(): React.JSX.Element {
     ({ item }: { item: (typeof messages)[number] }) => (
       <Card>
         <View style={styles.messageBubble}>
-          <Text style={styles.messageMeta}>{item.senderId}</Text>
+          <Text style={styles.messageMeta}>{resolveSenderName(item, t)}</Text>
           <Text style={styles.text}>{getLocalizedField(item, 'body', language)}</Text>
         </View>
       </Card>
     ),
-    [language]
+    [language, t]
   );
 
   return (

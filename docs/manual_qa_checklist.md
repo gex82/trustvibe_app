@@ -2,6 +2,12 @@
 
 Last updated: 2026-02-17
 
+Batch streams:
+- Batch 1: `docs/batch1_ux_fixes.md`
+- Batch 2: `docs/batch2_ux_fixes.md`
+- Batch 3: `docs/batch3_ux_fixes.md`
+- Batch 4: `docs/batch4_demo_gaps.md`
+
 ## Environment + Startup
 
 - [x] Run `npm run bootstrap:demo` successfully.
@@ -93,6 +99,18 @@ Last updated: 2026-02-17
 - [ ] Recommendation rows with no destination show disabled reason instead of silent no-op.
 - [x] Contractor Profile request-quote action opens Create Project without status popup.
 - [x] Contractor Profile shows explicit unavailable banner when selected contractor profile data is missing.
+
+## Batch 4 UX Demo Gaps (iPad / iPhone)
+
+- [ ] Contractor can open an `OPEN_FOR_QUOTES` project and submit a quote from mobile UI.
+- [ ] Contractor with an existing quote sees read-only submitted summary (no duplicate-submit confusion).
+- [ ] Messages display sender names (or friendly fallback labels) instead of raw UID-only values.
+- [ ] Customer `Review and Release` action routes to `ReviewSubmission` on success.
+- [ ] `ReviewSubmission` returns user to `ProjectDetail` after submit.
+- [ ] Home summary content differs by role (customer vs contractor).
+- [ ] First-use guidance card appears when user has no actionable project state.
+- [ ] FundEscrow milestone creation uses inline status feedback, not blocking success alert.
+- [ ] Contractor badge label is localized in EN/ES on search/recommendation cards.
 
 ## Laptop Browser Spot-Check (Chrome + Edge)
 

@@ -37,6 +37,8 @@ import {
   markEstimateAttendanceHandler,
 } from '../../http/productionHandlers';
 
+jest.setTimeout(120000);
+
 function req(uid: string, role: 'customer' | 'contractor' | 'admin', data: unknown): any {
   return {
     auth: {

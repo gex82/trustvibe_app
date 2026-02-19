@@ -1,6 +1,6 @@
 # Customer Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-17
+Last updated: 2026-02-19
 
 ## Preflight (before opening camera)
 
@@ -21,7 +21,7 @@ Last updated: 2026-02-17
 2. On login screen, tap email field and enter `maria.rodriguez@trustvibe.test`.
 3. Tap password field and enter `DemoCustomer!123`.
 4. Tap `Sign in`.
-5. On `Home`, point out greeting + financial card.
+5. On `Home`, point out greeting + role summary card + financial card.
 6. Tap language chip `ES` (top-right area on Home).
 7. Confirm labels change to Spanish.
 8. Tap language chip `EN` to continue in English.
@@ -41,16 +41,20 @@ Last updated: 2026-02-17
 22. Navigate back to project detail and open `Developer actions`.
 23. Tap `Create estimate deposit`, review amount/rationale dialog, then confirm.
 24. Show inline `Deposit Details` card and status update.
-25. Tap bottom tab `Profile`.
-26. Tap `History`.
-27. Tap `Recommendations`.
-28. Tap one recommendation row and confirm it opens a profile or project detail route.
-29. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
-30. Pick a demo file and confirm upload.
-31. Navigate back to `Home`.
-32. In the Home top row, tap the small `Log out` action (next to language switch).
-33. In confirmation alert, tap `Log out`.
-34. End recording on role-selection screen.
+25. If `Review and Release` is visible, tap it to execute release.
+26. Confirm app routes to `Submit review`.
+27. Select a rating, enter short feedback, and tap `Submit review`.
+28. Confirm return to `ProjectDetail`.
+29. Tap bottom tab `Profile`.
+30. Tap `History`.
+31. Tap `Recommendations`.
+32. Tap one recommendation row and confirm it opens a profile or project detail route.
+33. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
+34. Pick a demo file and confirm upload.
+35. Navigate back to `Home`.
+36. In the Home top row, tap the small `Log out` action (next to language switch).
+37. In confirmation alert, tap `Log out`.
+38. End recording on role-selection screen.
 
 ## Expected checkpoints
 
@@ -61,4 +65,5 @@ Last updated: 2026-02-17
 5. Contractor selection is deliberate (quote compare), not auto-selected.
 6. Agreement acceptance is transparent with visible policy and fee details.
 7. Deposit flow shows amount/rationale before create and details after create.
-8. Quick logout from Home returns to unauthenticated entry flow.
+8. Release action routes to review submission and returns to project detail after submit.
+9. Quick logout from Home returns to unauthenticated entry flow.

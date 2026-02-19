@@ -37,6 +37,7 @@ import { ReviewSubmissionScreen } from '../screens/shared/ReviewSubmissionScreen
 import { RecommendationsScreen } from '../screens/shared/RecommendationsScreen';
 import { AvailabilityScreen } from '../screens/contractor/AvailabilityScreen';
 import { EarningsScreen } from '../screens/contractor/EarningsScreen';
+import { SubmitQuoteScreen } from '../screens/contractor/SubmitQuoteScreen';
 import { TabBarIcon } from '../components/TabBarIcon';
 import { colors } from '../theme/tokens';
 
@@ -61,6 +62,7 @@ function FlowScreens(Stack: AppStack, t: Translate): React.JSX.Element {
     <>
       <Stack.Screen name="ProjectDetail" component={ProjectDetailScreen} options={{ title: t('project.detailTitle') }} />
       <Stack.Screen name="CreateProject" component={CreateProjectScreen} options={{ title: t('project.create.title') }} />
+      <Stack.Screen name="SubmitQuote" component={SubmitQuoteScreen} options={{ title: t('quote.submit') }} />
       <Stack.Screen name="QuotesCompare" component={QuotesCompareScreen} options={{ title: t('quote.compare') }} />
       <Stack.Screen name="AgreementReview" component={AgreementReviewScreen} options={{ title: t('agreement.title') }} />
       <Stack.Screen name="FundEscrow" component={FundEscrowScreen} options={{ title: t('escrow.fund') }} />
