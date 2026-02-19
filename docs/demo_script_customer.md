@@ -49,18 +49,19 @@ Last updated: 2026-02-19
 30. Show inline `Deposit Details` card and status update.
 31. If `Review and Release` is visible, tap it to execute release.
 32. Confirm app routes to `Submit review`.
-33. Select star rating, enter short feedback, and tap `Submit review`.
-34. Confirm inline success message then return to `ProjectDetail`.
-35. Tap bottom tab `Profile`.
-36. Tap `History`.
-37. Tap `Recommendations`.
-38. Tap one recommendation row and confirm it opens a profile or project detail route.
-39. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
-40. Pick a demo file and confirm upload.
-41. Navigate back to `Home`.
-42. In the Home top row, tap the small `Log out` action (next to language switch).
-43. In confirmation alert, tap `Log out`.
-44. End recording on role-selection screen.
+33. Select star rating, choose one or more review tags, enter short feedback, and tap `Submit review`.
+34. (Optional) Deselect all tags once to show validation, then reselect tags and submit.
+35. Confirm inline success message then return to `ProjectDetail`.
+36. Tap bottom tab `Profile`.
+37. Tap `History`.
+38. Tap `Recommendations`.
+39. Tap one recommendation row and confirm it opens a profile or project detail route.
+40. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
+41. Pick a demo file and confirm upload.
+42. Navigate back to `Home`.
+43. In the Home top row, tap the small `Log out` action (next to language switch).
+44. In confirmation alert, tap `Log out`.
+45. End recording on role-selection screen.
 
 ## Expected checkpoints
 
@@ -74,5 +75,6 @@ Last updated: 2026-02-19
 8. Fund escrow shows trust callout and trust-focused success copy.
 9. Search filters demonstrate category/rating filtering and clear action.
 10. Deposit flow shows amount/rationale before create and details after create.
-11. Release action routes to review submission and returns to project detail after submit.
-12. Quick logout from Home returns to unauthenticated entry flow.
+11. Review submission includes tag selection and validation.
+12. Release action routes to review submission and returns to project detail after submit.
+13. Quick logout from Home returns to unauthenticated entry flow.

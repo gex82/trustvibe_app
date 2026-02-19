@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -86,6 +86,7 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
         label={t('escrow.fund')}
         disabled={busy}
         onPress={async () => {
+          setStatusBanner(null);
           setBusy(true);
           try {
             await fundHold({ projectId });
@@ -94,7 +95,7 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
               navigation.replace('ProjectDetail', { projectId });
             }, 900);
           } catch (error) {
-            Alert.alert(t('common.error'), mapApiError(error));
+            setStatusBanner({ kind: 'error', message: mapApiError(error) });
           } finally {
             setBusy(false);
           }
@@ -106,6 +107,7 @@ export function FundEscrowScreen({ navigation, route }: Props): React.JSX.Elemen
           label={t('phase2.demoMilestones')}
           disabled={busy}
           onPress={async () => {
+            setStatusBanner(null);
             setBusy(true);
             try {
               await createMilestones({

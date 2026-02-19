@@ -125,6 +125,12 @@ Batch streams:
 - [ ] Search `Clear filters` resets chip state and restores list.
 - [ ] Batch 5 strings are fully localized in EN/ES.
 
+## Batch 5.1 UX Consistency (iPad / iPhone)
+
+- [ ] FundEscrow fund action errors render inline banner (no blocking alert modal).
+- [ ] Review submission shows selectable tags (quality/communication/timeliness).
+- [ ] Review submit blocks when zero tags are selected and shows inline error.
+
 ## Laptop Browser Spot-Check (Chrome + Edge)
 
 - [x] Chrome: customer login -> key navigation path -> home quick logout.
