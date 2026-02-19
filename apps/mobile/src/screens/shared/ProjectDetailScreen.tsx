@@ -269,14 +269,18 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
           <Text style={styles.meta}>{project.municipality}</Text>
         </Card>
 
-        <Card>
+        <Card testID="project-detail-workflow-card">
           <Text style={styles.sectionMeta}>{t('project.workflowStatusTitle')}</Text>
-          <Text style={styles.meta}>{t('project.workflowCurrentState', { status: getEscrowStateLabel(t, project.escrowState) })}</Text>
-          <Text style={styles.meta}>{t('project.workflowContractor', { contractor: contractorName })}</Text>
-          <Text style={styles.meta}>
+          <Text testID="project-detail-workflow-state" style={styles.meta}>
+            {t('project.workflowCurrentState', { status: getEscrowStateLabel(t, project.escrowState) })}
+          </Text>
+          <Text testID="project-detail-workflow-contractor" style={styles.meta}>
+            {t('project.workflowContractor', { contractor: contractorName })}
+          </Text>
+          <Text testID="project-detail-workflow-quote-amount" style={styles.meta}>
             {t('project.workflowQuoteAmount', { amount: formatUsd(Number(selectedQuote?.priceCents ?? quoteAmount)) })}
           </Text>
-          <Text style={styles.meta}>
+          <Text testID="project-detail-workflow-timeline" style={styles.meta}>
             {t('project.workflowTimeline', {
               timeline:
                 Number(selectedQuote?.timelineDays ?? agreement?.timelineDays ?? 0) > 0
@@ -286,11 +290,14 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                   : t('common.notAvailable'),
             })}
           </Text>
-          <Text style={styles.meta}>{t('project.workflowAgreement', { status: agreementStatusLabel(projectQuery.data, t) })}</Text>
+          <Text testID="project-detail-workflow-agreement" style={styles.meta}>
+            {t('project.workflowAgreement', { status: agreementStatusLabel(projectQuery.data, t) })}
+          </Text>
         </Card>
 
         {statusBanner ? (
           <View
+            testID="project-detail-status-banner"
             style={[
               styles.banner,
               statusBanner.kind === 'success'
@@ -301,6 +308,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
             ]}
           >
             <Text
+              testID="project-detail-status-banner-text"
               style={[
                 styles.bannerText,
                 statusBanner.kind === 'success'
@@ -390,15 +398,19 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
         </View>
 
         {estimateDeposit ? (
-          <Card>
+          <Card testID="project-detail-deposit-card">
             <Text style={styles.sectionMeta}>{t('project.depositDetailsTitle')}</Text>
-            <Text style={styles.meta}>{t('project.depositAmount', { amount: formatUsd(estimateDeposit.amountCents) })}</Text>
-            <Text style={styles.meta}>
+            <Text testID="project-detail-deposit-amount" style={styles.meta}>
+              {t('project.depositAmount', { amount: formatUsd(estimateDeposit.amountCents) })}
+            </Text>
+            <Text testID="project-detail-deposit-status" style={styles.meta}>
               {t('project.depositStatus', {
                 status: t(`project.depositStatusValue.${estimateDeposit.status}`),
               })}
             </Text>
-            <Text style={styles.meta}>{t('project.depositUpdatedAt', { timestamp: estimateDeposit.updatedAt })}</Text>
+            <Text testID="project-detail-deposit-updated-at" style={styles.meta}>
+              {t('project.depositUpdatedAt', { timestamp: estimateDeposit.updatedAt })}
+            </Text>
           </Card>
         ) : null}
 
@@ -430,6 +442,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                   <View style={styles.actionGroup}>
                     <Text style={styles.sectionMeta}>{t('project.estimateDepositFlow')}</Text>
                     <CTAButton
+                      testID="project-detail-create-estimate-deposit"
                       label={t('phase2.createEstimateDeposit')}
                       onPress={() => void previewAndConfirmEstimateDeposit()}
                       disabled={busy || !project.contractorId}
@@ -437,6 +450,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                     {!project.contractorId ? <Text style={styles.disabledReason}>{t('project.disabledNeedsContractor')}</Text> : null}
                     {estimateDeposit ? (
                       <CTAButton
+                        testID="project-detail-capture-estimate-deposit"
                         label={t('phase2.captureEstimateDeposit')}
                         onPress={() =>
                           void runAction(
@@ -453,6 +467,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                     ) : null}
                     {estimateDeposit ? (
                       <CTAButton
+                        testID="project-detail-apply-estimate-deposit"
                         label={t('phase2.applyDepositToJob')}
                         onPress={() =>
                           void runAction(
@@ -469,6 +484,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
                     ) : null}
                     {estimateDeposit ? (
                       <CTAButton
+                        testID="project-detail-refund-estimate-deposit"
                         label={t('phase2.refundEstimateDeposit')}
                         onPress={() =>
                           void runAction(

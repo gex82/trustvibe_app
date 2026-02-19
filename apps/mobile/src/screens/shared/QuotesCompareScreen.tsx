@@ -63,20 +63,20 @@ export function QuotesCompareScreen({ navigation, route }: Props): React.JSX.Ele
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.contractorName}>{item.contractorName ?? item.contractorId}</Text>
+          <View testID={`quote-card-${item.id}`} style={styles.card}>
+            <Text testID={`quote-contractor-${item.id}`} style={styles.contractorName}>{item.contractorName ?? item.contractorId}</Text>
             {typeof item.contractorRatingAvg === 'number' ? (
-              <Text style={styles.meta}>
+              <Text testID={`quote-rating-${item.id}`} style={styles.meta}>
                 {t('project.contractorRatingSummary', {
                   rating: item.contractorRatingAvg.toFixed(1),
                   reviews: item.contractorReviewCount ?? 0,
                 })}
               </Text>
             ) : null}
-            <Text style={styles.text}>{`${t('quote.price')}: ${formatUsd(Number(item.priceCents ?? 0))}`}</Text>
-            <Text style={styles.text}>{`${t('quote.timelineDays')}: ${item.timelineDays}`}</Text>
+            <Text testID={`quote-price-${item.id}`} style={styles.text}>{`${t('quote.price')}: ${formatUsd(Number(item.priceCents ?? 0))}`}</Text>
+            <Text testID={`quote-timeline-${item.id}`} style={styles.text}>{`${t('quote.timelineDays')}: ${item.timelineDays}`}</Text>
             <Text style={styles.scopeLabel}>{t('quote.scopeNotes')}</Text>
-            <Text style={styles.text}>{item.scopeNotes}</Text>
+            <Text testID={`quote-scope-${item.id}`} style={styles.text}>{item.scopeNotes}</Text>
             {role === 'customer' ? (
               <PrimaryButton
                 testID={`quote-select-${item.id}`}

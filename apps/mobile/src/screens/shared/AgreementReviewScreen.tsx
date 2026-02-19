@@ -84,7 +84,7 @@ export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.E
 
   return (
     <ScreenContainer style={styles.wrap}>
-      <Text style={styles.title}>{t('agreement.title')}</Text>
+      <Text testID="agreement-review-title" style={styles.title}>{t('agreement.title')}</Text>
       {demoAutoAdvanceEnabled && role === 'customer' ? (
         <View style={styles.infoBanner}>
           <Text style={styles.infoBannerText}>{t('agreement.demoAutoAdvanceNotice')}</Text>
@@ -100,20 +100,20 @@ export function AgreementReviewScreen({ navigation, route }: Props): React.JSX.E
           <Text style={styles.errorBannerText}>{inlineError}</Text>
         </View>
       ) : null}
-      <ScrollView style={styles.card} contentContainerStyle={styles.cardContent}>
-        <Text style={styles.rowLabel}>{t('project.contractorLabel', { contractor: contractorName })}</Text>
-        <Text style={styles.rowValue}>{`${t('agreement.price')}: ${formatUsd(priceCents)}`}</Text>
-        <Text style={styles.rowValue}>
+      <ScrollView testID="agreement-review-card" style={styles.card} contentContainerStyle={styles.cardContent}>
+        <Text testID="agreement-review-contractor" style={styles.rowLabel}>{t('project.contractorLabel', { contractor: contractorName })}</Text>
+        <Text testID="agreement-review-price" style={styles.rowValue}>{`${t('agreement.price')}: ${formatUsd(priceCents)}`}</Text>
+        <Text testID="agreement-review-timeline" style={styles.rowValue}>
           {`${t('agreement.timeline')}: ${
             timelineDays > 0 ? t('agreement.timelineDaysValue', { days: timelineDays }) : t('common.notAvailable')
           }`}
         </Text>
         <Text style={styles.sectionLabel}>{t('agreement.scopeSummary')}</Text>
-        <Text style={styles.text}>{scopeSummary}</Text>
+        <Text testID="agreement-review-scope" style={styles.text}>{scopeSummary}</Text>
         <Text style={styles.sectionLabel}>{t('agreement.policySummary')}</Text>
-        <Text style={styles.text}>{policySummary}</Text>
+        <Text testID="agreement-review-policy" style={styles.text}>{policySummary}</Text>
         <Text style={styles.sectionLabel}>{t('agreement.feeDisclosure')}</Text>
-        <Text style={styles.text}>{feeDisclosure}</Text>
+        <Text testID="agreement-review-fee" style={styles.text}>{feeDisclosure}</Text>
       </ScrollView>
       <PrimaryButton
         testID="agreement-review-accept"

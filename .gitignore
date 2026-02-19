@@ -17,10 +17,3 @@ playwright-report/
 expo*.log
 firebase-export-*
 logs/
-e2e/
-playwright.config.ts
-docs/*_report_*.md
-scripts/run_web_demo_pass.ps1
-scripts/generate_web_manual_pass_report.cjs
-scripts/smoke_admin_config.ps1
-scripts/check_demo_localization.ts
