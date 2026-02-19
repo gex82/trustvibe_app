@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -33,11 +33,13 @@ import { SectionHeader } from '../../components/SectionHeader';
 import { MilestoneRow } from '../../components/MilestoneRow';
 import { CTAButton } from '../../components/CTAButton';
 import { EmptyState } from '../../components/EmptyState';
+import { PhotoGallery } from '../../components/PhotoGallery';
 import { useAppStore } from '../../store/appStore';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
 import { getEscrowStateLabel } from '../../utils/escrowState';
 import { getLocalizedProjectDescription, getLocalizedProjectTitle } from '../../utils/localizedProject';
+import { demoProjectPhotosByCategory, resolveDemoProjectImageUri } from '../../assets/demoAssets';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ProjectDetail'>;
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -108,6 +110,45 @@ function getContractorDisplayName(project: ProjectRecord, selectedQuote: QuoteVi
     return `${t('project.selectedContractorFallback')} (${project.contractorId})`;
   }
   return t('project.pendingSelection');
+}
+
+function resolveProjectPhotoSource(value: string): ImageSourcePropType | string {
+  const resolved = resolveDemoProjectImageUri(value);
+  if (resolved) {
+    return resolved;
+  }
+  return value;
+}
+
+function fallbackGalleryByCategory(category: string): ImageSourcePropType[] {
+  switch (category) {
+    case 'plumbing':
+      return demoProjectPhotosByCategory.bathroom;
+    case 'electrical':
+    case 'painting':
+    case 'carpentry':
+      return demoProjectPhotosByCategory.kitchen;
+    case 'roofing':
+    case 'hvac':
+    case 'landscaping':
+      return demoProjectPhotosByCategory.concreteDriveway;
+    default:
+      return demoProjectPhotosByCategory.bathroom;
+  }
+}
+
+function resolveProjectGalleryPhotos(project: ProjectRecord): Array<ImageSourcePropType | string> {
+  const seeded = Array.isArray(project.photos)
+    ? project.photos
+        .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => resolveProjectPhotoSource(item))
+    : [];
+
+  if (seeded.length > 0) {
+    return seeded;
+  }
+
+  return fallbackGalleryByCategory(String(project.category));
 }
 
 function isDepositCaptured(deposit: EstimateDepositView | undefined): boolean {
@@ -202,6 +243,7 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
   const contractorOwnQuote = quotes.find((quote) => quote.contractorId === user?.uid);
   const contractorName = getContractorDisplayName(project, selectedQuote, t);
   const quoteAmount = Number(selectedQuote?.priceCents ?? project.selectedQuotePriceCents ?? project.heldAmountCents ?? 0);
+  const projectGalleryPhotos = resolveProjectGalleryPhotos(project);
   const nextMilestone = milestones.find((item) => item.status !== 'completed');
   const hasAnyAdvancedFlag =
     featureFlags.estimateDepositsEnabled ||
@@ -283,6 +325,13 @@ export function ProjectDetailScreen({ navigation, route }: Props): React.JSX.Ele
           <Text style={styles.meta}>{t('project.statusValue', { status: getEscrowStateLabel(t, project.escrowState) })}</Text>
           <Text style={styles.meta}>{project.municipality}</Text>
         </Card>
+
+        {projectGalleryPhotos.length > 0 ? (
+          <View style={styles.galleryWrap}>
+            <SectionHeader title={t('project.photos')} />
+            <PhotoGallery photos={projectGalleryPhotos} />
+          </View>
+        ) : null}
 
         <Card testID="project-detail-workflow-card">
           <Text style={styles.sectionMeta}>{t('project.workflowStatusTitle')}</Text>
@@ -712,6 +761,9 @@ const styles = StyleSheet.create({
   },
   meta: {
     color: colors.textSecondary,
+  },
+  galleryWrap: {
+    gap: spacing.xs,
   },
   ctaWrap: {
     gap: spacing.sm,

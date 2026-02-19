@@ -13,7 +13,12 @@ import { Card } from '../../components/Card';
 import { db } from '../../services/firebase';
 import type { HomeStackParamList } from '../../navigation/types';
 import { colors, spacing } from '../../theme/tokens';
-import { demoAvatars, demoProjectPhotos } from '../../assets/demoAssets';
+import {
+  demoAvatars,
+  demoContractorAvatarById,
+  demoProjectPhotos,
+  resolveDemoProjectImageUri,
+} from '../../assets/demoAssets';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'ContractorProfile'>;
 
@@ -29,12 +34,19 @@ type ContractorView = {
 };
 
 const demoPortfolioMap: Record<string, ImageSourcePropType> = {
-  'demo://projects/bathroom_remodel_01.png': demoProjectPhotos[0],
-  'demo://projects/bathroom_remodel_02.png': demoProjectPhotos[1],
-  'demo://projects/bathroom_remodel_03.png': demoProjectPhotos[2],
-  'demo://projects/kitchen_remodel_01.png': demoProjectPhotos[3],
-  'demo://projects/kitchen_remodel_02.png': demoProjectPhotos[4],
-  'demo://projects/concrete_driveway_01.png': demoProjectPhotos[5],
+  'demo://projects/bathroom_remodel_01.png': resolveDemoProjectImageUri('demo://projects/bathroom_remodel_01.png') as ImageSourcePropType,
+  'demo://projects/bathroom_remodel_02.png': resolveDemoProjectImageUri('demo://projects/bathroom_remodel_02.png') as ImageSourcePropType,
+  'demo://projects/bathroom_remodel_03.png': resolveDemoProjectImageUri('demo://projects/bathroom_remodel_03.png') as ImageSourcePropType,
+  'demo://projects/kitchen_remodel_01.png': resolveDemoProjectImageUri('demo://projects/kitchen_remodel_01.png') as ImageSourcePropType,
+  'demo://projects/kitchen_remodel_02.png': resolveDemoProjectImageUri('demo://projects/kitchen_remodel_02.png') as ImageSourcePropType,
+  'demo://projects/concrete_driveway_01.png': resolveDemoProjectImageUri('demo://projects/concrete_driveway_01.png') as ImageSourcePropType,
+  'demo://projects/job_mock_01_before.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_01_before.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_01_after.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_01_after.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_02_before.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_02_before.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_02_after.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_02_after.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_03_before.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_03_before.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_03_after.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_03_after.jpg') as ImageSourcePropType,
+  'demo://projects/job_mock_04_showcase.jpg': resolveDemoProjectImageUri('demo://projects/job_mock_04_showcase.jpg') as ImageSourcePropType,
 };
 
 function resolvePortfolioAsset(value: string): string | ImageSourcePropType | null {
@@ -53,7 +65,7 @@ const fallbackProfile: ContractorView = {
   rating: 4.9,
   projects: '50+',
   license: 'DACO #12345',
-  avatarSource: demoAvatars.juan,
+  avatarSource: demoContractorAvatarById['contractor-013'] ?? demoAvatars.juan,
   portfolio: demoProjectPhotos,
 };
 
@@ -62,10 +74,13 @@ function buildMissingProfile(contractorId: string): ContractorView {
     ...fallbackProfile,
     contractorId,
     name: contractorId,
+    avatarSource: demoContractorAvatarById[contractorId] ?? fallbackProfile.avatarSource,
   };
 }
 
 function buildHydratedProfile(contractorId: string, userData: Record<string, unknown>, contractorData: Record<string, unknown>): ContractorView {
+  const avatarUrl = typeof userData.avatarUrl === 'string' ? userData.avatarUrl : undefined;
+  const mappedAvatarSource = demoContractorAvatarById[contractorId];
   const portfolio = Array.isArray(contractorData.portfolio)
     ? contractorData.portfolio
         .map((item) => resolvePortfolioAsset(String((item as Record<string, unknown>).imageUrl ?? '')))
@@ -78,8 +93,8 @@ function buildHydratedProfile(contractorId: string, userData: Record<string, unk
     rating: Number(contractorData.ratingAvg ?? fallbackProfile.rating),
     projects: `${Number(contractorData.reviewCount ?? 50)}+`,
     license: 'DACO #12345',
-    avatarUrl: typeof userData.avatarUrl === 'string' ? userData.avatarUrl : undefined,
-    avatarSource: contractorId === 'contractor-001' ? demoAvatars.juan : undefined,
+    avatarUrl,
+    avatarSource: avatarUrl ? undefined : mappedAvatarSource,
     portfolio: portfolio.length ? portfolio : fallbackProfile.portfolio,
   };
 }

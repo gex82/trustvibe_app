@@ -26,26 +26,27 @@ Last updated: 2026-02-19
 7. Tap language chip `EN`.
 8. Tap bottom tab `Projects`.
 9. Open a project that is `Open for quotes` (for seeded demo data, use `Interior Painting Refresh` when visible).
-10. Tap `Submit quote`.
-11. Enter quote price, timeline days, and scope notes.
-12. Tap `Submit quote`.
-13. Confirm you return to project detail and can see submitted quote context.
-14. Open `Messages`.
-15. Enter short update text and send it.
-16. Confirm message sender labels are human names/friendly labels (not raw IDs).
-17. Tap bottom tab `Profile`.
-18. Tap `Edit Profile`.
-19. Upload avatar image and save.
-20. Go back and tap `Documents`.
-21. Tap `Upload Document`.
-22. Select a license/insurance mock document and confirm upload.
-23. Return to `Profile`.
-24. Tap `History`.
-25. Return and open `Earnings` (if present for this seeded state).
-26. Return to `Home`.
-27. In the Home top row, tap the small `Log out` action (next to language switch).
-28. In confirmation alert, tap `Log out`.
-29. End recording on role-selection screen.
+10. Confirm project detail now shows imported before/after gallery assets.
+11. Tap `Submit quote`.
+12. Enter quote price, timeline days, and scope notes.
+13. Tap `Submit quote`.
+14. Confirm you return to project detail and can see submitted quote context.
+15. Open `Messages`.
+16. Enter short update text and send it.
+17. Confirm message sender labels are human names/friendly labels (not raw IDs).
+18. Tap bottom tab `Profile`.
+19. Tap `Edit Profile`.
+20. Upload avatar image and save.
+21. Go back and tap `Documents`.
+22. Tap `Upload Document`.
+23. Select a license/insurance mock document and confirm upload.
+24. Return to `Profile`.
+25. Tap `History`.
+26. Return and open `Earnings` (if present for this seeded state).
+27. Return to `Home`.
+28. In the Home top row, tap the small `Log out` action (next to language switch).
+29. In confirmation alert, tap `Log out`.
+30. End recording on role-selection screen.
 
 ## Expected checkpoints
 

@@ -13,6 +13,7 @@ import { SectionHeader } from '../../components/SectionHeader';
 import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
 import { getFeaturedBusinessName, resolveContractorDisplayName } from '../../utils/contractorDisplay';
+import { demoContractorAvatarById } from '../../assets/demoAssets';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Search'>;
 
@@ -35,6 +36,10 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
   });
 
   const recommendationItems = recommendationsQuery.data?.recommendations ?? [];
+  const resolveAvatarSource = React.useCallback(
+    (contractorId: string | undefined) => (contractorId ? demoContractorAvatarById[contractorId] : undefined),
+    []
+  );
   const normalizedQuery = query.trim().toLowerCase();
   const filteredRecommendationItems = recommendationItems.filter((item) => {
     if (!normalizedQuery) {
@@ -72,6 +77,7 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
                 name={resolveContractorDisplayName(item.contractorName, item.contractorId ?? item.id, t)}
                 rating={item.contractorRatingAvg ?? 4.8}
                 municipality={item.reason}
+                avatarSource={resolveAvatarSource(item.contractorId ?? item.id)}
                 avatarUri={item.contractorAvatarUrl ?? null}
                 onPress={() => navigation.navigate('ContractorProfile', { contractorId: item.contractorId ?? item.id })}
               />
@@ -83,6 +89,7 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
                   name="Juan's Services"
                   rating={4.9}
                   municipality="San Juan"
+                  avatarSource={resolveAvatarSource('contractor-001')}
                   avatarUri={null}
                   onPress={() => navigation.navigate('ContractorProfile', { contractorId: 'contractor-001' })}
                 />
@@ -114,6 +121,7 @@ export function SearchScreen({ navigation }: Props): React.JSX.Element {
                 name={resolveContractorDisplayName(featuredProfileName, featuredContractorId, t)}
                 rating={4.9}
                 municipality={item.code}
+                avatarSource={resolveAvatarSource(featuredContractorId)}
                 onPress={featuredContractorId ? () => navigation.navigate('ContractorProfile', { contractorId: featuredContractorId }) : undefined}
               />
               );

@@ -29,32 +29,33 @@ Last updated: 2026-02-19
 10. Tap back to return to `Home`.
 11. Tap bottom tab `Search`.
 12. In contractor list, tap one recommended contractor card.
-13. On `Verified Portfolio`, confirm selected contractor context and scroll through credentials/projects.
+13. On `Verified Portfolio`, confirm selected contractor context and show the imported before/after job gallery set.
 14. Tap top-left back arrow.
 15. Tap bottom tab `Projects`.
 16. Tap `Bathroom Remodel`.
-17. Tap primary CTA `Select contractor` to open quote comparison.
-18. In `Compare quotes`, pick one quote card and tap `Select this contractor`.
-19. On `Agreement snapshot`, highlight contractor, price, scope, policy, and fee sections.
-20. Tap `Accept agreement`.
-21. Confirm the flow advances to escrow funding step.
-22. Navigate back to project detail and open `Developer actions`.
-23. Tap `Create estimate deposit`, review amount/rationale dialog, then confirm.
-24. Show inline `Deposit Details` card and status update.
-25. If `Review and Release` is visible, tap it to execute release.
-26. Confirm app routes to `Submit review`.
-27. Select a rating, enter short feedback, and tap `Submit review`.
-28. Confirm return to `ProjectDetail`.
-29. Tap bottom tab `Profile`.
-30. Tap `History`.
-31. Tap `Recommendations`.
-32. Tap one recommendation row and confirm it opens a profile or project detail route.
-33. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
-34. Pick a demo file and confirm upload.
-35. Navigate back to `Home`.
-36. In the Home top row, tap the small `Log out` action (next to language switch).
-37. In confirmation alert, tap `Log out`.
-38. End recording on role-selection screen.
+17. Show project photo gallery (before/after) on top of `ProjectDetail`.
+18. Tap primary CTA `Select contractor` to open quote comparison.
+19. In `Compare quotes`, pick one quote card and tap `Select this contractor`.
+20. On `Agreement snapshot`, highlight contractor, price, scope, policy, and fee sections.
+21. Tap `Accept agreement`.
+22. Confirm the flow advances to escrow funding step.
+23. Navigate back to project detail and open `Developer actions`.
+24. Tap `Create estimate deposit`, review amount/rationale dialog, then confirm.
+25. Show inline `Deposit Details` card and status update.
+26. If `Review and Release` is visible, tap it to execute release.
+27. Confirm app routes to `Submit review`.
+28. Select a rating, enter short feedback, and tap `Submit review`.
+29. Confirm return to `ProjectDetail`.
+30. Tap bottom tab `Profile`.
+31. Tap `History`.
+32. Tap `Recommendations`.
+33. Tap one recommendation row and confirm it opens a profile or project detail route.
+34. Return to `Profile`, tap `Documents`, then tap `Upload Document`.
+35. Pick a demo file and confirm upload.
+36. Navigate back to `Home`.
+37. In the Home top row, tap the small `Log out` action (next to language switch).
+38. In confirmation alert, tap `Log out`.
+39. End recording on role-selection screen.
 
 ## Expected checkpoints
 

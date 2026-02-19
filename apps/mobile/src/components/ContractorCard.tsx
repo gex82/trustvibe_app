@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import type { ImageSourcePropType } from 'react-native';
 import { Avatar } from './Avatar';
 import { Badge } from './Badge';
 import { Card } from './Card';
@@ -12,11 +13,20 @@ type Props = {
   rating: number;
   municipality?: string;
   avatarUri?: string | null;
+  avatarSource?: ImageSourcePropType;
   onPress?: () => void;
   testID?: string;
 };
 
-export function ContractorCard({ name, rating, municipality, avatarUri, onPress, testID }: Props): React.JSX.Element {
+export function ContractorCard({
+  name,
+  rating,
+  municipality,
+  avatarUri,
+  avatarSource,
+  onPress,
+  testID,
+}: Props): React.JSX.Element {
   const { t } = useTranslation();
   const formattedRating = Number.isFinite(rating) ? rating.toFixed(1) : '0.0';
 
@@ -28,7 +38,7 @@ export function ContractorCard({ name, rating, municipality, avatarUri, onPress,
     >
       <Card>
         <View style={styles.row}>
-          <Avatar name={name} uri={avatarUri} size={52} />
+          <Avatar name={name} source={avatarSource} uri={avatarUri} size={52} />
           <View style={styles.main}>
             <View style={styles.nameRow}>
               <Text style={styles.name}>{name}</Text>

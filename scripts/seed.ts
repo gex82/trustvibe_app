@@ -54,6 +54,34 @@ function asString(value: unknown, fallback = ''): string {
   return fallback;
 }
 
+function resolveSeededProjectPhotos(projectId: string, category: string): string[] {
+  const byProjectId: Record<string, string[]> = {
+    'project-001': [
+      'demo://projects/job_mock_01_before.jpg',
+      'demo://projects/job_mock_01_after.jpg',
+      'demo://projects/job_mock_04_showcase.jpg',
+    ],
+    'project-002': [
+      'demo://projects/job_mock_02_before.jpg',
+      'demo://projects/job_mock_02_after.jpg',
+    ],
+    'project-003': [
+      'demo://projects/job_mock_03_before.jpg',
+      'demo://projects/job_mock_03_after.jpg',
+    ],
+  };
+
+  if (byProjectId[projectId]) {
+    return byProjectId[projectId];
+  }
+
+  if (category === 'roofing' || category === 'landscaping') {
+    return ['demo://projects/job_mock_04_showcase.jpg'];
+  }
+
+  return [];
+}
+
 async function clearCollection(path: string): Promise<void> {
   const snap = await db.collection(path).get();
   const batch = db.batch();
@@ -275,12 +303,13 @@ async function run(): Promise<void> {
       // Keep seeded profile media deterministic for local demos.
       portfolio: isFeaturedDemoContractor
         ? [
-            { imageUrl: 'demo://projects/bathroom_remodel_01.png', caption: c.bioEn },
-            { imageUrl: 'demo://projects/bathroom_remodel_02.png', caption: c.bioEs },
-            { imageUrl: 'demo://projects/bathroom_remodel_03.png', caption: 'Milestone gallery asset' },
-            { imageUrl: 'demo://projects/kitchen_remodel_01.png', caption: 'Kitchen cabinet and backsplash upgrade' },
-            { imageUrl: 'demo://projects/kitchen_remodel_02.png', caption: 'Kitchen finishing and lighting' },
-            { imageUrl: 'demo://projects/concrete_driveway_01.png', caption: 'Concrete driveway resurfacing' },
+            { imageUrl: 'demo://projects/job_mock_01_before.jpg', caption: 'Bathroom refresh - before walk-through' },
+            { imageUrl: 'demo://projects/job_mock_01_after.jpg', caption: 'Bathroom refresh - after completion' },
+            { imageUrl: 'demo://projects/job_mock_02_before.jpg', caption: 'Electrical service - pre-work inspection' },
+            { imageUrl: 'demo://projects/job_mock_02_after.jpg', caption: 'Electrical service - completed upgrade' },
+            { imageUrl: 'demo://projects/job_mock_03_before.jpg', caption: 'Interior update - before execution' },
+            { imageUrl: 'demo://projects/job_mock_03_after.jpg', caption: 'Interior update - finished result' },
+            { imageUrl: 'demo://projects/job_mock_04_showcase.jpg', caption: 'Exterior showcase project highlight' },
           ]
         : [],
       credentials: [
@@ -377,7 +406,7 @@ async function run(): Promise<void> {
       description: descriptionEn,
       descriptionEn,
       descriptionEs,
-      photos: [],
+      photos: resolveSeededProjectPhotos(project.id, project.category),
       municipality: project.municipality,
       desiredTimeline: project.desiredTimeline,
       budgetMinCents: project.budgetMinCents,
