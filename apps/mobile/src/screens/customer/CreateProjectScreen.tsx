@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { Alert, Image, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -10,7 +10,9 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { FormInput } from '../../components/FormInput';
 import { PickerInput, type PickerOption } from '../../components/PickerInput';
+import { pickImage, uploadToStorage } from '../../services/upload';
 import type { HomeStackParamList } from '../../navigation/types';
+import { useAppStore } from '../../store/appStore';
 import { colors, spacing } from '../../theme/tokens';
 import municipalitiesData from '../../../../../data/demo/municipalities.json';
 
@@ -43,6 +45,9 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'CreateProject'>;
 
 export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const user = useAppStore((s) => s.user);
+  const [projectPhotos, setProjectPhotos] = React.useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = React.useState(false);
   const categoryOptions = React.useMemo<PickerOption[]>(
     () => [
       ...CATEGORY_OPTION_KEYS.map((key) => ({
@@ -78,6 +83,25 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
     resolver: zodResolver(schema),
     defaultValues: DEFAULT_FORM_VALUES,
   });
+
+  const handleUploadProjectPhoto = React.useCallback(async () => {
+    if (!user?.uid) {
+      return;
+    }
+    try {
+      setUploadingPhoto(true);
+      const localUri = await pickImage();
+      if (!localUri) {
+        return;
+      }
+      const uploadedUrl = await uploadToStorage(localUri, `projects/${user.uid}/photos/${Date.now()}.jpg`);
+      setProjectPhotos((current) => [...current, uploadedUrl]);
+    } catch (error) {
+      Alert.alert(t('common.error'), mapApiError(error));
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }, [t, user?.uid]);
 
   return (
     <ScreenContainer style={styles.wrap}>
@@ -161,16 +185,34 @@ export function CreateProjectScreen({ navigation }: Props): React.JSX.Element {
         )}
       />
 
+      <View style={styles.photoSection}>
+        <Text style={styles.photoLabel}>{t('project.photos')}</Text>
+        <PrimaryButton
+          testID="project-upload-photo"
+          label={uploadingPhoto ? t('common.loading') : t('profile.uploadPhoto')}
+          variant="secondary"
+          disabled={uploadingPhoto || !user?.uid}
+          onPress={() => void handleUploadProjectPhoto()}
+        />
+        {projectPhotos.length ? (
+          <View style={styles.photoList}>
+            {projectPhotos.map((photoUrl) => (
+              <Image key={photoUrl} source={{ uri: photoUrl }} style={styles.photoPreview} />
+            ))}
+          </View>
+        ) : null}
+      </View>
+
       <PrimaryButton
         label={formState.isSubmitting ? t('common.loading') : t('common.submit')}
-        disabled={formState.isSubmitting}
+        disabled={formState.isSubmitting || uploadingPhoto}
         onPress={handleSubmit(async (values) => {
           try {
             const result = await createProject({
               ...values,
               category: resolveSelectedLabel(values.category, categoryOptions),
               desiredTimeline: resolveSelectedLabel(values.desiredTimeline, timelineOptions),
-              photos: [],
+              photos: projectPhotos,
             });
             navigation.replace('ProjectDetail', { projectId: result.project.id });
           } catch (error) {
@@ -194,5 +236,25 @@ const styles = StyleSheet.create({
   textArea: {
     minHeight: 90,
     textAlignVertical: 'top',
+  },
+  photoSection: {
+    gap: spacing.xs,
+  },
+  photoLabel: {
+    color: colors.textPrimary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  photoList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  photoPreview: {
+    width: 72,
+    height: 72,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
   },
 });

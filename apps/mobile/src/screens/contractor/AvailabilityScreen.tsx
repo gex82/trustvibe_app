@@ -7,6 +7,8 @@ import { colors, spacing } from '../../theme/tokens';
 
 export function AvailabilityScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const [savedAt, setSavedAt] = React.useState<string | null>(null);
+
   return (
     <ScreenContainer style={styles.wrap}>
       <Text style={styles.title}>{t('availability.title')}</Text>
@@ -14,7 +16,8 @@ export function AvailabilityScreen(): React.JSX.Element {
         <Text style={styles.text}>{t('availability.hours')}</Text>
         <Text style={styles.text}>{t('availability.blackouts')}</Text>
       </View>
-      <PrimaryButton label={t('common.save')} onPress={() => undefined} />
+      {savedAt ? <Text style={styles.meta}>{savedAt}</Text> : null}
+      <PrimaryButton label={t('common.save')} onPress={() => setSavedAt(new Date().toLocaleString())} />
     </ScreenContainer>
   );
 }
@@ -35,4 +38,5 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   text: { color: colors.textPrimary },
+  meta: { color: colors.textSecondary, fontSize: 12 },
 });

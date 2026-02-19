@@ -9,7 +9,7 @@ Purpose: Map every feature from the original "LemonAid" request against the curr
 
 The original 2023 feature request described **10 features** across 21 pages. The core vision — **escrow-based contractor marketplace for Puerto Rico** — is fully aligned with what was built. There are **no fundamental contradictions** between the original request and the current app direction.
 
-However, there are **graduated gaps** — some features exist as full implementations, some as functional placeholders, and a few as empty shells. The biggest gap areas are: **push notifications**, **analytics/reporting**, **contractor availability calendar**, and **advanced search filters**.
+However, there are **graduated gaps** — some features exist as full implementations, some as functional placeholders, and a few are still MVP-depth only. The biggest remaining gap areas are: **push/email notification delivery**, **analytics depth (charts/export)**, **contractor availability management depth**, and **advanced search filters**.
 
 ---
 
@@ -19,7 +19,7 @@ However, there are **graduated gaps** — some features exist as full implementa
 
 | Requested | Built | Status |
 |-----------|-------|--------|
-| Switch language for everything within the app | i18next with shared EN/ES keys, language toggle in Settings | ✅ **Fully aligned** |
+| Switch language for everything within the app | i18next with shared EN/ES keys, language toggle visible on Home, Profile, and Settings | ✅ **Fully aligned** |
 | Covers toggles, FAQs, chats, etc. | All UI strings, all batch flows, error messages | ✅ **Fully aligned** |
 
 > **Verdict**: ✅ Complete. EN/ES bilingual coverage is one of the best-implemented features.
@@ -77,13 +77,13 @@ However, there are **graduated gaps** — some features exist as full implementa
 | Project listing cards | `ProjectsListScreen` with `ProjectCard` components showing title, status, municipality | ✅ |
 | Quote sort/filter | **Not implemented** — quotes displayed in a flat list with no sorting | 🟡 Nice-to-have |
 | Side-by-side comparison | Quotes shown as vertical list cards, not side-by-side split view | 🟡 Acceptable UX |
-| Image upload on project creation | **Not implemented** — project form has text fields only, no image picker | 🟡 Gap |
+| Image upload on project creation | Implemented in `CreateProjectScreen` via picker + storage upload (photo URLs sent in `createProject`) | ✅ |
 
-> **Verdict**: 🟡 Core flow complete. Missing project images on creation and quote sorting.
+> **Verdict**: 🟡 Core flow complete. Main enhancement remaining is quote sorting/filtering in compare view.
 >
-> **Demo impact**: Medium — a customer creation form without photo upload looks basic. Quote sorting is low-impact.
+> **Demo impact**: Low — image upload is now present for demo realism. Quote sorting remains low-impact.
 >
-> **MVP action**: Add image picker to `CreateProjectScreen` (the `pickImage` + `uploadToStorage` utilities already exist from avatar upload). Optionally add simple sort buttons (by price, by rating) to `QuotesCompareScreen`.
+> **MVP action**: Optionally add simple sort buttons (by price, by rating) to `QuotesCompareScreen`.
 
 ---
 
@@ -177,13 +177,13 @@ However, there are **graduated gaps** — some features exist as full implementa
 | Secure messaging per project | `MessagesScreen` with project selector cards, per-project message threads | ✅ |
 | Message input with text | Text input + send button with `KeyboardAvoidingView` (Batch 3) | ✅ |
 | File attachments | **Not implemented** — text-only messages, no attachment support | 🟡 Gap |
-| Push notifications for quotes, messages, updates | `NotificationsScreen` is an **empty placeholder** (33 lines, shows "No notifications") | 🔴 Placeholder |
+| Push notifications for quotes, messages, updates | `NotificationsScreen` now renders demo preview items; no real push delivery pipeline yet | 🟡 Partial |
 | Email alerts | **Not implemented** — no email notification system | 🔴 Not started |
-| Notification settings | **Not implemented** — no settings for notification preferences | 🔴 Not started |
+| Notification settings | Entry point exists in Settings, but no persisted per-event preference controls yet | 🟡 Partial |
 | End-to-end encryption | **Not implemented** — messages stored in plaintext in Firestore | 🟡 MVP work |
 | Voice notes / video calls | **Not implemented** — not realistic for MVP | ⚪ Deferred |
 
-> **Verdict**: 🟡 Messaging works but notifications are completely absent. This is the **largest gap** between the original request and the current build.
+> **Verdict**: 🟡 Messaging works and notification UI exists, but delivery and preference plumbing are still missing.
 >
 > **Contradiction**: None — the workplan explicitly lists "FCM/APNs + email template parity" as Iteration B work, confirming this was intentionally deferred.
 >
@@ -197,18 +197,18 @@ However, there are **graduated gaps** — some features exist as full implementa
 
 | Requested | Built | Status |
 |-----------|-------|--------|
-| Contractor analytics dashboard (KPIs, charts) | `EarningsScreen` exists (contractor-only) — specifics not verified but screen is registered | 🟡 Partial |
-| Customer project history + transaction details | `HistoryScreen` exists but uses **hardcoded sample events**, not real ledger data | 🔴 Placeholder |
+| Contractor analytics dashboard (KPIs, charts) | `EarningsScreen` reads completed-project payout totals from real project states | 🟡 Partial |
+| Customer project history + transaction details | `HistoryScreen` now reads ledger events from `ledgers/{projectId}/events` for user projects | 🟡 Partial |
 | Report generation (PDF/CSV export) | **Not implemented** — no export capability | 🔴 Not started |
 | Performance charts/graphs | **Not implemented** — no charting library integrated | 🔴 Not started |
 
-> **Verdict**: 🔴 This is the **most underdeveloped feature** relative to the original request. The original request envisioned a full analytics dashboard. What exists are placeholder screens.
+> **Verdict**: 🟡 Foundations are implemented (ledger-backed history + earnings totals), but charting/export/report depth from the original request remains MVP+ work.
 >
 > **Contradiction**: None — the workplan correctly deprioritized analytics behind core escrow/marketplace features.
 >
 > **Demo impact**: Low for initial demos (analytics is a retention feature, not an acquisition feature). High for investor/partner demos where you need to show business intelligence capability.
 >
-> **MVP action**: (1) Wire `HistoryScreen` to real ledger data from `ledgers/{projectId}/events`. (2) Wire `EarningsScreen` to real earnings data from completed projects. (3) Charts are post-MVP (use Victory Native or react-native-chart-kit when ready).
+> **MVP action**: (1) Add charted KPI views for contractors. (2) Add report generation/export (CSV/PDF). (3) Add richer customer interaction timelines beyond ledger-only events.
 
 ---
 
@@ -219,13 +219,13 @@ However, there are **graduated gaps** — some features exist as full implementa
 | 1 | Language EN/ES | ✅ Full | ✅ Yes | None | — |
 | 2 | Registration/Auth | ✅ Full | 🟡 Yes (no social) | None | Social login |
 | 3 | Contractor Profiles | ✅ Full | 🟡 Yes | None | Availability calendar is placeholder |
-| 4 | Project Listings/Quotes | ✅ Full | 🟡 Yes | None | No image upload on project creation |
+| 4 | Project Listings/Quotes | ✅ Full | ✅ Yes | None | Quote sorting/filter controls |
 | 5 | Escrow Payments | ✅ Full | ✅ Yes | None | Payment methods placeholder (by design) |
 | 6 | Dispute Resolution | ✅ Full | ✅ Yes | None (enhanced) | — |
 | 7 | Reviews/Ratings | 🟡 Partial | 🟡 Yes | None | Basic form, no review list on profile |
 | 8 | Search/Filtering | 🟡 Partial | 🟡 Yes | None | No filter UI at all |
-| 9 | Messaging/Notifications | 🟡 Partial | 🟡 Messaging only | None | Push/email notifications not started |
-| 10 | Analytics/Reporting | 🔴 Minimal | 🔴 No | None | Placeholder screens only |
+| 9 | Messaging/Notifications | 🟡 Partial | 🟡 Yes | None | Push/email delivery + persisted preferences not implemented |
+| 10 | Analytics/Reporting | 🟡 Partial | 🟡 Yes | None | No charts/exports yet |
 
 ---
 
@@ -240,23 +240,23 @@ The only directional shift is actually an improvement: the original request desc
 ## Prioritized Gap List (Demo → MVP → Post-MVP)
 
 ### Demo Gaps (fix before live demos)
-1. **Project image upload** — Add image picker to `CreateProjectScreen` (utilities exist)
-2. **Star rating UX** — Replace numbered buttons with star component in `ReviewSubmissionScreen`
-3. **History real data** — Wire `HistoryScreen` to actual ledger events instead of hardcoded samples
+1. **Star rating UX** — Replace numbered buttons with star component in `ReviewSubmissionScreen`
+2. **Quote comparison sorting** — Add sort/filter controls in `QuotesCompareScreen`
+3. **Notification experience clarity** — Add explicit per-event setting controls in Settings UI (even before live delivery)
 
 ### MVP Gaps (fix before first real users)
-4. **Push notifications** — FCM for key lifecycle events (already planned as Iteration B)
-5. **Search filters** — Category, municipality, rating filters on `SearchScreen`
-6. **Social login** — Google/Apple sign-in via Firebase Auth
-7. **Review depth** — Individual reviews list on contractor profile + selectable tags
-8. **Availability calendar** — Wire `AvailabilityScreen` to real scheduling data
-9. **Message attachments** — Image/document sharing in `MessagesScreen`
-10. **Payment methods** — Wire to Stripe Connect for real card/bank selection
+4. **Push notifications** — FCM/APNs for key lifecycle events (already planned as Iteration B)
+5. **Email notifications** — Fallback notification channel for critical events
+6. **Search filters** — Category, municipality, rating filters on `SearchScreen`
+7. **Social login** — Google/Apple sign-in via Firebase Auth
+8. **Review depth** — Individual reviews list on contractor profile + selectable tags
+9. **Availability calendar** — Wire `AvailabilityScreen` to real scheduling data
+10. **Message attachments** — Image/document sharing in `MessagesScreen`
+11. **Payment methods** — Wire to Stripe Connect for real card/bank selection
 
 ### Post-MVP Gaps (fix for scale)
-11. **Analytics dashboard** — Charts, KPIs, earnings trends for contractors
-12. **Report export** — PDF/CSV download capability
-13. **Email notifications** — Fallback notification channel
-14. **Notification preferences** — User-controlled notification settings
+12. **Analytics dashboard** — Charts, KPIs, earnings trends for contractors
+13. **Report export** — PDF/CSV download capability
+14. **Notification preferences** — Persisted user-controlled notification settings
 15. **End-to-end encryption** — Message security enhancement
 16. **Review moderation UI** — Customer-facing moderation transparency
