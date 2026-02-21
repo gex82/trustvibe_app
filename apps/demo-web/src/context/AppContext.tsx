@@ -448,6 +448,46 @@ const translations: Record<Lang, Record<string, string>> = {
     "detail.quoteAmount": "Quote amount:",
     "detail.timeline": "Timeline:",
     "detail.createEstimateDeposit": "Create estimate deposit",
+    "detail.depositConfirmTitle": "Create estimate deposit?",
+    "detail.depositConfirmAmountLabel": "Estimated deposit:",
+    "detail.depositConfirmCancel": "Cancel",
+    "detail.depositConfirmCreate": "Create deposit",
+    "detail.depositPreviewRationaleMock":
+      "Calculated from demo deposit policy for this project category.",
+    "detail.depositCardTitle": "Deposit Details",
+    "detail.depositAmountLabel": "Amount:",
+    "detail.depositStatusLabel": "Status:",
+    "detail.depositCreated": "Estimate deposit created.",
+    "detail.captureEstimateDeposit": "Capture estimate deposit",
+    "detail.depositCaptured": "Estimate deposit captured.",
+    "detail.createBookingRequest": "Create booking request",
+    "detail.bookingRequestNote":
+      "Demo booking request generated from project detail.",
+    "detail.bookingSuccess": "Booking request created successfully.",
+    "detail.bookingDisabledNeedsContractor":
+      "Select a contractor before creating a booking request.",
+    "detail.bookingDisabledNeedsDeposit":
+      "Create an estimate deposit before creating a booking request.",
+    "detail.bookingDisabledNeedsCapturedDeposit":
+      "Capture the estimate deposit before creating a booking request.",
+    "detail.errorDepositNeedsContractor":
+      "Select a contractor before creating an estimate deposit.",
+    "detail.errorBookingNeedsCapturedDeposit":
+      "Estimate deposit must be captured before booking.",
+    "detail.errorBookingNeedsContractor":
+      "Select a contractor before creating a booking request.",
+    "detail.workflowErrorGeneric":
+      "Unable to complete this action right now. Please try again.",
+    "detail.depositStatusCreated": "Created",
+    "detail.depositStatusCaptured": "Captured",
+    "detail.depositStatusContractorAttended": "Contractor attended",
+    "detail.depositStatusCustomerAttended": "Customer attended",
+    "detail.depositStatusContractorNoShow": "Contractor no-show",
+    "detail.depositStatusCustomerNoShow": "Customer no-show",
+    "detail.depositStatusRefunded": "Refunded",
+    "detail.depositStatusCredited": "Credited to job",
+    "detail.depositStatusClosed": "Closed",
+    "detail.depositStatusUnknown": "Unknown",
 
     // ── Release additions ───────────────────────────────────────────────────
     "release.contractorFallback": "the contractor",
@@ -1000,6 +1040,46 @@ const translations: Record<Lang, Record<string, string>> = {
     "detail.quoteAmount": "Monto de cotización:",
     "detail.timeline": "Plazo:",
     "detail.createEstimateDeposit": "Crear depósito de estimado",
+    "detail.depositConfirmTitle": "¿Crear depósito de estimado?",
+    "detail.depositConfirmAmountLabel": "Depósito estimado:",
+    "detail.depositConfirmCancel": "Cancelar",
+    "detail.depositConfirmCreate": "Crear depósito",
+    "detail.depositPreviewRationaleMock":
+      "Calculado con la política de depósitos demo para esta categoría.",
+    "detail.depositCardTitle": "Detalles del Depósito",
+    "detail.depositAmountLabel": "Monto:",
+    "detail.depositStatusLabel": "Estado:",
+    "detail.depositCreated": "Depósito de estimado creado.",
+    "detail.captureEstimateDeposit": "Capturar depósito de estimado",
+    "detail.depositCaptured": "Depósito de estimado capturado.",
+    "detail.createBookingRequest": "Crear solicitud de visita",
+    "detail.bookingRequestNote":
+      "Solicitud demo de visita creada desde detalle del proyecto.",
+    "detail.bookingSuccess": "Solicitud de visita creada con éxito.",
+    "detail.bookingDisabledNeedsContractor":
+      "Selecciona un contratista antes de crear una solicitud de visita.",
+    "detail.bookingDisabledNeedsDeposit":
+      "Crea un depósito de estimado antes de crear una solicitud de visita.",
+    "detail.bookingDisabledNeedsCapturedDeposit":
+      "Captura el depósito de estimado antes de crear una solicitud de visita.",
+    "detail.errorDepositNeedsContractor":
+      "Selecciona un contratista antes de crear un depósito de estimado.",
+    "detail.errorBookingNeedsCapturedDeposit":
+      "El depósito de estimado debe estar capturado antes de agendar.",
+    "detail.errorBookingNeedsContractor":
+      "Selecciona un contratista antes de crear una solicitud de visita.",
+    "detail.workflowErrorGeneric":
+      "No se pudo completar esta acción ahora mismo. Inténtalo de nuevo.",
+    "detail.depositStatusCreated": "Creado",
+    "detail.depositStatusCaptured": "Capturado",
+    "detail.depositStatusContractorAttended": "Contratista asistió",
+    "detail.depositStatusCustomerAttended": "Cliente asistió",
+    "detail.depositStatusContractorNoShow": "Contratista ausente",
+    "detail.depositStatusCustomerNoShow": "Cliente ausente",
+    "detail.depositStatusRefunded": "Reembolsado",
+    "detail.depositStatusCredited": "Acreditado al trabajo",
+    "detail.depositStatusClosed": "Cerrado",
+    "detail.depositStatusUnknown": "Desconocido",
 
     // ── Release additions ───────────────────────────────────────────────────
     "release.contractorFallback": "el contratista",

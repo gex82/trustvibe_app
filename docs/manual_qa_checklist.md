@@ -146,20 +146,22 @@ Batch streams:
 
 ## Demo-Web Lane (localhost:5174)
 
-- [ ] Demo-web launches at `http://localhost:5174/role`.
-- [ ] Image bundle exists under `apps/demo-web/public/images` (12 reference PNGs) and in-app image cards render with no broken placeholders.
-- [ ] Customer tabs are `Home`, `Search`, `Projects`, `Messages`; `Messages` opens `/messages`.
-- [ ] Customer profile remains reachable via Home avatar header tap and supports Documents flow.
-- [ ] Contractor tabs are `Home`, `Browse`, `Jobs`, `Earnings`, `Messages`; both `Earnings` and `Messages` open correctly.
-- [ ] Legacy `tab-profile` selector remains clickable for automation compatibility.
-- [ ] Admin path works: `/admin` dashboard -> users table -> cases card list (`cases-card-list` + `cases-table` alias) -> config save control.
-- [ ] Admin cases card can be expanded and one outcome action produces visible result banner.
-- [ ] Live/mock toggle works in floating dev switcher.
+- [x] Demo-web launches at `http://localhost:5174/role`.
+- [x] Image bundle exists under `apps/demo-web/public/images` (12 reference PNGs) and in-app image cards render with no broken placeholders.
+- [x] Customer tabs are `Home`, `Search`, `Projects`, `Messages`; `Messages` opens `/messages`.
+- [x] Customer profile remains reachable via Home avatar header tap and supports Documents flow.
+- [x] Contractor tabs are `Home`, `Browse`, `Jobs`, `Earnings`, `Messages`; both `Earnings` and `Messages` open correctly.
+- [x] Legacy `tab-profile` selector remains clickable for automation compatibility.
+- [x] Admin path works: `/admin` dashboard -> users table -> cases card list (`cases-card-list` + `cases-table` alias) -> config save control.
+- [x] Admin cases card can be expanded and one outcome action produces visible result banner.
+- [x] Live/mock toggle works in floating dev switcher (mock toggle path automated).
 - [ ] Demo data fallback mode remains usable when backend probe fails.
-- [ ] ES parity (customer): `/home -> /search -> /project/:id -> /messages -> /profile/documents` contains Spanish UI copy only (no blocked English tokens).
-- [ ] ES parity (contractor): `/home -> /earnings -> /messages -> /profile/edit -> /profile/documents` contains Spanish UI copy only.
-- [ ] ES parity (admin): `/admin -> /admin/users -> /admin/cases -> /admin/config` contains Spanish UI copy only.
-- [ ] `npm run check:demo-web:localization` passes locally before demo runs.
+- [x] ES parity (customer): `/home -> /search -> /project/:id -> /messages -> /profile/documents` contains Spanish UI copy only (no blocked English tokens).
+- [x] ES parity (contractor): `/home -> /earnings -> /messages -> /profile/edit -> /profile/documents` contains Spanish UI copy only.
+- [x] ES parity (admin): `/admin -> /admin/users -> /admin/cases -> /admin/config` contains Spanish UI copy only.
+- [x] Deposit confirm modal appears from project developer actions and creates inline deposit card (`project-detail-deposit-confirm-modal`, `project-detail-deposit-card`).
+- [x] Booking request action stays disabled until deposit is captured and shows inline reason, then succeeds with banner (`project-detail-booking-disabled-reason`, `project-detail-booking-success`).
+- [x] `npm run check:demo-web:localization` passes locally before demo runs.
 
 ## Automation Parity
 

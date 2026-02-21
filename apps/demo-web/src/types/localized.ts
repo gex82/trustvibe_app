@@ -1,4 +1,9 @@
-import type { EarningsRecord, ProjectStatus, QuoteStatus } from "./index";
+import type {
+  EarningsRecord,
+  EstimateDepositView,
+  ProjectStatus,
+  QuoteStatus,
+} from "./index";
 
 export interface LocalizedLineItemSource {
   label: string;
@@ -51,6 +56,7 @@ export interface LocalizedProjectSource {
   acceptedQuoteId?: string;
   escrowAmount?: number;
   trustvibeFee?: number;
+  estimateDeposit?: EstimateDepositView;
   completionPhotos?: string[];
   completionNote?: string;
   completionNoteEn?: string;

@@ -1,6 +1,6 @@
 # Contractor Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-19
+Last updated: 2026-02-21
 
 ## Preflight (before opening camera)
 
@@ -46,7 +46,7 @@ Last updated: 2026-02-19
 27. Select a license/insurance mock document and confirm upload.
 28. Return to `Profile`.
 29. Tap `History`.
-30. Return and open `Earnings` (if present for this seeded state).
+30. Return and open `Earnings`.
 31. Return to `Home`.
 32. In the Home top row, tap the small `Log out` action (next to language switch).
 33. In confirmation alert, tap `Log out`.
@@ -61,3 +61,21 @@ Last updated: 2026-02-19
 5. Message sender labels are readable (no raw UID-only labels in primary flow).
 6. Contractor profile/docs flow is functional and upload paths complete.
 7. Quick logout from Home returns to unauthenticated entry flow.
+
+---
+
+## Demo-Web Variant (`apps/demo-web`)
+
+Use this variant when presenting contractor flow in browser phone-mimic mode:
+
+1. Run `npm run bootstrap:demo`.
+2. Run `npm run dev:demo-web`.
+3. Open `http://localhost:5174/role`.
+4. Select `Continue as Contractor`.
+5. Login with `juan.services@trustvibe.test` / `DemoContractor!123`.
+6. Confirm bottom tabs are exactly: `Home`, `Explore`, `Projects`, `Earnings`, `Messages`.
+7. Open `Earnings` tab and verify `/earnings`.
+8. Open `Messages` tab and send one short message.
+9. Return to `Home`, tap avatar header area, then open `Edit Profile`.
+10. Return to profile menu, open `Documents`, and verify upload control.
+11. Return to `Home` and use quick logout.

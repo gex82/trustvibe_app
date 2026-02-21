@@ -34,7 +34,20 @@ Last updated: 2026-02-21
 
 - Demo-web relies on reference assets under `apps/demo-web/public/images`.
 - Required set: 4 contractor avatars + 8 job photos (12 PNG total).
-- Verify quickly with: `npm run test:e2e:demo-web -- assets-smoke.spec.ts`
+- Verify quickly with:
+  - `npx playwright test e2e/browser-demo-web/assets-smoke.spec.ts --config=playwright.demo-web.config.ts`
+
+## Deposit + Booking Smoke
+
+- Run focused flow:
+  - `npx playwright test e2e/browser-demo-web/deposit-booking-flow.spec.ts --config=playwright.demo-web.config.ts`
+- Expected selectors in that flow:
+  - `project-detail-deposit-confirm-modal`
+  - `project-detail-deposit-card`
+  - `project-detail-deposit-status`
+  - `project-detail-capture-estimate-deposit`
+  - `project-detail-booking-disabled-reason`
+  - `project-detail-booking-success`
 
 ## Environment Variables
 

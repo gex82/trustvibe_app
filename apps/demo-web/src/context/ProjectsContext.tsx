@@ -55,6 +55,7 @@ function cloneMockProjects(lang: "en" | "es"): Project[] {
     ...item,
     quotes: item.quotes.map((quote) => ({ ...quote, breakdown: [...quote.breakdown] })),
     photos: [...item.photos],
+    estimateDeposit: item.estimateDeposit ? { ...item.estimateDeposit } : undefined,
     completionPhotos: item.completionPhotos ? [...item.completionPhotos] : undefined,
   }));
 }

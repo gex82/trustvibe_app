@@ -3,13 +3,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, Clock, Shield, Star, MessageCircle } from "lucide-react";
 import { useProjects } from "../../context/ProjectsContext";
 import { useApp } from "../../context/AppContext";
+import { useRuntime } from "../../context/RuntimeContext";
 import { findUserById } from "../../data/users";
-import type { Contractor, Quote } from "../../types";
+import type { Contractor, EstimateDepositView, Quote } from "../../types";
 import TopBar from "../../components/layout/TopBar";
 import Badge from "../../components/ui/Badge";
 import ProgressStepper from "../../components/ui/ProgressStepper";
 import Avatar from "../../components/ui/Avatar";
 import { formatCurrency } from "../../utils/formatters";
+import {
+  captureEstimateDeposit as captureEstimateDepositApi,
+  createBookingRequest as createBookingRequestApi,
+  createEstimateDeposit as createEstimateDepositApi,
+  previewEstimateDeposit,
+} from "../../services/api";
+import {
+  buildBookingWindow,
+  getMockDepositAmountCents,
+  isDepositCaptured,
+  resolveBookingDisabledReasonKey,
+  resolveDepositStatusLabelKey,
+} from "../../utils/projectWorkflow";
 
 const CATEGORY_TRANSLATION_KEY_BY_VALUE: Record<string, string> = {
   bathroom: "category.bathroom",
@@ -24,12 +38,58 @@ const CATEGORY_TRANSLATION_KEY_BY_VALUE: Record<string, string> = {
   other: "category.other",
 };
 
+type WorkflowAction = "depositPreview" | "depositCreate" | "depositCapture" | "bookingCreate";
+
+type WorkflowBanner = {
+  kind: "success" | "error";
+  message: string;
+} | null;
+
+function resolveWorkflowError(
+  action: WorkflowAction,
+  error: unknown,
+  t: (key: string, fallback?: string) => string
+): string {
+  const raw = String((error as { message?: string })?.message ?? "");
+  if (
+    (action === "depositPreview" || action === "depositCreate") &&
+    raw.includes("Contractor must be selected for estimate deposit")
+  ) {
+    return t("detail.errorDepositNeedsContractor");
+  }
+  if (
+    action === "bookingCreate" &&
+    raw.includes("Estimate deposit must be captured before booking")
+  ) {
+    return t("detail.errorBookingNeedsCapturedDeposit");
+  }
+  if (
+    action === "bookingCreate" &&
+    raw.includes("Contractor must be selected before booking")
+  ) {
+    return t("detail.errorBookingNeedsContractor");
+  }
+  return t("detail.workflowErrorGeneric");
+}
+
 export default function ProjectDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getProject, acceptQuote } = useProjects();
+  const { getProject, acceptQuote, refresh } = useProjects();
+  const { dataMode } = useRuntime();
   const { t, lang, locale } = useApp();
   const [showDeveloperActions, setShowDeveloperActions] = useState(false);
+  const [pendingAction, setPendingAction] = useState<WorkflowAction | null>(null);
+  const [workflowBanner, setWorkflowBanner] = useState<WorkflowBanner>(null);
+  const [bookingSuccess, setBookingSuccess] = useState("");
+  const [showDepositConfirm, setShowDepositConfirm] = useState(false);
+  const [depositPreview, setDepositPreview] = useState<{
+    amountCents: number;
+    rationale: string;
+  } | null>(null);
+  const [mockEstimateDeposit, setMockEstimateDeposit] = useState<
+    EstimateDepositView | undefined
+  >(undefined);
 
   const project = getProject(id ?? "");
   if (!project) {
@@ -42,13 +102,175 @@ export default function ProjectDetailScreen() {
   }
 
   const acceptedQuote = project.quotes.find((q) => q.id === project.acceptedQuoteId);
+  const selectedContractorId = acceptedQuote?.contractorId ?? null;
   const contractor = acceptedQuote
     ? (findUserById(acceptedQuote.contractorId, lang) as Contractor | null)
     : null;
+  const estimateDeposit =
+    dataMode === "mock" ? mockEstimateDeposit ?? project.estimateDeposit : project.estimateDeposit;
+  const bookingDisabledReasonKey = resolveBookingDisabledReasonKey({
+    contractorId: selectedContractorId,
+    estimateDeposit,
+  });
+  const bookingDisabledReason = bookingDisabledReasonKey
+    ? t(bookingDisabledReasonKey)
+    : null;
+  const canCaptureEstimateDeposit = Boolean(
+    estimateDeposit && !isDepositCaptured(estimateDeposit)
+  );
 
   const handleAcceptQuote = (quoteId: string) => {
     void acceptQuote(project.id, quoteId);
     navigate(`/project/${project.id}/agreement`);
+  };
+
+  const handleOpenDepositConfirm = async () => {
+    if (pendingAction) {
+      return;
+    }
+
+    setPendingAction("depositPreview");
+    setWorkflowBanner(null);
+    setBookingSuccess("");
+
+    try {
+      if (dataMode === "live") {
+        const preview = await previewEstimateDeposit({ projectId: project.id });
+        setDepositPreview({
+          amountCents: preview.amountCents,
+          rationale: preview.rationale,
+        });
+      } else {
+        setDepositPreview({
+          amountCents: getMockDepositAmountCents(project.category),
+          rationale: t("detail.depositPreviewRationaleMock"),
+        });
+      }
+      setShowDepositConfirm(true);
+    } catch (error) {
+      setWorkflowBanner({
+        kind: "error",
+        message: resolveWorkflowError("depositPreview", error, t),
+      });
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const handleCreateEstimateDeposit = async () => {
+    if (!depositPreview || pendingAction) {
+      return;
+    }
+
+    setPendingAction("depositCreate");
+    setWorkflowBanner(null);
+    setBookingSuccess("");
+
+    try {
+      if (dataMode === "live") {
+        await createEstimateDepositApi({ projectId: project.id });
+        await refresh();
+      } else {
+        const now = new Date().toISOString();
+        setMockEstimateDeposit({
+          id: `dep-mock-${project.id}`,
+          projectId: project.id,
+          customerId: project.customerId,
+          contractorId: selectedContractorId ?? "unknown-contractor",
+          amountCents: depositPreview.amountCents,
+          status: "CREATED",
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+
+      setShowDepositConfirm(false);
+      setDepositPreview(null);
+      setWorkflowBanner({
+        kind: "success",
+        message: `${t("detail.depositCreated")} ${formatCurrency(
+          depositPreview.amountCents / 100,
+          locale
+        )}`,
+      });
+    } catch (error) {
+      setWorkflowBanner({
+        kind: "error",
+        message: resolveWorkflowError("depositCreate", error, t),
+      });
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const handleCaptureEstimateDeposit = async () => {
+    if (!estimateDeposit || pendingAction) {
+      return;
+    }
+
+    setPendingAction("depositCapture");
+    setWorkflowBanner(null);
+    setBookingSuccess("");
+
+    try {
+      if (dataMode === "live") {
+        await captureEstimateDepositApi({ depositId: estimateDeposit.id });
+        await refresh();
+      } else {
+        setMockEstimateDeposit((current) =>
+          current
+            ? {
+                ...current,
+                status: "CAPTURED",
+                updatedAt: new Date().toISOString(),
+              }
+            : current
+        );
+      }
+      setWorkflowBanner({
+        kind: "success",
+        message: t("detail.depositCaptured"),
+      });
+    } catch (error) {
+      setWorkflowBanner({
+        kind: "error",
+        message: resolveWorkflowError("depositCapture", error, t),
+      });
+    } finally {
+      setPendingAction(null);
+    }
+  };
+
+  const handleCreateBookingRequest = async () => {
+    if (pendingAction || bookingDisabledReasonKey || !estimateDeposit) {
+      return;
+    }
+
+    setPendingAction("bookingCreate");
+    setWorkflowBanner(null);
+    setBookingSuccess("");
+
+    try {
+      const bookingWindow = buildBookingWindow();
+      if (dataMode === "live") {
+        await createBookingRequestApi({
+          projectId: project.id,
+          estimateDepositId: estimateDeposit.id,
+          startAt: bookingWindow.startAt,
+          endAt: bookingWindow.endAt,
+          note: t("detail.bookingRequestNote"),
+        });
+      }
+
+      setBookingSuccess(t("detail.bookingSuccess"));
+    } catch (error) {
+      setWorkflowBanner({
+        kind: "error",
+        message: resolveWorkflowError("bookingCreate", error, t),
+      });
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   const categoryKey = CATEGORY_TRANSLATION_KEY_BY_VALUE[project.category.toLowerCase()];
@@ -287,17 +509,133 @@ export default function ProjectDetailScreen() {
                 <p data-testid="project-detail-workflow-timeline" className="text-[12px] text-gray-600">
                   {t("detail.timeline")} {acceptedQuote?.timeline ?? project.timeline}
                 </p>
+                {workflowBanner ? (
+                  <div
+                    className={`rounded-xl px-3 py-2 text-[12px] ${
+                      workflowBanner.kind === "error"
+                        ? "bg-red-50 border border-red-200 text-red-700"
+                        : "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                    }`}
+                  >
+                    {workflowBanner.message}
+                  </div>
+                ) : null}
+                {bookingSuccess ? (
+                  <div
+                    data-testid="project-detail-booking-success"
+                    className="rounded-xl px-3 py-2 text-[12px] bg-emerald-50 border border-emerald-200 text-emerald-700"
+                  >
+                    {bookingSuccess}
+                  </div>
+                ) : null}
+
+                {estimateDeposit ? (
+                  <div
+                    data-testid="project-detail-deposit-card"
+                    className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3"
+                  >
+                    <p className="text-[11px] font-semibold text-gray-600">
+                      {t("detail.depositCardTitle")}
+                    </p>
+                    <p className="text-[12px] text-gray-700 mt-1">
+                      {t("detail.depositAmountLabel")}{" "}
+                      <span className="font-semibold">
+                        {formatCurrency(estimateDeposit.amountCents / 100, locale)}
+                      </span>
+                    </p>
+                    <p
+                      data-testid="project-detail-deposit-status"
+                      className="text-[12px] text-gray-600 mt-1"
+                    >
+                      {t("detail.depositStatusLabel")}{" "}
+                      <span className="font-semibold">
+                        {t(resolveDepositStatusLabelKey(estimateDeposit.status))}
+                      </span>
+                    </p>
+                  </div>
+                ) : null}
+
                 <button
                   data-testid="project-detail-create-estimate-deposit"
-                  className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit"
+                  className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit disabled:opacity-60"
+                  onClick={() => void handleOpenDepositConfirm()}
+                  disabled={Boolean(pendingAction)}
                 >
                   {t("detail.createEstimateDeposit")}
                 </button>
+                {estimateDeposit ? (
+                  <button
+                    data-testid="project-detail-capture-estimate-deposit"
+                    className="bg-white border border-teal-300 text-teal-700 rounded-xl px-3 py-2 text-[12px] font-semibold w-fit disabled:opacity-60"
+                    onClick={() => void handleCaptureEstimateDeposit()}
+                    disabled={Boolean(pendingAction) || !canCaptureEstimateDeposit}
+                  >
+                    {t("detail.captureEstimateDeposit")}
+                  </button>
+                ) : null}
+                <button
+                  data-testid="project-detail-create-booking-request"
+                  className="bg-indigo-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit disabled:opacity-60"
+                  onClick={() => void handleCreateBookingRequest()}
+                  disabled={Boolean(pendingAction) || Boolean(bookingDisabledReasonKey)}
+                >
+                  {t("detail.createBookingRequest")}
+                </button>
+                {bookingDisabledReason ? (
+                  <p
+                    data-testid="project-detail-booking-disabled-reason"
+                    className="text-[11px] text-amber-700"
+                  >
+                    {bookingDisabledReason}
+                  </p>
+                ) : null}
               </div>
             ) : null}
           </div>
         </div>
       </div>
+
+      {showDepositConfirm && depositPreview ? (
+        <div
+          data-testid="project-detail-deposit-confirm-modal"
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px] px-4 flex items-center justify-center"
+        >
+          <div className="w-full max-w-sm bg-white rounded-2xl p-4 shadow-xl">
+            <p className="text-[15px] font-bold text-gray-900">
+              {t("detail.depositConfirmTitle")}
+            </p>
+            <p className="text-[13px] text-gray-600 mt-2">
+              {t("detail.depositConfirmAmountLabel")}{" "}
+              <span className="font-bold text-gray-900">
+                {formatCurrency(depositPreview.amountCents / 100, locale)}
+              </span>
+            </p>
+            <p className="text-[12px] text-gray-500 mt-2">
+              {depositPreview.rationale}
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                data-testid="project-detail-deposit-confirm-cancel"
+                className="rounded-xl border border-gray-200 text-gray-700 text-[12px] font-semibold py-2.5"
+                onClick={() => {
+                  setShowDepositConfirm(false);
+                  setDepositPreview(null);
+                }}
+              >
+                {t("detail.depositConfirmCancel")}
+              </button>
+              <button
+                data-testid="project-detail-deposit-confirm-create"
+                className="rounded-xl bg-teal-600 text-white text-[12px] font-semibold py-2.5 disabled:opacity-60"
+                onClick={() => void handleCreateEstimateDeposit()}
+                disabled={pendingAction === "depositCreate"}
+              >
+                {t("detail.depositConfirmCreate")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

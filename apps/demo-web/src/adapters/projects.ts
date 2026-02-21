@@ -4,7 +4,13 @@ import type {
   ProjectRecord,
   ProjectQuoteRecord,
 } from "@trustvibe/shared";
-import type { DemoProject, DemoQuote, LineItem, ProjectStatus } from "../types";
+import type {
+  DemoProject,
+  DemoQuote,
+  EstimateDepositView,
+  LineItem,
+  ProjectStatus,
+} from "../types";
 import { getLocalizedField, type DemoLang } from "../utils/localization";
 
 function toProjectStatus(escrowState: EscrowState | string): ProjectStatus {
@@ -113,5 +119,25 @@ export function mapProjectDetailResponse(
   response: CallableResponse<"getProject">,
   lang: DemoLang = "en"
 ): DemoProject {
-  return mapProjectRecordToDemoProject(response.project, response.quotes, lang);
+  const mapped = mapProjectRecordToDemoProject(response.project, response.quotes, lang);
+  const estimateDeposit = response.estimateDeposit;
+  if (!estimateDeposit) {
+    return mapped;
+  }
+
+  const depositView: EstimateDepositView = {
+    id: estimateDeposit.id,
+    projectId: estimateDeposit.projectId,
+    customerId: estimateDeposit.customerId,
+    contractorId: estimateDeposit.contractorId,
+    amountCents: estimateDeposit.amountCents,
+    status: estimateDeposit.status,
+    createdAt: estimateDeposit.createdAt,
+    updatedAt: estimateDeposit.updatedAt,
+  };
+
+  return {
+    ...mapped,
+    estimateDeposit: depositView,
+  };
 }

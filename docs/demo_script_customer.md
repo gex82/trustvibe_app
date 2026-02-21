@@ -94,8 +94,12 @@ Use this variant when presenting in a browser with phone-mimic framing:
 7. On Home, confirm hero/project images render and visible copy is Spanish-only.
 8. Open Search, verify `Filtros`/`Limpiar filtros`, then open one contractor profile.
 9. Open Projects, then open one project and show photos + workflow card in Spanish copy.
-10. Tap bottom `Mensajes` tab and confirm `/messages` composer is visible.
-11. Return to Home and tap avatar header area to open Profile.
-12. Open `Documents` and confirm upload control renders with Spanish labels.
-13. Return Home and use quick logout.
-14. Optional hard gate: run `npm run check:demo-web:localization` before recording handoff.
+10. Open `Developer actions`, tap `Crear depósito de estimado`, confirm the modal, and show the new inline `Detalles del Depósito` card.
+11. Show booking action disabled with inline reason until deposit is captured.
+12. Tap `Capturar depósito de estimado`, then show booking action enabled.
+13. Tap `Crear solicitud de visita` and confirm success banner appears.
+14. Tap bottom `Mensajes` tab and confirm `/messages` composer is visible.
+15. Return to Home and tap avatar header area to open Profile.
+16. Open `Documents` and confirm upload control renders with Spanish labels.
+17. Return Home and use quick logout.
+18. Optional hard gate: run `npm run check:demo-web:localization` before recording handoff.

@@ -1,3 +1,5 @@
+import type { EstimateDeposit } from "@trustvibe/shared";
+
 export type UserRole = "customer" | "contractor" | "admin";
 
 export type ProjectStatus =
@@ -74,9 +76,22 @@ export interface Project {
   acceptedQuoteId?: string;
   escrowAmount?: number;
   trustvibeFee?: number;
+  estimateDeposit?: EstimateDepositView;
   completionPhotos?: string[];
   completionNote?: string;
 }
+
+export type EstimateDepositView = Pick<
+  EstimateDeposit,
+  | "id"
+  | "projectId"
+  | "customerId"
+  | "contractorId"
+  | "amountCents"
+  | "status"
+  | "createdAt"
+  | "updatedAt"
+>;
 
 export interface Message {
   id: string;

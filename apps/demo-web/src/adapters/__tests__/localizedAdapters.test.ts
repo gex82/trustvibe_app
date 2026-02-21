@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapProjectRecordToDemoProject } from "../projects";
+import { mapProjectDetailResponse, mapProjectRecordToDemoProject } from "../projects";
 import { mapMessagesToThread } from "../messages";
 import { mapLocalizedReviewToReview } from "../reviews";
 
@@ -91,5 +91,44 @@ describe("localized adapter mappings", () => {
 
     expect(review.text).toBe("Excelente trabajo");
     expect(review.tags).toEqual(["A Tiempo"]);
+  });
+
+  it("maps estimate deposit from getProject detail response", () => {
+    const mapped = mapProjectDetailResponse(
+      {
+        project: {
+          id: "proj-1",
+          customerId: "customer-1",
+          title: "Base title",
+          description: "Base description",
+          category: "bathroom",
+          municipality: "San Juan, PR",
+          desiredTimeline: "3 weeks",
+          escrowState: "OPEN_FOR_QUOTES",
+          createdAt: "2026-02-01",
+          photos: [],
+        },
+        quotes: [],
+        estimateDeposit: {
+          id: "dep-1",
+          projectId: "proj-1",
+          customerId: "customer-1",
+          contractorId: "contractor-1",
+          category: "general",
+          amountCents: 3900,
+          currency: "USD",
+          status: "CREATED",
+          createdAt: "2026-02-01T10:00:00.000Z",
+          updatedAt: "2026-02-01T10:00:00.000Z",
+          schemaVersion: 1,
+          updatedBy: "tester",
+        },
+      } as any,
+      "en"
+    );
+
+    expect(mapped.estimateDeposit?.id).toBe("dep-1");
+    expect(mapped.estimateDeposit?.amountCents).toBe(3900);
+    expect(mapped.estimateDeposit?.status).toBe("CREATED");
   });
 });

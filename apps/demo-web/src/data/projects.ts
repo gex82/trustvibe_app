@@ -411,6 +411,9 @@ function mapProject(source: LocalizedProjectSource, lang: DemoLang): Project {
           source.completionNote
         )
       : undefined,
+    estimateDeposit: source.estimateDeposit
+      ? { ...source.estimateDeposit }
+      : undefined,
     quotes: source.quotes.map((quote) => mapQuote(quote, lang)),
   };
 }
