@@ -9,9 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @trustvibe/shared && npm run build -w @trustvibe/functions && npm run build -w @trustvibe/mobile && npm run build -w @trustvibe/admin",
+    "build": "npm run build -w @trustvibe/shared && npm run build -w @trustvibe/functions && npm run build -w @trustvibe/mobile && npm run build -w @trustvibe/admin && npm run build -w @trustvibe/demo-web",
     "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck -w @trustvibe/shared && npm run typecheck -w @trustvibe/functions && npm run typecheck -w @trustvibe/mobile && npm run typecheck -w @trustvibe/admin",
+    "typecheck": "npm run typecheck -w @trustvibe/shared && npm run typecheck -w @trustvibe/functions && npm run typecheck -w @trustvibe/mobile && npm run typecheck -w @trustvibe/admin && npm run typecheck -w @trustvibe/demo-web",
     "deps:check": "npm outdated --workspaces || echo Dependencies out of date",
     "test": "jest",
     "test:unit": "jest packages/shared/src/__tests__ --runInBand",
@@ -29,7 +29,13 @@
     "bootstrap:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_demo.ps1",
     "check:demo:localization": "npm exec -w @trustvibe/functions ts-node ../scripts/check_demo_localization.ts",
     "test:e2e:web": "playwright test --config=playwright.config.ts",
-    "pass:web:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run_web_demo_pass.ps1"
+    "test:e2e:demo-web": "playwright test --config=playwright.demo-web.config.ts",
+    "test:unit:demo-web": "npm run test -w @trustvibe/demo-web",
+    "dev:demo-web": "npm run dev -w @trustvibe/demo-web",
+    "build:demo-web": "npm run build -w @trustvibe/demo-web",
+    "typecheck:demo-web": "npm run typecheck -w @trustvibe/demo-web",
+    "pass:web:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run_web_demo_pass.ps1",
+    "pass:demo-web": "powershell -ExecutionPolicy Bypass -File .\\scripts\\run_demo_web_pass.ps1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

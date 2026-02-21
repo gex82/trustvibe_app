@@ -1,0 +1,48 @@
+import type { Review } from "../types";
+
+export const REVIEWS: Review[] = [
+  {
+    id: "rev-1",
+    projectId: "proj-sample-1",
+    fromUserId: "user-cust-1",
+    toUserId: "user-juan",
+    rating: 5,
+    tags: ["On Time", "Clean Work", "Communicative", "Fair Price"],
+    text: "Juan did an outstanding job on our master bathroom. He was punctual every single day, kept the area spotless, and communicated every step of the process. The tile work is flawless. Highly recommend!",
+    createdAt: "2025-12-15",
+    fromName: "Sofia L.",
+  },
+  {
+    id: "rev-2",
+    projectId: "proj-sample-2",
+    fromUserId: "user-cust-2",
+    toUserId: "user-juan",
+    rating: 5,
+    tags: ["Professional", "Quality Work", "On Time", "Would Hire Again"],
+    text: "Fixed a major plumbing leak quickly and affordably. Juan explained exactly what was wrong and what he was doing to fix it. Zero surprises, zero mess. Will absolutely hire again.",
+    createdAt: "2025-11-20",
+    fromName: "Roberto M.",
+  },
+  {
+    id: "rev-3",
+    projectId: "proj-sample-3",
+    fromUserId: "user-cust-3",
+    toUserId: "user-juan",
+    rating: 4,
+    tags: ["Quality Work", "Fair Price", "Communicative"],
+    text: "Good work overall. Took one extra day due to a supplier delay on the shower fixtures, but Juan communicated promptly about it. Final result looks excellent — very happy with the tile.",
+    createdAt: "2025-10-08",
+    fromName: "Carmen V.",
+  },
+  {
+    id: "rev-4",
+    projectId: "proj-sample-4",
+    fromUserId: "user-cust-4",
+    toUserId: "user-juan",
+    rating: 5,
+    tags: ["On Time", "Clean Work", "Professional"],
+    text: "Hired Juan for a full guest bathroom remodel. Everything from demo to final caulk was done perfectly. He even noticed a small pipe issue behind the wall and fixed it proactively. A true professional.",
+    createdAt: "2025-09-01",
+    fromName: "Andres P.",
+  },
+];

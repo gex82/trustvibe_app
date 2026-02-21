@@ -6,6 +6,7 @@ Bilingual (EN/ES) iOS-first marketplace for Puerto Rico with escrow-style hold f
 
 - `apps/mobile`: Expo React Native app (iOS-first)
 - `apps/admin`: Next.js admin console
+- `apps/demo-web`: Vite phone-mimic web demo (customer/contractor + `/admin`)
 - `functions`: Firebase Cloud Functions
 - `packages/shared`: shared types/schemas/i18n/constants
 - `scripts`: seeding and flow scenario scripts
@@ -19,6 +20,7 @@ Bilingual (EN/ES) iOS-first marketplace for Puerto Rico with escrow-style hold f
 4. Start mobile app: `npm run dev -w @trustvibe/mobile`.
 5. Open Expo QR on physical iPhone.
 6. Start admin app: `npm run dev -w @trustvibe/admin`.
+7. Start demo-web app: `npm run dev:demo-web`.
 
 ## Status
 

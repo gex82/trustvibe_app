@@ -1,6 +1,6 @@
 # Customer Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 
 ## Preflight (before opening camera)
 
@@ -78,3 +78,22 @@ Last updated: 2026-02-19
 11. Review submission includes tag selection and validation.
 12. Release action routes to review submission and returns to project detail after submit.
 13. Quick logout from Home returns to unauthenticated entry flow.
+
+---
+
+## Demo-Web Variant (`apps/demo-web`)
+
+Use this variant when presenting in a browser with phone-mimic framing:
+
+1. Run `npm run bootstrap:demo`.
+2. Run `npm run dev:demo-web`.
+3. Open `http://localhost:5174/role`.
+4. Select `Continue as Customer`.
+5. Login with `maria.rodriguez@trustvibe.test` / `DemoCustomer!123`.
+6. On Home, confirm hero/project images render (no broken placeholders), then toggle language EN/ES.
+7. Open Search, then open one contractor profile.
+8. Open Projects, then open one project and show photos + workflow card.
+9. Tap bottom `Messages` tab and confirm `/messages` composer is visible.
+10. Return to Home and tap avatar header area to open Profile.
+11. Open `Documents` and confirm upload control renders.
+12. Return Home and use quick logout.

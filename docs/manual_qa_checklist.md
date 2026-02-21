@@ -1,6 +1,6 @@
 # Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 
 Batch streams:
 - Batch 1: `docs/batch1_ux_fixes.md`
@@ -143,6 +143,19 @@ Batch streams:
 - [x] Edge: Home activity row tap opens correct project detail.
 - [x] Edge: Search and Recommendations rows show clear tap feedback and route correctly.
 - [x] Edge: Agreement/deposit transparency checkpoints render correctly.
+
+## Demo-Web Lane (localhost:5174)
+
+- [ ] Demo-web launches at `http://localhost:5174/role`.
+- [ ] Image bundle exists under `apps/demo-web/public/images` (12 reference PNGs) and in-app image cards render with no broken placeholders.
+- [ ] Customer tabs are `Home`, `Search`, `Projects`, `Messages`; `Messages` opens `/messages`.
+- [ ] Customer profile remains reachable via Home avatar header tap and supports Documents flow.
+- [ ] Contractor tabs are `Home`, `Browse`, `Jobs`, `Earnings`, `Messages`; both `Earnings` and `Messages` open correctly.
+- [ ] Legacy `tab-profile` selector remains clickable for automation compatibility.
+- [ ] Admin path works: `/admin` dashboard -> users table -> cases card list (`cases-card-list` + `cases-table` alias) -> config save control.
+- [ ] Admin cases card can be expanded and one outcome action produces visible result banner.
+- [ ] Live/mock toggle works in floating dev switcher.
+- [ ] Demo data fallback mode remains usable when backend probe fails.
 
 ## Automation Parity
 

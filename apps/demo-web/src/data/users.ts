@@ -1,0 +1,126 @@
+import type { User, Contractor } from "../types";
+
+export const USERS: (User | Contractor)[] = [
+  {
+    id: "user-maria",
+    email: "maria.rodriguez@trustvibe.test",
+    password: "DemoCustomer!123",
+    role: "customer",
+    name: "Maria Rodriguez",
+    avatarUrl: "/images/contractors/maria-rodriguez.png",
+    phone: "(787) 555-0191",
+    location: "San Juan, PR",
+    memberSince: "2024-03",
+    verified: true,
+  },
+  {
+    id: "user-juan",
+    email: "juan.services@trustvibe.test",
+    password: "DemoContractor!123",
+    role: "contractor",
+    name: "Juan Reyes",
+    businessName: "Juan's Home Services",
+    avatarUrl: "/images/contractors/juan-reyes.png",
+    phone: "(787) 555-0234",
+    location: "San Juan, PR",
+    memberSince: "2023-11",
+    verified: true,
+    specialty: ["Plumbing", "Tile Work", "Bathroom Renovation"],
+    rating: 4.8,
+    reviewCount: 31,
+    completedJobs: 23,
+    reliabilityScore: 96,
+    bio: "15+ years experience in residential plumbing and bathroom renovation. Licensed and insured. Serving the San Juan metro area. I take pride in clean work and clear communication — every project is treated like it's my own home.",
+    portfolioImages: [
+      "/images/jobs/bathroom-renovation.png",
+      "/images/jobs/living-room-reno.png",
+      "/images/jobs/bedroom-interior.png",
+      "/images/jobs/kitchen-cabinets.png",
+    ],
+    licenseNumber: "PR-CONT-2891",
+    insuranceVerified: true,
+    responseTime: "< 2 hours",
+    badges: ["Top Rated", "Licensed", "Insured", "Background Checked"],
+    hourlyRate: 85,
+  } as Contractor,
+  {
+    id: "user-rosa",
+    email: "rosa.plumbing@trustvibe.test",
+    password: "DemoContractor!123",
+    role: "contractor",
+    name: "Rosa Morales",
+    businessName: "Rosa Plumbing Pro",
+    avatarUrl: "/images/contractors/rosa-morales.png",
+    phone: "(787) 555-0312",
+    location: "Bayamón, PR",
+    memberSince: "2024-01",
+    verified: true,
+    specialty: ["Plumbing", "Water Heaters", "Pipe Repair"],
+    rating: 4.6,
+    reviewCount: 22,
+    completedJobs: 15,
+    reliabilityScore: 88,
+    bio: "Specialized plumbing contractor with focus on water systems and emergency repairs. Fast response, quality work. Licensed and insured in Puerto Rico.",
+    portfolioImages: [
+      "/images/jobs/roof-repair.png",
+      "/images/jobs/solar-install.png",
+      "/images/jobs/exterior-painting.png",
+    ],
+    licenseNumber: "PR-CONT-3142",
+    insuranceVerified: true,
+    responseTime: "< 4 hours",
+    badges: ["Licensed", "Insured"],
+    hourlyRate: 75,
+  } as Contractor,
+  {
+    id: "user-carlos",
+    email: "carlos.electric@trustvibe.test",
+    password: "DemoContractor!123",
+    role: "contractor",
+    name: "Carlos Vega",
+    businessName: "Vega Electric & More",
+    avatarUrl: "/images/contractors/carlos-vega.png",
+    phone: "(787) 555-0455",
+    location: "Caguas, PR",
+    memberSince: "2023-08",
+    verified: true,
+    specialty: ["Electrical", "Solar Installation", "Panel Upgrades", "Ceiling Fans"],
+    rating: 4.7,
+    reviewCount: 18,
+    completedJobs: 19,
+    reliabilityScore: 91,
+    bio: "Master electrician with 12 years in residential and light commercial electrical work. NABCEP-certified solar installer — 14 residential solar installs across Puerto Rico. All permits pulled, net metering paperwork handled. Fast, clean, safe.",
+    portfolioImages: [
+      "/images/jobs/solar-install.png",
+      "/images/jobs/exterior-painting.png",
+    ],
+    licenseNumber: "PR-ELEC-1847",
+    insuranceVerified: true,
+    responseTime: "< 3 hours",
+    badges: ["Licensed", "Insured", "Permit-Ready"],
+    hourlyRate: 90,
+  } as Contractor,
+  {
+    id: "user-admin",
+    email: "admin@trustvibe.test",
+    password: "DemoAdmin!123",
+    role: "admin",
+    name: "Admin",
+    avatarUrl: "/images/contractors/maria-rodriguez.png",
+    location: "San Juan, PR",
+    memberSince: "2023-01",
+    verified: true,
+  },
+];
+
+export function findUserByCredentials(email: string, password: string): User | Contractor | null {
+  return USERS.find((u) => u.email === email && u.password === password) ?? null;
+}
+
+export function findUserById(id: string): User | Contractor | null {
+  return USERS.find((u) => u.id === id) ?? null;
+}
+
+export function getContractors(): Contractor[] {
+  return USERS.filter((u): u is Contractor => u.role === "contractor");
+}
