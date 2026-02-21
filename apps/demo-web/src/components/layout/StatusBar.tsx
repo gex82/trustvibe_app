@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
+import { useApp } from "../../context/AppContext";
 
 export default function StatusBar() {
+  const { locale } = useApp();
   const [time, setTime] = useState("");
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
       setTime(
-        now.toLocaleTimeString("en-US", {
+        now.toLocaleTimeString(locale, {
           hour: "numeric",
           minute: "2-digit",
           hour12: true,
@@ -17,7 +19,7 @@ export default function StatusBar() {
     update();
     const interval = setInterval(update, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [locale]);
 
   return (
     <div

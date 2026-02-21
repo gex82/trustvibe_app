@@ -27,21 +27,21 @@ export default function RoleSelectScreen() {
           className="w-full rounded-2xl bg-white text-teal-700 font-bold py-3.5 pressable"
           onClick={() => navigate("/login?role=customer")}
         >
-          Continue as Customer
+          {t("role.continueCustomer")}
         </button>
         <button
           data-testid="role-select-contractor"
           className="w-full rounded-2xl bg-white/15 text-white border border-white/35 font-bold py-3.5 pressable"
           onClick={() => navigate("/login?role=contractor")}
         >
-          Continue as Contractor
+          {t("role.continueContractor")}
         </button>
         <button
           data-testid="role-select-admin"
           className="w-full rounded-2xl bg-white/10 text-white border border-white/25 font-semibold py-3 pressable"
           onClick={() => navigate("/login?role=admin")}
         >
-          Continue as Admin
+          {t("role.continueAdmin")}
         </button>
       </div>
     </div>

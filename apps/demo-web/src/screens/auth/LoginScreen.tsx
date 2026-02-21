@@ -66,6 +66,7 @@ export default function LoginScreen() {
       {/* Language toggle top */}
       <div className="flex justify-end px-5 pt-3">
         <button
+          data-testid="login-language-toggle"
           onClick={() => setLang(lang === "en" ? "es" : "en")}
           className="text-[11px] font-bold px-2.5 py-1 rounded-full border border-white/30 text-white/80"
         >
@@ -102,7 +103,7 @@ export default function LoginScreen() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t("login.emailPlaceholder")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition"
               autoComplete="email"
               required

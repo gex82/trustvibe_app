@@ -15,7 +15,7 @@ export default function SubmitReviewScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getProject } = useProjects();
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const { dataMode } = useRuntime();
 
   const [rating, setRating] = useState(0);
@@ -39,7 +39,7 @@ export default function SubmitReviewScreen() {
   const project = getProject(id ?? "");
   const acceptedQuote = project?.quotes.find((q) => q.id === project?.acceptedQuoteId);
   const contractor = acceptedQuote
-    ? (findUserById(acceptedQuote.contractorId) as Contractor | null)
+    ? (findUserById(acceptedQuote.contractorId, lang) as Contractor | null)
     : null;
 
   const toggleTag = (key: string) => {
@@ -66,7 +66,7 @@ export default function SubmitReviewScreen() {
       return;
     }
     if (selectedTags.length === 0) {
-      setError("Select at least one tag before submitting.");
+      setError(t("review.selectTagError"));
       return;
     }
     setError("");

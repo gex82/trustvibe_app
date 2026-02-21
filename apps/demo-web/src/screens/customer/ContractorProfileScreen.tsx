@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, MapPin, CheckCircle, Zap, Shield, Award, MessageCircle, ChevronLeft } from "lucide-react";
 import { findUserById } from "../../data/users";
-import { REVIEWS } from "../../data/reviews";
+import { getReviews } from "../../data/reviews";
 import type { Contractor } from "../../types";
 import Avatar from "../../components/ui/Avatar";
 import StarRating from "../../components/ui/StarRating";
@@ -10,9 +10,9 @@ import { useApp } from "../../context/AppContext";
 export default function ContractorProfileScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useApp();
+  const { t, lang } = useApp();
 
-  const user = findUserById(id ?? "");
+  const user = findUserById(id ?? "", lang);
   if (!user || user.role !== "contractor") {
     return (
       <div className="h-full flex items-center justify-center p-8 text-center">
@@ -25,7 +25,8 @@ export default function ContractorProfileScreen() {
     );
   }
   const c = user as Contractor;
-  const reviews = REVIEWS.filter((r) => r.toUserId === c.id);
+  const allReviews = getReviews(lang);
+  const reviews = allReviews.filter((r) => r.toUserId === c.id);
 
   return (
     <div className="h-full overflow-y-auto bg-gray-50">
@@ -167,7 +168,7 @@ export default function ContractorProfileScreen() {
               <img
                 key={i}
                 src={img}
-                alt={`Portfolio ${i + 1}`}
+                alt={`${t("label.portfolio")} ${i + 1}`}
                 className="w-full h-28 object-cover rounded-xl"
               />
             ))}
@@ -180,7 +181,7 @@ export default function ContractorProfileScreen() {
             {t("label.reviews")}
           </h2>
           <div className="flex flex-col gap-3">
-            {(reviews.length > 0 ? reviews : REVIEWS).map((r) => (
+            {(reviews.length > 0 ? reviews : allReviews).map((r) => (
               <div
                 key={r.id}
                 className="bg-white rounded-2xl p-4"

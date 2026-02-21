@@ -1,7 +1,8 @@
 import type { Role } from "@trustvibe/shared";
-import { USERS } from "../data/users";
+import { getUsers } from "../data/users";
 import type { Contractor, DemoUser, User } from "../types";
 import type { UserProfile } from "../services/api";
+import type { DemoLang } from "../utils/localization";
 
 const emailToStableId: Record<string, string> = {
   "maria.rodriguez@trustvibe.test": "user-maria",
@@ -19,8 +20,14 @@ function roleFromEmail(email: string): Role {
   return "customer";
 }
 
-export function findDemoUserByEmail(email: string): DemoUser | null {
-  return USERS.find((item) => item.email.toLowerCase() === email.toLowerCase()) ?? null;
+export function findDemoUserByEmail(
+  email: string,
+  lang: DemoLang = "en"
+): DemoUser | null {
+  return (
+    getUsers(lang).find((item) => item.email.toLowerCase() === email.toLowerCase()) ??
+    null
+  );
 }
 
 export function toStableDemoUserId(uid: string, email: string | null): string {
@@ -32,9 +39,10 @@ export function toStableDemoUserId(uid: string, email: string | null): string {
 
 export function mapProfileToDemoUser(
   profile: UserProfile | null,
-  fallbackEmail: string | null
+  fallbackEmail: string | null,
+  lang: DemoLang = "en"
 ): DemoUser {
-  const matchedByEmail = fallbackEmail ? findDemoUserByEmail(fallbackEmail) : null;
+  const matchedByEmail = fallbackEmail ? findDemoUserByEmail(fallbackEmail, lang) : null;
   if (matchedByEmail) {
     return { ...matchedByEmail };
   }
@@ -45,7 +53,7 @@ export function mapProfileToDemoUser(
     email: profile?.email ?? fallbackEmail ?? "demo@trustvibe.test",
     password: "",
     role,
-    name: profile?.name || "TrustVibe User",
+    name: profile?.name || (lang === "es" ? "Usuario TrustVibe" : "TrustVibe User"),
     avatarUrl: profile?.avatarUrl ?? "/images/contractors/maria-rodriguez.png",
     phone: profile?.phone,
     location: "Puerto Rico",
@@ -57,16 +65,19 @@ export function mapProfileToDemoUser(
     const contractor: Contractor = {
       ...base,
       role: "contractor",
-      businessName: profile?.name ?? "Trusted Contractor",
+      businessName: profile?.name ?? (lang === "es" ? "Contratista Confiable" : "Trusted Contractor"),
       specialty: ["General"],
       rating: 4.8,
       reviewCount: 0,
       completedJobs: 0,
-      bio: "Verified TrustVibe contractor profile.",
+      bio:
+        lang === "es"
+          ? "Perfil de contratista TrustVibe verificado."
+          : "Verified TrustVibe contractor profile.",
       portfolioImages: [],
       insuranceVerified: true,
-      responseTime: "< 4 hours",
-      badges: ["Verified"],
+      responseTime: lang === "es" ? "< 4 horas" : "< 4 hours",
+      badges: [lang === "es" ? "Verificado" : "Verified"],
     };
     return contractor;
   }

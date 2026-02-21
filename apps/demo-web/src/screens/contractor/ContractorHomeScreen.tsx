@@ -3,7 +3,7 @@ import { Star, TrendingUp, ChevronRight, Shield, Hammer, Clock, Bell } from "luc
 import { useAuth } from "../../context/AuthContext";
 import { useProjects } from "../../context/ProjectsContext";
 import { useApp } from "../../context/AppContext";
-import { EARNINGS } from "../../data/earnings";
+import { getEarnings } from "../../data/earnings";
 import type { Contractor } from "../../types";
 import Avatar from "../../components/ui/Avatar";
 import Badge from "../../components/ui/Badge";
@@ -13,8 +13,9 @@ import { formatCurrency } from "../../utils/formatters";
 export default function ContractorHomeScreen() {
   const { currentUser } = useAuth();
   const { projects } = useProjects();
-  const { t } = useApp();
+  const { t, lang, locale } = useApp();
   const navigate = useNavigate();
+  const earnings = getEarnings(lang);
 
   const c = currentUser as Contractor;
 
@@ -44,11 +45,11 @@ export default function ContractorHomeScreen() {
       ? openProjectsByIdentity
       : projects.filter((p) => p.status === "open");
 
-  const totalEarned = EARNINGS.filter((e) => e.status === "paid").reduce(
+  const totalEarned = earnings.filter((e) => e.status === "paid").reduce(
     (sum, e) => sum + e.netPaid,
     0
   );
-  const heldAmount = EARNINGS.find((e) => e.status === "held")?.amount ?? 0;
+  const heldAmount = earnings.find((e) => e.status === "held")?.amount ?? 0;
 
   const hour = new Date().getHours();
   const greeting =
@@ -111,11 +112,11 @@ export default function ContractorHomeScreen() {
           </p>
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-[28px] font-extrabold">{formatCurrency(totalEarned)}</p>
+              <p className="text-[28px] font-extrabold">{formatCurrency(totalEarned, locale)}</p>
               <p className="text-teal-100 text-[12px]">{t("chome.totalEarned")}</p>
             </div>
             <div className="text-right">
-              <p className="text-[18px] font-bold">{formatCurrency(heldAmount)}</p>
+              <p className="text-[18px] font-bold">{formatCurrency(heldAmount, locale)}</p>
               <div className="flex items-center gap-1 text-teal-200 justify-end">
                 <Shield size={11} />
                 <span className="text-[11px]">{t("chome.inEscrow")}</span>
@@ -171,7 +172,7 @@ export default function ContractorHomeScreen() {
                     {job.escrowAmount && (
                       <p className="text-teal-600 text-[12px] font-bold mt-1 flex items-center gap-1">
                         <Shield size={11} />
-                        {formatCurrency(job.escrowAmount)} {t("chome.inEscrow")}
+                        {formatCurrency(job.escrowAmount, locale)} {t("chome.inEscrow")}
                       </p>
                     )}
                   </div>

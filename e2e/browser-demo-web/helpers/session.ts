@@ -25,7 +25,8 @@ export async function loginAs(
   page: Page,
   role: "customer" | "contractor" | "admin",
   email: string,
-  password: string
+  password: string,
+  lang: "en" | "es" = "en"
 ): Promise<void> {
   await openRoleSelect(page);
   const roleId =
@@ -35,6 +36,15 @@ export async function loginAs(
         ? "role-select-contractor"
         : "role-select-admin";
   await page.getByTestId(roleId).click();
+  const languageToggle = page.getByTestId("login-language-toggle");
+  await expect(languageToggle).toBeVisible();
+  const currentToggleLabel = (await languageToggle.textContent())?.trim().toUpperCase() ?? "";
+  if (lang === "es" && currentToggleLabel === "ES") {
+    await languageToggle.click();
+  }
+  if (lang === "en" && currentToggleLabel === "EN") {
+    await languageToggle.click();
+  }
   await page.getByTestId("login-email-input").fill(email);
   await page.getByTestId("login-password-input").fill(password);
   await page.getByTestId("login-submit").click();

@@ -6,26 +6,26 @@ import { useAuth } from "../../context/AuthContext";
 import { useApp } from "../../context/AppContext";
 import TopBar from "../../components/layout/TopBar";
 
-const CATEGORIES = [
-  "Bathroom",
-  "Kitchen",
-  "Painting",
-  "HVAC",
-  "Electrical",
-  "Plumbing",
-  "Carpentry",
-  "Tiling",
-  "Roofing",
-  "Other",
+const CATEGORY_OPTIONS = [
+  { value: "Bathroom", key: "category.bathroom" },
+  { value: "Kitchen", key: "category.kitchen" },
+  { value: "Painting", key: "category.painting" },
+  { value: "HVAC", key: "category.hvac" },
+  { value: "Electrical", key: "category.electrical" },
+  { value: "Plumbing", key: "category.plumbing" },
+  { value: "Carpentry", key: "category.carpentry" },
+  { value: "Tiling", key: "category.tiling" },
+  { value: "Roofing", key: "category.roofing" },
+  { value: "Other", key: "category.other" },
 ];
 
-const TIMELINES = [
-  "1–3 days",
-  "1 week",
-  "2 weeks",
-  "3–4 weeks",
-  "1–2 months",
-  "Flexible",
+const TIMELINE_OPTIONS = [
+  { value: "1-3 days", key: "newProject.timelineOption1to3Days" },
+  { value: "1 week", key: "newProject.timelineOption1Week" },
+  { value: "2 weeks", key: "newProject.timelineOption2Weeks" },
+  { value: "3-4 weeks", key: "newProject.timelineOption3to4Weeks" },
+  { value: "1-2 months", key: "newProject.timelineOption1to2Months" },
+  { value: "Flexible", key: "newProject.timelineOptionFlexible" },
 ];
 
 export default function NewProjectScreen() {
@@ -138,8 +138,10 @@ export default function NewProjectScreen() {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-white appearance-none"
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                {CATEGORY_OPTIONS.map((categoryOption) => (
+                  <option key={categoryOption.value} value={categoryOption.value}>
+                    {t(categoryOption.key)}
+                  </option>
                 ))}
               </select>
               <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -186,8 +188,10 @@ export default function NewProjectScreen() {
                 onChange={(e) => setTimeline(e.target.value)}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-white appearance-none"
               >
-                {TIMELINES.map((tl) => (
-                  <option key={tl} value={tl}>{tl}</option>
+                {TIMELINE_OPTIONS.map((timelineOption) => (
+                  <option key={timelineOption.value} value={timelineOption.value}>
+                    {t(timelineOption.key)}
+                  </option>
                 ))}
               </select>
               <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -203,7 +207,7 @@ export default function NewProjectScreen() {
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="San Juan, PR"
+              placeholder={t("newProject.locationPlaceholder")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent bg-white"
             />
           </div>

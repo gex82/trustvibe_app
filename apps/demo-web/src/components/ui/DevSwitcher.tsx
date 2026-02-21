@@ -1,13 +1,15 @@
 import { useAuth } from "../../context/AuthContext";
+import { useApp } from "../../context/AppContext";
 import { useRuntime } from "../../context/RuntimeContext";
 
 const DEMO_ACCOUNTS = [
-  { label: "Maria", sublabel: "Customer", email: "maria.rodriguez@trustvibe.test", password: "DemoCustomer!123", color: "bg-teal-500" },
-  { label: "Juan", sublabel: "Contractor", email: "juan.services@trustvibe.test", password: "DemoContractor!123", color: "bg-blue-500" },
-  { label: "Admin", sublabel: "Admin", email: "admin@trustvibe.test", password: "DemoAdmin!123", color: "bg-purple-500" },
+  { label: "Maria", sublabelKey: "login.customer", email: "maria.rodriguez@trustvibe.test", password: "DemoCustomer!123", color: "bg-teal-500" },
+  { label: "Juan", sublabelKey: "login.contractor", email: "juan.services@trustvibe.test", password: "DemoContractor!123", color: "bg-blue-500" },
+  { label: "Admin", sublabelKey: "login.admin", email: "admin@trustvibe.test", password: "DemoAdmin!123", color: "bg-purple-500" },
 ];
 
 export default function DevSwitcher() {
+  const { t } = useApp();
   const { login, currentUser } = useAuth();
   const { dataMode, autoFallback, backendReachable, setDataMode, recheckBackend } =
     useRuntime();
@@ -22,7 +24,7 @@ export default function DevSwitcher() {
           className="bg-amber-500/95 text-black rounded-2xl px-3 py-2 text-[11px] font-semibold max-w-[240px]"
           data-testid="demo-data-mode-banner"
         >
-          Demo data mode active. Backend is unreachable.
+          {t("runtime.demoFallbackBanner")}
         </div>
       )}
       <div
@@ -30,7 +32,7 @@ export default function DevSwitcher() {
         style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}
       >
         <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest text-center mb-1">
-          Switch Role
+          {t("runtime.switchRole")}
         </p>
         <div className="grid grid-cols-2 gap-1 mb-1">
           <button
@@ -43,7 +45,7 @@ export default function DevSwitcher() {
             }}
             data-testid="demo-mode-live"
           >
-            Live
+            {t("runtime.live")}
           </button>
           <button
             className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
@@ -52,12 +54,12 @@ export default function DevSwitcher() {
             onClick={() => setDataMode("mock")}
             data-testid="demo-mode-mock"
           >
-            Mock
+            {t("runtime.mock")}
           </button>
         </div>
         {autoFallback ? (
           <p className="text-amber-300 text-[10px] text-center">
-            Auto-fallback enabled
+            {t("runtime.autoFallbackEnabled")}
           </p>
         ) : null}
         {DEMO_ACCOUNTS.map((acc) => {
@@ -81,7 +83,7 @@ export default function DevSwitcher() {
                 <div className="text-white font-semibold text-[12px] leading-none">
                   {acc.label}
                 </div>
-                <div className="text-white/50 text-[10px] mt-0.5">{acc.sublabel}</div>
+                <div className="text-white/50 text-[10px] mt-0.5">{t(acc.sublabelKey)}</div>
               </div>
               {isActive && (
                 <div className="ml-auto w-2 h-2 bg-emerald-400 rounded-full" />

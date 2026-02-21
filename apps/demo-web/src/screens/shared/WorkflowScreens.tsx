@@ -31,17 +31,18 @@ function Placeholder({
 
 export function ProfileScreen() {
   const { currentUser, logout } = useAuth();
+  const { t } = useApp();
   const navigate = useNavigate();
 
   if (!currentUser) {
     return (
       <div className="h-full flex flex-col bg-gray-50">
-        <TopBar title="Profile" />
+        <TopBar title={t("workflow.profile.title")} />
         <div className="flex-1 p-4">
           <EmptyState
             icon={FileText}
-            title="No session"
-            subtitle="Sign in to access profile"
+            title={t("workflow.profile.noSessionTitle")}
+            subtitle={t("workflow.profile.noSessionSubtitle")}
           />
         </div>
       </div>
@@ -51,54 +52,56 @@ export function ProfileScreen() {
   const actions = [
     {
       id: "profile-edit",
-      label: "Edit Profile",
+      label: t("workflow.profile.editProfile"),
       path: "/profile/edit",
     },
     {
       id: "profile-documents",
-      label: "Documents",
+      label: t("workflow.profile.documents"),
       path: "/profile/documents",
     },
     {
       id: "profile-history",
-      label: "History",
+      label: t("workflow.profile.history"),
       path: "/history",
     },
     {
       id: "profile-messages",
-      label: "Messages",
+      label: t("workflow.profile.messages"),
       path: "/messages",
     },
     {
       id: "profile-recommendations",
-      label: "Recommendations",
+      label: t("workflow.profile.recommendations"),
       path: "/recommendations",
     },
     {
       id: "profile-notifications",
-      label: "Notifications",
+      label: t("workflow.profile.notifications"),
       path: "/notifications",
     },
     {
       id: "profile-payment-methods",
-      label: "Payment Methods",
+      label: t("workflow.profile.paymentMethods"),
       path: "/payment-methods",
     },
     {
       id: "profile-settings",
-      label: "Settings",
+      label: t("workflow.profile.settings"),
       path: "/settings",
     },
   ];
 
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Profile" />
+      <TopBar title={t("workflow.profile.title")} />
       <div className="px-4 py-4 flex flex-col gap-3">
         <Card>
           <p className="font-extrabold text-gray-900 text-[16px]">{currentUser.name}</p>
           <p className="text-gray-500 text-[12px]">{currentUser.email}</p>
-          <p className="text-gray-500 text-[12px] capitalize mt-1">{currentUser.role}</p>
+          <p className="text-gray-500 text-[12px] capitalize mt-1">
+            {t(`workflow.profile.role.${currentUser.role}`)}
+          </p>
         </Card>
         {actions.map((action) => (
           <button
@@ -116,7 +119,7 @@ export function ProfileScreen() {
             onClick={() => navigate("/earnings")}
             className="w-full text-left bg-white rounded-2xl px-4 py-3 font-semibold text-gray-700 pressable"
           >
-            Earnings
+            {t("nav.earnings")}
           </button>
         )}
         <button
@@ -124,7 +127,7 @@ export function ProfileScreen() {
           onClick={() => void logout()}
           className="w-full text-left bg-red-50 rounded-2xl px-4 py-3 font-semibold text-red-600 pressable"
         >
-          Log out
+          {t("admin.logout")}
         </button>
       </div>
     </div>
@@ -132,26 +135,28 @@ export function ProfileScreen() {
 }
 
 export function EditProfileScreen() {
+  const { t } = useApp();
+
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Edit Profile" back />
+      <TopBar title={t("workflow.edit.title")} back />
       <div className="px-4 py-4">
         <Card className="flex flex-col gap-3">
-          <p className="font-bold text-gray-900 text-[14px]">Profile Editor</p>
+          <p className="font-bold text-gray-900 text-[14px]">{t("workflow.edit.editorTitle")}</p>
           <p className="text-gray-500 text-[12px]">
-            Use this surface to validate profile update UX in demo mode.
+            {t("workflow.edit.editorSubtitle")}
           </p>
           <button
             data-testid="edit-profile-upload-avatar"
             className="bg-teal-50 text-teal-700 rounded-xl px-3 py-2 text-[12px] font-semibold w-fit"
           >
-            Upload Avatar
+            {t("workflow.edit.uploadAvatar")}
           </button>
           <button
             data-testid="edit-profile-save"
             className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit"
           >
-            Save
+            {t("workflow.edit.save")}
           </button>
         </Card>
       </div>
@@ -160,17 +165,19 @@ export function EditProfileScreen() {
 }
 
 export function DocumentsScreen() {
+  const { t } = useApp();
+
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Documents" back />
+      <TopBar title={t("workflow.documents.title")} back />
       <div className="px-4 py-4">
         <Card className="flex flex-col gap-3">
-          <p className="font-bold text-gray-900 text-[14px]">Documents</p>
+          <p className="font-bold text-gray-900 text-[14px]">{t("workflow.documents.title")}</p>
           <button
             data-testid="documents-upload"
             className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit"
           >
-            Upload Document
+            {t("workflow.documents.upload")}
           </button>
           <p data-testid="documents-url-demo" className="text-gray-500 text-[12px]">
             https://demo.local/document/mock-url
@@ -182,52 +189,62 @@ export function DocumentsScreen() {
 }
 
 export function NotificationsScreen() {
+  const { t } = useApp();
+
   return (
     <Placeholder
-      title="Notifications"
-      subtitle="Notification center for lifecycle and trust events."
+      title={t("workflow.notifications.title")}
+      subtitle={t("workflow.notifications.subtitle")}
     />
   );
 }
 
 export function PaymentMethodsScreen() {
+  const { t } = useApp();
+
   return (
     <Placeholder
-      title="Payment Methods"
-      subtitle="Card and payout method management surface."
+      title={t("workflow.payments.title")}
+      subtitle={t("workflow.payments.subtitle")}
     />
   );
 }
 
 export function SettingsScreen() {
+  const { t } = useApp();
+
   return (
-    <Placeholder title="Settings" subtitle="Language, privacy, and account controls." />
+    <Placeholder
+      title={t("workflow.settings.title")}
+      subtitle={t("workflow.settings.subtitle")}
+    />
   );
 }
 
 export function HistoryScreen() {
   const { projects } = useProjects();
+  const { t, locale } = useApp();
   const completed = projects.filter((project) =>
     ["completed", "disputed", "complete_requested"].includes(project.status)
   );
 
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="History" back />
+      <TopBar title={t("workflow.history.title")} back />
       <div className="px-4 py-4 flex flex-col gap-3">
-        <p className="font-bold text-gray-800 text-[13px]">Transactions</p>
+        <p className="font-bold text-gray-800 text-[13px]">{t("workflow.history.transactions")}</p>
         {completed.length === 0 ? (
           <Card>
-            <p className="text-gray-500 text-[12px]">No historical items yet.</p>
+            <p className="text-gray-500 text-[12px]">{t("workflow.history.empty")}</p>
           </Card>
         ) : (
           completed.map((project) => (
             <Card key={project.id}>
               <p className="font-semibold text-gray-800 text-[13px]">{project.title}</p>
-              <p className="text-gray-500 text-[11px] capitalize">{project.status}</p>
+              <p className="text-gray-500 text-[11px] capitalize">{t(`status.${project.status}`)}</p>
               {project.escrowAmount ? (
                 <p className="text-teal-700 text-[12px] font-semibold mt-1">
-                  {formatCurrency(project.escrowAmount)}
+                  {formatCurrency(project.escrowAmount, locale)}
                 </p>
               ) : null}
             </Card>
@@ -239,12 +256,13 @@ export function HistoryScreen() {
 }
 
 export function RecommendationsScreen() {
-  const contractors = getContractors().slice(0, 4);
+  const { t, lang } = useApp();
+  const contractors = getContractors(lang).slice(0, 4);
   const navigate = useNavigate();
 
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Recommendations" back />
+      <TopBar title={t("workflow.recommendations.title")} back />
       <div className="px-4 py-4 flex flex-col gap-3">
         {contractors.map((contractor, index) => (
           <button
@@ -268,16 +286,17 @@ export function AgreementReviewScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getProject } = useProjects();
+  const { t, locale } = useApp();
   const project = getProject(id ?? "");
   const selected = project?.quotes.find((quote) => quote.id === project.acceptedQuoteId);
 
   if (!project) {
     return (
       <div className="h-full flex flex-col bg-gray-50">
-        <TopBar title="Agreement" back />
+        <TopBar title={t("workflow.agreement.title")} back />
         <div className="p-4">
           <Card>
-            <p className="text-gray-500 text-[12px]">Project not found.</p>
+            <p className="text-gray-500 text-[12px]">{t("detail.projectNotFound")}</p>
           </Card>
         </div>
       </div>
@@ -286,34 +305,34 @@ export function AgreementReviewScreen() {
 
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Agreement Snapshot" back />
+      <TopBar title={t("workflow.agreement.snapshotTitle")} back />
       <div className="px-4 py-4 flex flex-col gap-3">
         <Card data-testid="agreement-review-card">
           <p className="font-bold text-gray-800 text-[14px]">{project.title}</p>
           <p data-testid="agreement-review-contractor" className="text-gray-500 text-[12px] mt-1">
-            Contractor: {selected?.contractorId ?? "Pending"}
+            {t("workflow.agreement.contractor")} {selected?.contractorId ?? t("status.pending")}
           </p>
           <p data-testid="agreement-review-price" className="text-gray-500 text-[12px]">
-            Price: {selected ? formatCurrency(selected.amount) : "TBD"}
+            {t("workflow.agreement.price")} {selected ? formatCurrency(selected.amount, locale) : t("workflow.agreement.tbd")}
           </p>
           <p data-testid="agreement-review-timeline" className="text-gray-500 text-[12px]">
-            Timeline: {selected?.timeline ?? project.timeline}
+            {t("workflow.agreement.timeline")} {selected?.timeline ?? project.timeline}
           </p>
           <p data-testid="agreement-review-scope" className="text-gray-500 text-[12px]">
-            Scope: {selected?.notes ?? project.description}
+            {t("workflow.agreement.scope")} {selected?.notes ?? project.description}
           </p>
           <p data-testid="agreement-review-policy" className="text-gray-500 text-[12px]">
-            Policy: Payment is released only after customer approval.
+            {t("workflow.agreement.policy")}
           </p>
           <p data-testid="agreement-review-fee" className="text-gray-500 text-[12px]">
-            Platform fee: 7%
+            {t("workflow.agreement.platformFee")}
           </p>
           <button
             data-testid="agreement-review-accept"
             className="mt-3 bg-teal-600 text-white rounded-xl px-4 py-2 text-[12px] font-semibold"
             onClick={() => navigate(`/project/${project.id}/fund`)}
           >
-            Accept agreement
+            {t("workflow.agreement.accept")}
           </button>
         </Card>
       </div>
@@ -333,7 +352,7 @@ export function IssueScreen() {
       <div className="px-4 py-4">
         <Card className="flex flex-col gap-3">
           <p className="font-bold text-gray-800 text-[14px]">
-            Funds will remain on hold while this issue is under review.
+            {t("workflow.issue.holdNotice")}
           </p>
           <button
             className="bg-red-600 text-white rounded-xl px-4 py-2 text-[12px] font-semibold w-fit"
@@ -344,7 +363,7 @@ export function IssueScreen() {
               navigate(`/project/${id}`);
             }}
           >
-            Confirm issue
+            {t("workflow.issue.confirm")}
           </button>
         </Card>
       </div>
@@ -353,14 +372,18 @@ export function IssueScreen() {
 }
 
 export function AvailabilityScreen() {
+  const { t } = useApp();
+
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Availability" back />
+      <TopBar title={t("workflow.availability.title")} back />
       <div className="px-4 py-4 grid grid-cols-2 gap-3">
         {[History, Bell, Wallet, FileText, Settings].map((Icon, index) => (
           <Card key={index} className="flex flex-col items-center justify-center py-6 gap-2">
             <Icon className="text-teal-600" size={20} />
-            <p className="text-[11px] text-gray-600 font-semibold">Slot {index + 1}</p>
+            <p className="text-[11px] text-gray-600 font-semibold">
+              {t("workflow.availability.slot")} {index + 1}
+            </p>
           </Card>
         ))}
       </div>

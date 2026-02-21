@@ -9,36 +9,54 @@ import TopBar from "../../components/layout/TopBar";
 import Badge from "../../components/ui/Badge";
 import ProgressStepper from "../../components/ui/ProgressStepper";
 import Avatar from "../../components/ui/Avatar";
-import { formatCurrency, formatCurrency as fmt } from "../../utils/formatters";
+import { formatCurrency } from "../../utils/formatters";
+
+const CATEGORY_TRANSLATION_KEY_BY_VALUE: Record<string, string> = {
+  bathroom: "category.bathroom",
+  kitchen: "category.kitchen",
+  painting: "category.painting",
+  hvac: "category.hvac",
+  electrical: "category.electrical",
+  plumbing: "category.plumbing",
+  carpentry: "category.carpentry",
+  tiling: "category.tiling",
+  roofing: "category.roofing",
+  other: "category.other",
+};
 
 export default function ProjectDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getProject, acceptQuote } = useProjects();
-  const { t } = useApp();
+  const { t, lang, locale } = useApp();
   const [showDeveloperActions, setShowDeveloperActions] = useState(false);
 
   const project = getProject(id ?? "");
   if (!project) {
     return (
       <div className="flex flex-col h-full">
-        <TopBar title="Project" back />
+        <TopBar title={t("detail.projectTitle")} back />
         <div className="flex-1 flex items-center justify-center text-gray-400">{t("detail.projectNotFound")}</div>
       </div>
     );
   }
 
   const acceptedQuote = project.quotes.find((q) => q.id === project.acceptedQuoteId);
-  const contractor = acceptedQuote ? (findUserById(acceptedQuote.contractorId) as Contractor | null) : null;
+  const contractor = acceptedQuote
+    ? (findUserById(acceptedQuote.contractorId, lang) as Contractor | null)
+    : null;
 
   const handleAcceptQuote = (quoteId: string) => {
     void acceptQuote(project.id, quoteId);
     navigate(`/project/${project.id}/agreement`);
   };
 
+  const categoryKey = CATEGORY_TRANSLATION_KEY_BY_VALUE[project.category.toLowerCase()];
+  const categoryLabel = categoryKey ? t(categoryKey, project.category) : project.category;
+
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      <TopBar title={project.category} back />
+      <TopBar title={categoryLabel} back />
 
       <div className="flex-1 overflow-y-auto">
         {/* Hero photo */}
@@ -98,7 +116,7 @@ export default function ProjectDetailScreen() {
                 className="text-[11px] text-gray-500 font-medium mt-2 text-center capitalize"
                 data-testid="project-detail-workflow-state"
               >
-                {project.status.replace("_", " ")}
+                {t(`status.${project.status}`, project.status.replace("_", " "))}
               </p>
             )}
           </div>
@@ -152,19 +170,19 @@ export default function ProjectDetailScreen() {
                 <div className="bg-teal-50 rounded-xl p-3 mb-3">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[12px] text-teal-700 font-medium">{t("detail.agreedAmount")}</span>
-                    <span className="text-[14px] font-extrabold text-teal-800">{formatCurrency(acceptedQuote.amount)}</span>
+                    <span className="text-[14px] font-extrabold text-teal-800">{formatCurrency(acceptedQuote.amount, locale)}</span>
                   </div>
                   {project.trustvibeFee && (
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[11px] text-teal-600">{t("detail.tvFee")}</span>
-                      <span className="text-[12px] font-bold text-teal-700">–{formatCurrency(project.trustvibeFee)}</span>
+                      <span className="text-[12px] font-bold text-teal-700">–{formatCurrency(project.trustvibeFee, locale)}</span>
                     </div>
                   )}
                   {project.escrowAmount && project.trustvibeFee && (
                     <div className="flex items-center justify-between border-t border-teal-200 pt-1.5">
                       <span className="text-[11px] text-teal-700 font-semibold">{t("detail.contractorReceives")}</span>
                       <span className="text-[13px] font-extrabold text-teal-800">
-                        {formatCurrency(project.escrowAmount - project.trustvibeFee)}
+                        {formatCurrency(project.escrowAmount - project.trustvibeFee, locale)}
                       </span>
                     </div>
                   )}
@@ -237,7 +255,7 @@ export default function ProjectDetailScreen() {
                   className="text-teal-600 text-[11px] font-semibold"
                   onClick={() => navigate(`/project/${project.id}/quotes`)}
                 >
-                  Select contractor
+                  {t("detail.selectContractor")}
                 </button>
               </div>
               <div className="flex flex-col gap-3">
@@ -259,21 +277,21 @@ export default function ProjectDetailScreen() {
               className="text-[11px] font-bold text-gray-500"
               onClick={() => setShowDeveloperActions((current) => !current)}
             >
-              Developer actions
+              {t("detail.developerActions")}
             </button>
             {showDeveloperActions ? (
               <div className="mt-3 flex flex-col gap-2">
                 <p data-testid="project-detail-workflow-quote-amount" className="text-[12px] text-gray-600">
-                  Quote amount: {acceptedQuote ? formatCurrency(acceptedQuote.amount) : "N/A"}
+                  {t("detail.quoteAmount")} {acceptedQuote ? formatCurrency(acceptedQuote.amount, locale) : t("common.notAvailable")}
                 </p>
                 <p data-testid="project-detail-workflow-timeline" className="text-[12px] text-gray-600">
-                  Timeline: {acceptedQuote?.timeline ?? project.timeline}
+                  {t("detail.timeline")} {acceptedQuote?.timeline ?? project.timeline}
                 </p>
                 <button
                   data-testid="project-detail-create-estimate-deposit"
                   className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[12px] font-semibold w-fit"
                 >
-                  Create estimate deposit
+                  {t("detail.createEstimateDeposit")}
                 </button>
               </div>
             ) : null}
@@ -293,8 +311,8 @@ function QuoteCard({
   onAccept: () => void;
   testId: string;
 }) {
-  const { t } = useApp();
-  const contractor = findUserById(quote.contractorId) as Contractor | null;
+  const { t, lang, locale } = useApp();
+  const contractor = findUserById(quote.contractorId, lang) as Contractor | null;
 
   return (
     <div
@@ -323,7 +341,7 @@ function QuoteCard({
                 className="text-[18px] font-extrabold text-gray-900"
                 data-testid={`quote-price-${testId}`}
               >
-                {formatCurrency(quote.amount)}
+                {formatCurrency(quote.amount, locale)}
               </p>
               <p className="text-[11px] text-gray-400" data-testid={`quote-timeline-${testId}`}>
                 {quote.timeline}
@@ -337,7 +355,7 @@ function QuoteCard({
           {quote.breakdown.map((item) => (
             <div key={item.label} className="flex items-center justify-between py-0.5">
               <span className="text-[11px] text-gray-600">{item.label}</span>
-              <span className="text-[11px] font-semibold text-gray-700">{fmt(item.amount)}</span>
+              <span className="text-[11px] font-semibold text-gray-700">{formatCurrency(item.amount, locale)}</span>
             </div>
           ))}
         </div>

@@ -12,7 +12,7 @@ export default function MyJobsScreen() {
   const navigate = useNavigate();
   const { projects } = useProjects();
   const { currentUser } = useAuth();
-  const { t } = useApp();
+  const { t, locale } = useApp();
 
   const myJobsByIdentity = projects.filter((p) =>
     p.quotes.some(
@@ -83,7 +83,7 @@ export default function MyJobsScreen() {
                           <span className="text-[12px] text-teal-700 font-semibold">{t("jobs.yourQuote")}</span>
                         </div>
                         <span className="text-[14px] font-extrabold text-teal-800">
-                          {formatCurrency(myQuote.amount)}
+                          {formatCurrency(myQuote.amount, locale)}
                         </span>
                       </div>
                     )}
@@ -125,7 +125,7 @@ export default function MyJobsScreen() {
                       <div className="flex items-center gap-1 text-amber-500">
                         <Clock size={12} />
                         <span className="text-[11px] font-semibold">
-                          {myQuote ? formatCurrency(myQuote.amount) : "—"}
+                          {myQuote ? formatCurrency(myQuote.amount, locale) : "—"}
                         </span>
                       </div>
                       <ChevronRight size={14} className="text-gray-300" />

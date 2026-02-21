@@ -10,7 +10,7 @@ import { formatCurrency } from "../../utils/formatters";
 export default function AdminDashboardScreen() {
   const { currentUser, logout } = useAuth();
   const { projects } = useProjects();
-  const { t } = useApp();
+  const { t, locale } = useApp();
 
   const ACTIVITY_LOG = [
     { id: 1, icon: "✅", text: `${t("admin.activity.escrowReleased")} Bathroom Renovation ($2,604 ${t("admin.activity.toContractor")} Juan)`, time: `2 ${t("admin.activity.hoursAgo")}` },
@@ -65,7 +65,7 @@ export default function AdminDashboardScreen() {
           <p className="text-blue-200 text-[11px] font-semibold uppercase tracking-wide mb-1">
             {t("admin.totalEscrow")}
           </p>
-          <p className="text-[30px] font-extrabold">{formatCurrency(totalEscrow + 2800)}</p>
+          <p className="text-[30px] font-extrabold">{formatCurrency(totalEscrow + 2800, locale)}</p>
           <div className="flex items-center gap-1 mt-1">
             <TrendingUp size={13} className="text-blue-300" />
             <p className="text-blue-200 text-[12px]">{t("admin.platformWide")}</p>
@@ -92,15 +92,15 @@ export default function AdminDashboardScreen() {
         {/* Quick nav */}
         <div className="bg-white rounded-2xl overflow-hidden flex flex-col" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           {[
-            { label: "Users", path: "/admin/users", icon: Users, testId: "admin-nav-users" },
+            { label: t("admin.nav.users"), path: "/admin/users", icon: Users, testId: "admin-nav-users" },
             { label: t("admin.viewProjects"), path: "/admin/projects", icon: FolderOpen, testId: "admin-nav-projects" },
             { label: t("admin.casesNav"), path: "/admin/cases", icon: Scale, testId: "admin-nav-cases" },
-            { label: "Deposits", path: "/admin/deposits", icon: Shield, testId: "admin-nav-deposits" },
-            { label: "Reliability", path: "/admin/reliability", icon: TrendingUp, testId: "admin-nav-reliability" },
-            { label: "Subscriptions", path: "/admin/subscriptions", icon: Users, testId: "admin-nav-subscriptions" },
-            { label: "Concierge", path: "/admin/concierge", icon: AlertCircle, testId: "admin-nav-concierge" },
-            { label: "Reviews", path: "/admin/reviews", icon: Users, testId: "admin-nav-reviews" },
-            { label: "Config", path: "/admin/config", icon: Shield, testId: "admin-nav-config" },
+            { label: t("admin.nav.deposits"), path: "/admin/deposits", icon: Shield, testId: "admin-nav-deposits" },
+            { label: t("admin.nav.reliability"), path: "/admin/reliability", icon: TrendingUp, testId: "admin-nav-reliability" },
+            { label: t("admin.nav.subscriptions"), path: "/admin/subscriptions", icon: Users, testId: "admin-nav-subscriptions" },
+            { label: t("admin.nav.concierge"), path: "/admin/concierge", icon: AlertCircle, testId: "admin-nav-concierge" },
+            { label: t("admin.nav.reviews"), path: "/admin/reviews", icon: Users, testId: "admin-nav-reviews" },
+            { label: t("admin.nav.config"), path: "/admin/config", icon: Shield, testId: "admin-nav-config" },
           ].map(({ label, path, icon: Icon, testId }) => (
             <Link
               key={path}

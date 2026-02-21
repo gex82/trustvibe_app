@@ -4,12 +4,13 @@ import { Send, FolderOpen } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useApp } from "../../context/AppContext";
 import { useRuntime } from "../../context/RuntimeContext";
-import { INITIAL_THREADS } from "../../data/messages";
+import { getInitialThreads } from "../../data/messages";
 import { findUserById } from "../../data/users";
 import type { Contractor, Message, MessageThread } from "../../types";
 import TopBar from "../../components/layout/TopBar";
 import Avatar from "../../components/ui/Avatar";
 import { formatTime } from "../../utils/formatters";
+import { getLocalizedField } from "../../utils/localization";
 import {
   listMessages as listMessagesApi,
   sendMessage as sendMessageApi,
@@ -17,52 +18,71 @@ import {
 
 export default function MessagesScreen() {
   const { currentUser } = useAuth();
-  const { t } = useApp();
+  const { t, lang, locale } = useApp();
   const { dataMode } = useRuntime();
   const [searchParams] = useSearchParams();
+  const contractorIdParam = searchParams.get("contractor");
   const navigate = useNavigate();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Build initial threads — add a new thread if ?contractor= param is present and thread doesn't exist yet
-  const [threads, setThreads] = useState<MessageThread[]>(() => {
-    const contractorId = searchParams.get("contractor");
-    if (!contractorId || !currentUser) return INITIAL_THREADS;
+  const buildInitialThreads = (): MessageThread[] => {
+    const baseThreads = getInitialThreads(lang);
 
-    const existing = INITIAL_THREADS.find(
-      (th) => th.participants.includes(contractorId) && th.participants.includes(currentUser.id)
+    if (!contractorIdParam || !currentUser) return baseThreads;
+
+    const existing = baseThreads.find(
+      (th) =>
+        th.participants.includes(contractorIdParam) &&
+        th.participants.includes(currentUser.id)
     );
-    if (existing) return INITIAL_THREADS;
+    if (existing) return baseThreads;
 
-    const contractor = findUserById(contractorId) as Contractor | null;
-    if (!contractor) return INITIAL_THREADS;
+    const contractor = findUserById(contractorIdParam, lang) as Contractor | null;
+    if (!contractor) return baseThreads;
 
     const newThread: MessageThread = {
-      id: `thread-${contractorId}-${Date.now()}`,
-      participants: [currentUser.id, contractorId],
+      id: `thread-${contractorIdParam}-${Date.now()}`,
+      participants: [currentUser.id, contractorIdParam],
       projectId: "",
-      projectTitle: (contractor.businessName ?? contractor.name),
+      projectTitle: contractor.businessName ?? contractor.name,
       messages: [],
     };
-    return [newThread, ...INITIAL_THREADS];
-  });
+    return [newThread, ...baseThreads];
+  };
 
-  // Set active thread: if ?contractor= is specified, find that thread; otherwise use first thread
-  const [activeThread, setActiveThread] = useState<MessageThread | null>(() => {
-    const contractorId = searchParams.get("contractor");
-    if (contractorId && currentUser) {
-      const match = threads.find(
-        (th) => th.participants.includes(contractorId) && th.participants.includes(currentUser.id)
+  const resolveInitialActiveThread = (seedThreads: MessageThread[]): MessageThread | null => {
+    if (contractorIdParam && currentUser) {
+      const match = seedThreads.find(
+        (th) =>
+          th.participants.includes(contractorIdParam) &&
+          th.participants.includes(currentUser.id)
       );
       if (match) return match;
     }
-    return threads[0] ?? null;
-  });
+    return seedThreads[0] ?? null;
+  };
+
+  // Build initial threads — add a new thread if ?contractor= param is present and thread doesn't exist yet
+  const [threads, setThreads] = useState<MessageThread[]>(() => buildInitialThreads());
+
+  // Set active thread: if ?contractor= is specified, find that thread; otherwise use first thread
+  const [activeThread, setActiveThread] = useState<MessageThread | null>(() =>
+    resolveInitialActiveThread(threads)
+  );
 
   const [input, setInput] = useState("");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeThread?.messages.length]);
+
+  useEffect(() => {
+    const nextThreads = buildInitialThreads();
+    setThreads(nextThreads);
+    setActiveThread(resolveInitialActiveThread(nextThreads));
+    // Reset composer so message language is consistent after toggles.
+    setInput("");
+  }, [lang, contractorIdParam, currentUser?.id]);
 
   useEffect(() => {
     if (dataMode !== "live" || !activeThread?.projectId) {
@@ -80,7 +100,12 @@ export default function MessagesScreen() {
           id: item.id,
           threadId: activeThread.id,
           senderId: item.senderId,
-          text: item.body,
+          text: getLocalizedField(
+            item as unknown as Record<string, unknown>,
+            "body",
+            lang,
+            item.body
+          ),
           timestamp: item.createdAt,
           read: true,
         }));
@@ -97,7 +122,7 @@ export default function MessagesScreen() {
         // keep existing thread data on failures
       }
     })();
-  }, [activeThread?.id, activeThread?.projectId, dataMode]);
+  }, [activeThread?.id, activeThread?.projectId, dataMode, lang]);
 
   const sendMessage = () => {
     if (!input.trim() || !activeThread || !currentUser) return;
@@ -121,7 +146,12 @@ export default function MessagesScreen() {
             id: response.message.id,
             threadId: activeThread.id,
             senderId: response.message.senderId,
-            text: response.message.body,
+            text: getLocalizedField(
+              response.message as unknown as Record<string, unknown>,
+              "body",
+              lang,
+              response.message.body
+            ),
             timestamp: response.message.createdAt,
             read: true,
           };
@@ -186,7 +216,7 @@ export default function MessagesScreen() {
   }
 
   const otherUserId = activeThread.participants.find((p) => p !== currentUser?.id);
-  const otherUser = findUserById(otherUserId ?? "");
+  const otherUser = findUserById(otherUserId ?? "", lang);
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
@@ -246,7 +276,7 @@ export default function MessagesScreen() {
                   {msg.text}
                 </div>
                 <span className="text-[9px] text-gray-400 mt-1 px-1">
-                  {formatTime(msg.timestamp)}
+                  {formatTime(msg.timestamp, locale)}
                 </span>
               </div>
             </div>

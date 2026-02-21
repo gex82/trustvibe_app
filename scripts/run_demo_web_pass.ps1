@@ -97,6 +97,13 @@ try {
   $meta.demoWebReachable = $true
   Write-Ok 'Demo-web is ready'
 
+  Write-Step 'Running demo-web localization gates'
+  npm run check:demo-web:localization
+  if ($LASTEXITCODE -ne 0) {
+    throw 'check:demo-web:localization failed'
+  }
+  Write-Ok 'Localization checks passed'
+
   Write-Step 'Running Playwright demo-web pass'
   $env:DEMO_PASS_DIR = $runDir
   $env:DEMO_WEB_URL = $DemoWebUrl

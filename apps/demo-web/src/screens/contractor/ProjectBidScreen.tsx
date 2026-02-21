@@ -14,7 +14,7 @@ export default function ProjectBidScreen() {
   const navigate = useNavigate();
   const { getProject, submitQuote } = useProjects();
   const { currentUser } = useAuth();
-  const { t } = useApp();
+  const { t, locale } = useApp();
 
   const project = getProject(id ?? "");
   const [amount, setAmount] = useState("");
@@ -141,7 +141,7 @@ export default function ProjectBidScreen() {
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
             <p className="text-amber-800 font-bold text-[14px]">{t("bid.alreadyQuoted")}</p>
             <p className="text-amber-600 text-[12px] mt-1">
-              {t("bid.alreadyQuotedSub")} {formatCurrency(existingQuote.amount)} · {t("bid.timeline")} {existingQuote.timeline}
+              {t("bid.alreadyQuotedSub")} {formatCurrency(existingQuote.amount, locale)} · {t("bid.timeline")} {existingQuote.timeline}
             </p>
           </div>
         )}
@@ -225,7 +225,7 @@ export default function ProjectBidScreen() {
                 <div className="border-t border-gray-100 mt-3 pt-2 flex items-center justify-between">
                   <span className="text-[12px] text-gray-500 font-medium">{t("bid.breakdownTotal")}</span>
                   <span className="text-[14px] font-extrabold text-gray-800">
-                    {formatCurrency(total)}
+                    {formatCurrency(total, locale)}
                   </span>
                 </div>
               )}
@@ -271,9 +271,9 @@ export default function ProjectBidScreen() {
             <button
               onClick={handleSubmit}
               disabled={!amount || parseFloat(amount) <= 0}
-              className="w-full bg-teal-600 text-white font-bold py-4 rounded-2xl text-[15px] pressable disabled:opacity-40"
-            >
-              {t("bid.submitBtn")} {amount ? formatCurrency(parseFloat(amount)) : "$0"}
+            className="w-full bg-teal-600 text-white font-bold py-4 rounded-2xl text-[15px] pressable disabled:opacity-40"
+          >
+              {t("bid.submitBtn")} {amount ? formatCurrency(parseFloat(amount), locale) : "$0"}
             </button>
 
             <p className="text-[10px] text-gray-400 text-center leading-relaxed pb-2">

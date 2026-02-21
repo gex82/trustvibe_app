@@ -13,7 +13,7 @@ export default function ApproveReleaseScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getProject, approveRelease, raiseIssue } = useProjects();
-  const { t } = useApp();
+  const { t, lang, locale } = useApp();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState<"approved" | "issue" | null>(null);
 
@@ -29,7 +29,7 @@ export default function ApproveReleaseScreen() {
 
   const acceptedQuote = project.quotes.find((q) => q.id === project.acceptedQuoteId);
   const contractor = acceptedQuote
-    ? (findUserById(acceptedQuote.contractorId) as Contractor | null)
+    ? (findUserById(acceptedQuote.contractorId, lang) as Contractor | null)
     : null;
 
   const handleApprove = async () => {
@@ -54,7 +54,7 @@ export default function ApproveReleaseScreen() {
           </div>
           <h2 className="text-[22px] font-extrabold text-gray-900 mb-2">{t("release.successTitle")}</h2>
           <p className="text-gray-500 text-[13px] leading-relaxed mb-2 max-w-xs">
-            <span className="font-bold text-gray-700">{formatCurrency(project.escrowAmount ?? 0)}</span> {t("release.successSub")} {contractor?.businessName ?? "the contractor"}.
+            <span className="font-bold text-gray-700">{formatCurrency(project.escrowAmount ?? 0, locale)}</span> {t("release.successSub")} {contractor?.businessName ?? t("release.contractorFallback")}.
           </p>
           <p className="text-gray-400 text-[12px] mb-8">{t("release.fundsArrival")}</p>
           <button
@@ -114,7 +114,7 @@ export default function ApproveReleaseScreen() {
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-[12px] text-gray-600 leading-relaxed italic">
-                "{project.completionNote ?? "All work has been completed as per the agreement. Please review and approve when ready."}"
+                "{project.completionNote ?? t("release.defaultCompletionNote")}"
               </p>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function ApproveReleaseScreen() {
             <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{t("release.completionPhotos")}</p>
             <div className="grid grid-cols-2 gap-2">
               {project.completionPhotos.map((photo, i) => (
-                <img key={i} src={photo} alt={`Completion ${i + 1}`} className="w-full h-28 object-cover rounded-xl" />
+                <img key={i} src={photo} alt={`${t("release.completionPhotos")} ${i + 1}`} className="w-full h-28 object-cover rounded-xl" />
               ))}
             </div>
           </div>
@@ -141,11 +141,11 @@ export default function ApproveReleaseScreen() {
           <div className="flex items-center justify-between">
             <span className="text-[13px] text-teal-700">{t("release.heldInEscrow")}</span>
             <span className="text-[16px] font-extrabold text-teal-800">
-              {formatCurrency(project.escrowAmount ?? 0)}
+              {formatCurrency(project.escrowAmount ?? 0, locale)}
             </span>
           </div>
           <p className="text-[11px] text-teal-600 mt-1.5 leading-relaxed">
-            {t("release.releaseNote")} {contractor?.businessName ?? "the contractor"}.
+            {t("release.releaseNote")} {contractor?.businessName ?? t("release.contractorFallback")}.
           </p>
         </div>
 
@@ -161,7 +161,7 @@ export default function ApproveReleaseScreen() {
             ) : (
               <>
                 <CheckCircle size={18} />
-                {t("release.approveBtn")} {formatCurrency(project.escrowAmount ?? 0)}
+                {t("release.approveBtn")} {formatCurrency(project.escrowAmount ?? 0, locale)}
               </>
             )}
           </button>

@@ -67,6 +67,7 @@ export default function TopBar({
         {right}
         {/* Language toggle */}
         <button
+          data-testid="topbar-language-toggle"
           onClick={() => setLang(lang === "en" ? "es" : "en")}
           className={`text-[11px] font-bold px-2 py-1 rounded-full border transition-colors pressable ${
             light

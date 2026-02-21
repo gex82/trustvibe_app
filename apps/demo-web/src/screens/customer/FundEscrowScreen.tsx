@@ -11,7 +11,7 @@ export default function FundEscrowScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getProject, fundEscrow } = useProjects();
-  const { t } = useApp();
+  const { t, locale } = useApp();
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
@@ -46,7 +46,7 @@ export default function FundEscrowScreen() {
           </div>
           <h2 className="text-[22px] font-extrabold text-gray-900 mb-2">{t("fund.success.title")}</h2>
           <p className="text-gray-500 text-[13px] leading-relaxed mb-6 max-w-xs">
-            <span className="font-bold text-gray-700">{formatCurrency(amount)}</span> {t("fund.success.sub")}
+            <span className="font-bold text-gray-700">{formatCurrency(amount, locale)}</span> {t("fund.success.sub")}
           </p>
           <div className="w-full bg-teal-50 border border-teal-100 rounded-2xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-2">
@@ -82,7 +82,7 @@ export default function FundEscrowScreen() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-[13px] text-gray-600">{project.title}</span>
-              <span className="text-[14px] font-bold text-gray-800">{formatCurrency(amount)}</span>
+              <span className="text-[14px] font-bold text-gray-800">{formatCurrency(amount, locale)}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
@@ -91,12 +91,12 @@ export default function FundEscrowScreen() {
                   <span className="text-[9px] text-gray-500 font-bold">i</span>
                 </div>
               </div>
-              <span className="text-[13px] font-semibold text-gray-600">{formatCurrency(fee)}</span>
+              <span className="text-[13px] font-semibold text-gray-600">{formatCurrency(fee, locale)}</span>
             </div>
           </div>
           <div className="border-t border-gray-100 mt-3 pt-3 flex items-center justify-between">
             <span className="text-[14px] font-bold text-gray-800">{t("label.totalCharged")}</span>
-            <span className="text-[20px] font-extrabold text-teal-700">{formatCurrency(total)}</span>
+            <span className="text-[20px] font-extrabold text-teal-700">{formatCurrency(total, locale)}</span>
           </div>
           <p className="text-[10px] text-gray-400 mt-1">{t("fund.escrowNote")}</p>
         </div>
@@ -152,7 +152,7 @@ export default function FundEscrowScreen() {
           ) : (
             <>
               <Lock size={16} />
-              {t("fund.confirmBtn")} {formatCurrency(total)}
+              {t("fund.confirmBtn")} {formatCurrency(total, locale)}
             </>
           )}
         </button>

@@ -28,6 +28,7 @@
     "scenario:high-ticket": "npm run scenario:high-ticket -w @trustvibe/functions",
     "bootstrap:demo": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_demo.ps1",
     "check:demo:localization": "npm exec -w @trustvibe/functions ts-node ../scripts/check_demo_localization.ts",
+    "check:demo-web:localization": "npm exec -w @trustvibe/functions ts-node ../scripts/check_demo_web_localization.ts && npm exec -w @trustvibe/functions ts-node ../scripts/check_demo_web_localized_data.ts",
     "test:e2e:web": "playwright test --config=playwright.config.ts",
     "test:e2e:demo-web": "playwright test --config=playwright.demo-web.config.ts",
     "test:unit:demo-web": "npm run test -w @trustvibe/demo-web",

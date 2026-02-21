@@ -14,6 +14,7 @@ import {
 import { findDemoUserByEmail, mapProfileToDemoUser } from "../adapters/users";
 import { useRuntime } from "./RuntimeContext";
 import { enableDemoDataFallback } from "../config/runtime";
+import { useApp } from "./AppContext";
 
 interface AuthContextType {
   currentUser: DemoUser | null;
@@ -26,6 +27,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { dataMode, setDataMode } = useRuntime();
+  const { lang } = useApp();
   const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
   const [hydrating, setHydrating] = useState(false);
 
@@ -33,11 +35,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (dataMode === "live") {
       try {
         await loginApi({ email, password });
-        const matched = findDemoUserByEmail(email);
+        const matched = findDemoUserByEmail(email, lang);
         if (matched) {
           setCurrentUser({ ...matched });
         } else {
-          setCurrentUser(mapProfileToDemoUser(null, email));
+          setCurrentUser(mapProfileToDemoUser(null, email, lang));
         }
         setHydrating(false);
         return true;
@@ -48,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const user = findUserByCredentials(email, password);
+    const user = findUserByCredentials(email, password, lang);
     if (user) {
       if (dataMode === "live") {
         setDataMode("mock");

@@ -12,7 +12,7 @@ import { getRecommendations } from "../../services/api";
 
 export default function SearchScreen() {
   const navigate = useNavigate();
-  const { t } = useApp();
+  const { t, lang } = useApp();
   const { dataMode } = useRuntime();
   const [query, setQuery] = useState("");
   const [liveContractors, setLiveContractors] = useState<Contractor[] | null>(null);
@@ -23,12 +23,12 @@ export default function SearchScreen() {
   }>({});
 
   const CATEGORIES = [
-    { key: "plumbing", label: t("category.plumbing") },
-    { key: "electrical", label: t("category.electrical") },
-    { key: "painting", label: t("category.painting") },
-    { key: "hvac", label: t("category.hvac") },
-    { key: "carpentry", label: t("category.carpentry") },
-    { key: "tiling", label: t("category.tiling") },
+    { key: "plumbing", label: t("category.plumbing"), terms: ["plumbing", t("category.plumbing")] },
+    { key: "electrical", label: t("category.electrical"), terms: ["electrical", t("category.electrical")] },
+    { key: "painting", label: t("category.painting"), terms: ["painting", t("category.painting")] },
+    { key: "hvac", label: t("category.hvac"), terms: ["hvac", t("category.hvac")] },
+    { key: "carpentry", label: t("category.carpentry"), terms: ["carpentry", t("category.carpentry")] },
+    { key: "tiling", label: t("category.tiling"), terms: ["tiling", t("category.tiling")] },
   ];
   const MUNICIPALITIES = ["San Juan", "Bayamon", "Carolina", "Ponce", "Caguas"];
   const RATING_FILTERS = [4, 3];
@@ -50,33 +50,34 @@ export default function SearchScreen() {
           .map((item, index) => {
             const meta = item as any;
             const matched = item.contractorId
-              ? (findUserById(item.contractorId) as Contractor | null)
+              ? (findUserById(item.contractorId, lang) as Contractor | null)
               : null;
             if (matched) {
               return matched;
             }
             const id = item.contractorId ?? `live-contractor-${index}`;
+            const fallbackName = t("search.recommendedContractor");
             return {
               id,
               email: `${id}@trustvibe.test`,
               password: "",
               role: "contractor" as const,
-              name: meta.contractorName ?? "Recommended Contractor",
-              businessName: meta.contractorName ?? "Recommended Contractor",
+              name: meta.contractorName ?? fallbackName,
+              businessName: meta.contractorName ?? fallbackName,
               avatarUrl:
                 meta.contractorAvatarUrl ?? "/images/contractors/juan-reyes.png",
-              location: item.reason,
+              location: "Puerto Rico",
               memberSince: "2026-01",
               verified: true,
-              specialty: ["General"],
+              specialty: [t("search.generalSpecialty")],
               rating: meta.contractorRatingAvg ?? 4.7,
               reviewCount: meta.contractorReviewCount ?? 12,
               completedJobs: 8,
-              bio: "Recommended by TrustVibe compatibility scoring.",
+              bio: t("search.recommendedBio"),
               portfolioImages: [],
               insuranceVerified: true,
-              responseTime: "< 2 hours",
-              badges: ["Recommended"],
+              responseTime: lang === "es" ? "< 2 horas" : "< 2 hours",
+              badges: [t("search.recommendedBadge")],
             };
           });
         setLiveContractors(mapped);
@@ -88,9 +89,9 @@ export default function SearchScreen() {
     return () => {
       mounted = false;
     };
-  }, [dataMode]);
+  }, [dataMode, lang, t]);
 
-  const contractors = liveContractors?.length ? liveContractors : getContractors();
+  const contractors = liveContractors?.length ? liveContractors : getContractors(lang);
   const hasActiveFilters = Boolean(
     filters.category || filters.municipality || filters.minRating
   );
@@ -102,11 +103,15 @@ export default function SearchScreen() {
       c.businessName.toLowerCase().includes(query.toLowerCase()) ||
       c.specialty.some((s) => s.toLowerCase().includes(query.toLowerCase()));
 
+    const activeCategory = CATEGORIES.find((cat) => cat.key === filters.category);
     const matchesCategory =
-      !filters.category ||
-      c.specialty.some((s) =>
-        s.toLowerCase().includes(filters.category?.toLowerCase() ?? "")
-      );
+      !activeCategory ||
+      c.specialty.some((s) => {
+        const lower = s.toLowerCase();
+        return activeCategory.terms.some((term) =>
+          lower.includes(term.toLowerCase())
+        );
+      });
     const matchesMunicipality =
       !filters.municipality ||
       (c.location ?? "").toLowerCase().includes(filters.municipality.toLowerCase());
@@ -155,14 +160,14 @@ export default function SearchScreen() {
       {/* Category chips */}
       <div className="px-4 py-3 overflow-y-auto scrollbar-none bg-white border-b border-gray-100 flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] text-gray-500 font-semibold uppercase">Filters</p>
+          <p className="text-[11px] text-gray-500 font-semibold uppercase">{t("search.filters")}</p>
           {hasActiveFilters ? (
             <button
               data-testid="search-clear-filters"
               className="text-teal-600 text-[11px] font-semibold"
               onClick={() => setFilters({})}
             >
-              Clear filters
+              {t("search.clearFilters")}
             </button>
           ) : null}
         </div>
@@ -210,7 +215,7 @@ export default function SearchScreen() {
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {stars}+ Stars
+              {stars}+ {t("search.starsSuffix")}
             </button>
           ))}
         </div>

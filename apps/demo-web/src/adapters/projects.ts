@@ -5,6 +5,7 @@ import type {
   ProjectQuoteRecord,
 } from "@trustvibe/shared";
 import type { DemoProject, DemoQuote, LineItem, ProjectStatus } from "../types";
+import { getLocalizedField, type DemoLang } from "../utils/localization";
 
 function toProjectStatus(escrowState: EscrowState | string): ProjectStatus {
   switch (escrowState) {
@@ -32,19 +33,20 @@ function toProjectStatus(escrowState: EscrowState | string): ProjectStatus {
   }
 }
 
-function toBudgetLabel(min?: number, max?: number): string {
+function toBudgetLabel(lang: DemoLang, min?: number, max?: number): string {
+  const locale = lang === "es" ? "es-PR" : "en-US";
   const toUsd = (value: number) =>
-    `$${Math.round(value / 100).toLocaleString("en-US")}`;
+    `$${Math.round(value / 100).toLocaleString(locale)}`;
   if (min && max) {
     return `${toUsd(min)} - ${toUsd(max)}`;
   }
   if (max) {
-    return `Up to ${toUsd(max)}`;
+    return lang === "es" ? `Hasta ${toUsd(max)}` : `Up to ${toUsd(max)}`;
   }
   if (min) {
     return `${toUsd(min)}+`;
   }
-  return "TBD";
+  return lang === "es" ? "Por definir" : "TBD";
 }
 
 function toLineItems(items?: Array<{ description: string; amountCents: number }>): LineItem[] {
@@ -54,14 +56,17 @@ function toLineItems(items?: Array<{ description: string; amountCents: number }>
   }));
 }
 
-export function mapQuoteRecordToDemoQuote(record: ProjectQuoteRecord): DemoQuote {
+export function mapQuoteRecordToDemoQuote(
+  record: ProjectQuoteRecord,
+  lang: DemoLang = "en"
+): DemoQuote {
   return {
     id: record.id,
     projectId: record.projectId,
     contractorId: record.contractorId,
     amount: Math.round(record.priceCents / 100),
     breakdown: toLineItems(record.lineItems),
-    timeline: `${record.timelineDays} days`,
+    timeline: lang === "es" ? `${record.timelineDays} días` : `${record.timelineDays} days`,
     notes: record.scopeNotes,
     status:
       record.status === "SELECTED"
@@ -75,21 +80,27 @@ export function mapQuoteRecordToDemoQuote(record: ProjectQuoteRecord): DemoQuote
 
 export function mapProjectRecordToDemoProject(
   record: ProjectRecord,
-  quotes: ProjectQuoteRecord[] = []
+  quotes: ProjectQuoteRecord[] = [],
+  lang: DemoLang = "en"
 ): DemoProject {
   return {
     id: record.id,
     customerId: record.customerId,
-    title: record.titleEn ?? record.title,
-    description: record.descriptionEn ?? record.description,
+    title: getLocalizedField(record as unknown as Record<string, unknown>, "title", lang, record.title),
+    description: getLocalizedField(
+      record as unknown as Record<string, unknown>,
+      "description",
+      lang,
+      record.description
+    ),
     category: record.category,
     location: record.municipality,
-    budget: toBudgetLabel(record.budgetMinCents, record.budgetMaxCents),
+    budget: toBudgetLabel(lang, record.budgetMinCents, record.budgetMaxCents),
     timeline: record.desiredTimeline,
     status: toProjectStatus(record.escrowState),
     createdAt: record.createdAt,
     photos: record.photos ?? [],
-    quotes: quotes.map(mapQuoteRecordToDemoQuote),
+    quotes: quotes.map((quote) => mapQuoteRecordToDemoQuote(quote, lang)),
     acceptedQuoteId: record.selectedQuoteId,
     escrowAmount: record.selectedQuotePriceCents
       ? Math.round(record.selectedQuotePriceCents / 100)
@@ -99,7 +110,8 @@ export function mapProjectRecordToDemoProject(
 }
 
 export function mapProjectDetailResponse(
-  response: CallableResponse<"getProject">
+  response: CallableResponse<"getProject">,
+  lang: DemoLang = "en"
 ): DemoProject {
-  return mapProjectRecordToDemoProject(response.project, response.quotes);
+  return mapProjectRecordToDemoProject(response.project, response.quotes, lang);
 }

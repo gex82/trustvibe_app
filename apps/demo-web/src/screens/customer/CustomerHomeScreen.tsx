@@ -11,13 +11,13 @@ import { formatCurrency, formatRelative } from "../../utils/formatters";
 export default function CustomerHomeScreen() {
   const { currentUser, logout } = useAuth();
   const { projects } = useProjects();
-  const { t, lang, setLang } = useApp();
+  const { t, lang, locale, setLang } = useApp();
   const navigate = useNavigate();
 
   const ACTIVITY = [
-    { id: "a1", icon: "💬", text: `Juan ${t("activity.messageSent")} Bathroom Renovation`, time: "2026-02-01T12:05:00", path: "/messages" },
+    { id: "a1", icon: "💬", text: `Juan ${t("activity.messageSent")} ${t("activity.projectBathroom")}`, time: "2026-02-01T12:05:00", path: "/messages" },
     { id: "a2", icon: "✅", text: `${t("activity.escrowFunded")} $2,800 ${t("activity.heldSecurely")}`, time: "2026-01-15T09:00:00", path: "/project/proj-bathroom" },
-    { id: "a3", icon: "📋", text: `Juan ${t("activity.quoteSubmitted")} Kitchen Cabinet Repair`, time: "2026-02-05T14:30:00", path: "/project/proj-kitchen" },
+    { id: "a3", icon: "📋", text: `Juan ${t("activity.quoteSubmitted")} ${t("activity.projectKitchen")}`, time: "2026-02-05T14:30:00", path: "/project/proj-kitchen" },
   ];
 
   const myProjects = projects.filter((p) => p.customerId === currentUser?.id);
@@ -28,7 +28,7 @@ export default function CustomerHomeScreen() {
     (p) => p.status === "in_progress" || p.status === "funded" || p.status === "complete_requested"
   );
 
-  const firstName = currentUser?.name?.split(" ")[0] ?? "there";
+  const firstName = currentUser?.name?.split(" ")[0] ?? t("home.fallbackName");
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t("greeting.morning") : hour < 17 ? t("greeting.afternoon") : t("greeting.evening");
@@ -69,7 +69,7 @@ export default function CustomerHomeScreen() {
               onClick={() => void logout()}
               className="text-[11px] font-semibold text-gray-500 hover:text-red-500"
             >
-              Log out
+              {t("admin.logout")}
             </button>
           </div>
         </div>
@@ -118,9 +118,9 @@ export default function CustomerHomeScreen() {
                   <div className="mt-3 flex items-center justify-between bg-teal-50 rounded-xl px-3 py-2">
                     <div>
                       <p className="text-[10px] text-teal-600 font-semibold uppercase">{t("home.inEscrow")}</p>
-                      <p className="text-teal-800 font-bold text-[16px]">
-                        {formatCurrency(activeProject.escrowAmount)}
-                      </p>
+                        <p className="text-teal-800 font-bold text-[16px]">
+                        {formatCurrency(activeProject.escrowAmount, locale)}
+                        </p>
                     </div>
                     <Shield size={20} className="text-teal-500" />
                   </div>
@@ -188,7 +188,7 @@ export default function CustomerHomeScreen() {
                   <p className="text-[12px] text-gray-700 leading-snug">{item.text}</p>
                   <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
                     <Clock size={10} />
-                    {formatRelative(item.time)}
+                    {formatRelative(item.time, locale)}
                   </p>
                 </div>
                 <ChevronRight size={14} className="text-gray-300 flex-shrink-0 mt-1" />

@@ -1,6 +1,6 @@
 # Customer Demo Script (Click-by-Click, iPad Recording)
 
-Last updated: 2026-02-20
+Last updated: 2026-02-21
 
 ## Preflight (before opening camera)
 
@@ -90,10 +90,12 @@ Use this variant when presenting in a browser with phone-mimic framing:
 3. Open `http://localhost:5174/role`.
 4. Select `Continue as Customer`.
 5. Login with `maria.rodriguez@trustvibe.test` / `DemoCustomer!123`.
-6. On Home, confirm hero/project images render (no broken placeholders), then toggle language EN/ES.
-7. Open Search, then open one contractor profile.
-8. Open Projects, then open one project and show photos + workflow card.
-9. Tap bottom `Messages` tab and confirm `/messages` composer is visible.
-10. Return to Home and tap avatar header area to open Profile.
-11. Open `Documents` and confirm upload control renders.
-12. Return Home and use quick logout.
+6. On login, switch to `ES` before submitting credentials.
+7. On Home, confirm hero/project images render and visible copy is Spanish-only.
+8. Open Search, verify `Filtros`/`Limpiar filtros`, then open one contractor profile.
+9. Open Projects, then open one project and show photos + workflow card in Spanish copy.
+10. Tap bottom `Mensajes` tab and confirm `/messages` composer is visible.
+11. Return to Home and tap avatar header area to open Profile.
+12. Open `Documents` and confirm upload control renders with Spanish labels.
+13. Return Home and use quick logout.
+14. Optional hard gate: run `npm run check:demo-web:localization` before recording handoff.

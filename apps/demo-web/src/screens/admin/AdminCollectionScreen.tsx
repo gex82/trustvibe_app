@@ -1,6 +1,7 @@
 import TopBar from "../../components/layout/TopBar";
 import Card from "../../components/ui/Card";
 import { useCollectionData } from "../../hooks/useCollectionData";
+import { useApp } from "../../context/AppContext";
 
 type Props = {
   title: string;
@@ -15,6 +16,7 @@ export function AdminCollectionScreen({
   columns,
   testIdPrefix,
 }: Props) {
+  const { t } = useApp();
   const { rows, loading, error } = useCollectionData(collectionPath, 80);
 
   return (
@@ -23,7 +25,7 @@ export function AdminCollectionScreen({
       <div className="px-4 py-4 flex flex-col gap-3">
         <Card>
           <p className="text-[12px] text-gray-500">
-            {loading ? "Loading..." : `${rows.length} rows`}
+            {loading ? t("common.loading") : `${rows.length} ${t("admin.collection.rowsLabel")}`}
           </p>
           {error ? <p className="text-[12px] text-red-600 mt-2">{error}</p> : null}
         </Card>

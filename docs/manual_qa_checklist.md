@@ -1,6 +1,6 @@
 # Manual QA Checklist (Demo-Critical)
 
-Last updated: 2026-02-20
+Last updated: 2026-02-21
 
 Batch streams:
 - Batch 1: `docs/batch1_ux_fixes.md`
@@ -156,6 +156,10 @@ Batch streams:
 - [ ] Admin cases card can be expanded and one outcome action produces visible result banner.
 - [ ] Live/mock toggle works in floating dev switcher.
 - [ ] Demo data fallback mode remains usable when backend probe fails.
+- [ ] ES parity (customer): `/home -> /search -> /project/:id -> /messages -> /profile/documents` contains Spanish UI copy only (no blocked English tokens).
+- [ ] ES parity (contractor): `/home -> /earnings -> /messages -> /profile/edit -> /profile/documents` contains Spanish UI copy only.
+- [ ] ES parity (admin): `/admin -> /admin/users -> /admin/cases -> /admin/config` contains Spanish UI copy only.
+- [ ] `npm run check:demo-web:localization` passes locally before demo runs.
 
 ## Automation Parity
 

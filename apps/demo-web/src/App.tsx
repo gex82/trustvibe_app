@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { useApp } from "./context/AppContext";
 import PhoneFrame from "./components/layout/PhoneFrame";
 import DevSwitcher from "./components/ui/DevSwitcher";
 
@@ -53,11 +54,12 @@ import AdminConfigScreen from "./screens/admin/AdminConfigScreen";
 
 function AppRoutes() {
   const { currentUser, hydrating } = useAuth();
+  const { t } = useApp();
 
   if (hydrating) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500 text-sm">
-        Loading session...
+        {t("app.loadingSession")}
       </div>
     );
   }

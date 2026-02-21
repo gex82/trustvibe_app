@@ -11,7 +11,7 @@ import { formatCurrency } from "../../utils/formatters";
 export default function MyProjectsScreen() {
   const { projects } = useProjects();
   const { currentUser } = useAuth();
-  const { t } = useApp();
+  const { t, locale } = useApp();
   const navigate = useNavigate();
 
   const myProjects = projects.filter((p) => p.customerId === currentUser?.id);
@@ -77,7 +77,7 @@ export default function MyProjectsScreen() {
                       <div className="ml-auto flex items-center gap-1 text-teal-600">
                         <Shield size={11} />
                         <span className="text-[11px] font-bold">
-                          {formatCurrency(project.escrowAmount)}
+                          {formatCurrency(project.escrowAmount, locale)}
                         </span>
                       </div>
                     )}

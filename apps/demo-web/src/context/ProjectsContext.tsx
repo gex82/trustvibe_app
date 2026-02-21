@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Project, Quote } from "../types";
-import { INITIAL_PROJECTS } from "../data/projects";
+import { getInitialProjects } from "../data/projects";
 import {
   acceptAgreement,
   approveRelease as approveReleaseApi,
@@ -27,6 +27,7 @@ import {
 } from "../adapters/projects";
 import { useRuntime } from "./RuntimeContext";
 import { enableDemoDataFallback } from "../config/runtime";
+import { useApp } from "./AppContext";
 
 interface ProjectsContextType {
   projects: Project[];
@@ -49,8 +50,8 @@ interface ProjectsContextType {
 
 const ProjectsContext = createContext<ProjectsContextType | null>(null);
 
-function cloneMockProjects(): Project[] {
-  return INITIAL_PROJECTS.map((item) => ({
+function cloneMockProjects(lang: "en" | "es"): Project[] {
+  return getInitialProjects(lang).map((item) => ({
     ...item,
     quotes: item.quotes.map((quote) => ({ ...quote, breakdown: [...quote.breakdown] })),
     photos: [...item.photos],
@@ -79,7 +80,8 @@ function parseBudgetLabel(budget: string): { min?: number; max?: number } {
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
   const { dataMode, setDataMode } = useRuntime();
-  const [projects, setProjects] = useState<Project[]>(cloneMockProjects);
+  const { lang } = useApp();
+  const [projects, setProjects] = useState<Project[]>(() => cloneMockProjects(lang));
   const [loading, setLoading] = useState(true);
 
   const updateProject = useCallback((projectId: string, updates: Partial<Project>) => {
@@ -92,7 +94,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     setLoading(true);
 
     if (dataMode === "mock") {
-      setProjects(cloneMockProjects());
+      setProjects(cloneMockProjects(lang));
       setLoading(false);
       return;
     }
@@ -103,9 +105,9 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         listed.projects.map(async (projectRecord) => {
           try {
             const detail = await getProjectApi({ projectId: projectRecord.id });
-            return mapProjectDetailResponse(detail);
+            return mapProjectDetailResponse(detail, lang);
           } catch {
-            return mapProjectRecordToDemoProject(projectRecord);
+            return mapProjectRecordToDemoProject(projectRecord, [], lang);
           }
         })
       );
@@ -113,12 +115,12 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     } catch {
       if (enableDemoDataFallback) {
         setDataMode("mock");
-        setProjects(cloneMockProjects());
+        setProjects(cloneMockProjects(lang));
       }
     } finally {
       setLoading(false);
     }
-  }, [dataMode, setDataMode]);
+  }, [dataMode, lang, setDataMode]);
 
   useEffect(() => {
     void refresh();

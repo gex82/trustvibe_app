@@ -1,18 +1,19 @@
 import { TrendingUp, Shield, DollarSign } from "lucide-react";
 import { useApp } from "../../context/AppContext";
-import { EARNINGS } from "../../data/earnings";
+import { getEarnings } from "../../data/earnings";
 import TopBar from "../../components/layout/TopBar";
 import Badge from "../../components/ui/Badge";
 import { formatCurrency, formatDate } from "../../utils/formatters";
 
 export default function EarningsScreen() {
-  const { t } = useApp();
-  const paid = EARNINGS.filter((e) => e.status === "paid");
-  const held = EARNINGS.filter((e) => e.status === "held");
+  const { t, lang, locale } = useApp();
+  const earnings = getEarnings(lang);
+  const paid = earnings.filter((e) => e.status === "paid");
+  const held = earnings.filter((e) => e.status === "held");
 
   const totalNet = paid.reduce((sum, e) => sum + e.netPaid, 0);
-  const totalFees = EARNINGS.reduce((sum, e) => sum + e.fee, 0);
-  const totalGross = EARNINGS.reduce((sum, e) => sum + e.amount, 0);
+  const totalFees = earnings.reduce((sum, e) => sum + e.fee, 0);
+  const totalGross = earnings.reduce((sum, e) => sum + e.amount, 0);
   const heldAmount = held.reduce((sum, e) => sum + e.amount, 0);
 
   return (
@@ -28,23 +29,23 @@ export default function EarningsScreen() {
           <p className="text-teal-100 text-[11px] font-semibold uppercase tracking-widest mb-1">
             {t("earn.totalEarned")}
           </p>
-          <p className="text-[36px] font-extrabold">{formatCurrency(totalNet)}</p>
+          <p className="text-[36px] font-extrabold">{formatCurrency(totalNet, locale)}</p>
           <p className="text-teal-200 text-[12px] mt-1">{t("earn.afterFees")}</p>
 
           <div className="flex gap-4 mt-4 pt-4 border-t border-white/20">
             <div>
-              <p className="text-[13px] font-bold">{formatCurrency(heldAmount)}</p>
+              <p className="text-[13px] font-bold">{formatCurrency(heldAmount, locale)}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <Shield size={11} className="text-teal-200" />
                 <p className="text-teal-200 text-[11px]">{t("earn.inEscrow")}</p>
               </div>
             </div>
             <div>
-              <p className="text-[13px] font-bold">{EARNINGS.length}</p>
+              <p className="text-[13px] font-bold">{earnings.length}</p>
               <p className="text-teal-200 text-[11px] mt-0.5">{t("earn.totalJobs")}</p>
             </div>
             <div>
-              <p className="text-[13px] font-bold">{formatCurrency(totalFees)}</p>
+              <p className="text-[13px] font-bold">{formatCurrency(totalFees, locale)}</p>
               <p className="text-teal-200 text-[11px] mt-0.5">{t("earn.feesPaid")}</p>
             </div>
           </div>
@@ -54,7 +55,7 @@ export default function EarningsScreen() {
         <div className="flex gap-3 px-4 mt-3">
           <div className="flex-1 bg-white rounded-2xl p-3 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <DollarSign size={18} className="text-teal-500 mx-auto mb-1" />
-            <p className="text-[14px] font-extrabold text-gray-900">{formatCurrency(totalGross)}</p>
+            <p className="text-[14px] font-extrabold text-gray-900">{formatCurrency(totalGross, locale)}</p>
             <p className="text-[10px] text-gray-400">{t("earn.grossGmv")}</p>
           </div>
           <div className="flex-1 bg-white rounded-2xl p-3 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
@@ -72,10 +73,10 @@ export default function EarningsScreen() {
             {t("earn.history")}
           </h2>
           <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            {EARNINGS.map((e, i) => (
+            {earnings.map((e, i) => (
               <div
                 key={e.id}
-                className={`px-4 py-3.5 ${i < EARNINGS.length - 1 ? "border-b border-gray-50" : ""}`}
+                className={`px-4 py-3.5 ${i < earnings.length - 1 ? "border-b border-gray-50" : ""}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -90,15 +91,15 @@ export default function EarningsScreen() {
                         e.status === "held" ? "text-blue-600" : "text-emerald-600"
                       }`}
                     >
-                      +{formatCurrency(e.netPaid)}
+                      +{formatCurrency(e.netPaid, locale)}
                     </p>
                     <Badge status={e.status} size="xs" />
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-[10px] text-gray-400">{formatDate(e.paidAt)}</p>
+                  <p className="text-[10px] text-gray-400">{formatDate(e.paidAt, locale)}</p>
                   <p className="text-[10px] text-gray-400">
-                    {t("earn.fee")} {formatCurrency(e.fee)} · {t("earn.gross")} {formatCurrency(e.amount)}
+                    {t("earn.fee")} {formatCurrency(e.fee, locale)} · {t("earn.gross")} {formatCurrency(e.amount, locale)}
                   </p>
                 </div>
               </div>

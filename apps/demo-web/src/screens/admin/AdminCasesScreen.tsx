@@ -26,7 +26,7 @@ import {
 } from "../../adapters/adminCases";
 
 export default function AdminCasesScreen() {
-  const { t } = useApp();
+  const { t, locale } = useApp();
   const { dataMode } = useRuntime();
   const { rows, loading, error, refresh } = useCollectionData("cases", 80);
 
@@ -88,7 +88,7 @@ export default function AdminCasesScreen() {
 
     if (dataMode === "mock") {
       setResolutions((prev) => ({ ...prev, [caseItem.id]: action }));
-      setResult(`Mock mode: ${actionLabel} (${caseItem.id})`);
+      setResult(`${t("runtime.mockModeLabel")}: ${actionLabel} (${caseItem.id})`);
       return;
     }
 
@@ -129,14 +129,14 @@ export default function AdminCasesScreen() {
       <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-3">
         <Card>
           <p className="text-[12px] text-gray-500">
-            {loading ? "Loading..." : `${cases.length} cases`}
+            {loading ? t("common.loading") : `${cases.length} ${t("admin.cases.countLabel")}`}
           </p>
           {error && dataMode !== "mock" ? (
             <p className="text-[12px] text-red-600 mt-1">{error}</p>
           ) : null}
           {shouldUseFallback ? (
             <p className="text-[12px] text-amber-700 mt-1">
-              Demo fallback cases are shown for a stable walkthrough.
+              {t("admin.cases.fallbackBanner")}
             </p>
           ) : null}
           {result ? (
@@ -198,12 +198,12 @@ export default function AdminCasesScreen() {
                         </div>
                         <p className="font-bold text-gray-900 text-[14px]">{caseItem.title}</p>
                         <p className="text-gray-400 text-[11px]">
-                          {caseItem.customerName} vs {caseItem.contractorName}
+                          {caseItem.customerName} {t("admin.cases.vs")} {caseItem.contractorName}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
                         <p className="text-[15px] font-extrabold text-gray-800">
-                          {formatCurrency(caseItem.amountCents / 100)}
+                          {formatCurrency(caseItem.amountCents / 100, locale)}
                         </p>
                         <div className="flex items-center gap-1 text-teal-600">
                           <Shield size={11} />
@@ -234,8 +234,8 @@ export default function AdminCasesScreen() {
                       </p>
                       <div className="flex flex-col gap-1.5 mb-4">
                         {caseItem.evidence.length === 0 ? (
-                          <div className="bg-gray-50 rounded-xl px-3 py-2 text-[12px] text-gray-500">
-                            No evidence items attached.
+                            <div className="bg-gray-50 rounded-xl px-3 py-2 text-[12px] text-gray-500">
+                            {t("admin.cases.noEvidence")}
                           </div>
                         ) : (
                           caseItem.evidence.map((item) => (
@@ -272,7 +272,7 @@ export default function AdminCasesScreen() {
                               {!resolution && t("admin.cases.resolved")}
                             </p>
                             <p className="text-emerald-600 text-[11px] mt-0.5">
-                              {t("admin.cases.resolved")} - {formatCurrency(caseItem.amountCents / 100)}
+                              {t("admin.cases.resolved")} - {formatCurrency(caseItem.amountCents / 100, locale)}
                             </p>
                           </div>
                         </div>
@@ -312,7 +312,7 @@ export default function AdminCasesScreen() {
 
             {cases.length === 0 && !loading ? (
               <Card>
-                <p className="text-gray-500 text-[12px]">No cases found.</p>
+                <p className="text-gray-500 text-[12px]">{t("admin.cases.noCasesFound")}</p>
               </Card>
             ) : null}
           </div>

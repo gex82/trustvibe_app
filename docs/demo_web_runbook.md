@@ -1,6 +1,6 @@
 # Demo-Web Runbook
 
-Last updated: 2026-02-20
+Last updated: 2026-02-21
 
 ## Purpose
 
@@ -44,6 +44,8 @@ Last updated: 2026-02-20
 
 ## Automated Pass
 
+- Run localization gates only:
+  - `npm run check:demo-web:localization`
 - Run demo-web unit/integration tests (Vitest):
   - `npm run test:unit:demo-web`
 - Run Playwright suite only:
@@ -52,6 +54,14 @@ Last updated: 2026-02-20
   - `npm run pass:demo-web`
 
 Artifacts are written under `artifacts/demo-pass/<timestamp>/`.
+
+## Localization Troubleshooting
+
+1. If ES mode shows English text in UI, run `npm run check:demo-web:localization`.
+2. If the static gate fails, remove hardcoded English from `apps/demo-web/src/**` and use `t(...)` keys.
+3. If the data gate fails, add missing `*En`/`*Es` fields in `apps/demo-web/src/data/*`.
+4. Re-run unit + e2e localization suites before demo handoff.
+5. Contract reference: `docs/demo_web_localization_contract.md`.
 
 ## Notes
 

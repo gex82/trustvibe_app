@@ -3,9 +3,11 @@ import TopBar from "../../components/layout/TopBar";
 import Card from "../../components/ui/Card";
 import { adminSetConfig, getCurrentConfig } from "../../services/api";
 import { useRuntime } from "../../context/RuntimeContext";
+import { useApp } from "../../context/AppContext";
 
 export default function AdminConfigScreen() {
   const { dataMode } = useRuntime();
+  const { t } = useApp();
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,9 +42,19 @@ export default function AdminConfigScreen() {
 
   const keys = useMemo(() => Object.keys(flags), [flags]);
 
+  const flagLabels = useMemo(
+    () => ({
+      recommendationsEnabled: t("admin.config.flagRecommendations"),
+      growthEnabled: t("admin.config.flagGrowth"),
+      estimateDepositsEnabled: t("admin.config.flagEstimateDeposits"),
+      reliabilityScoringEnabled: t("admin.config.flagReliabilityScoring"),
+    }),
+    [t]
+  );
+
   const save = async () => {
     if (dataMode === "mock") {
-      setMessage("Mock mode enabled. Config is not persisted.");
+      setMessage(t("admin.config.mockNotPersisted"));
       return;
     }
 
@@ -50,7 +62,7 @@ export default function AdminConfigScreen() {
     setMessage("");
     try {
       await adminSetConfig({ featureFlags: flags });
-      setMessage("Config saved.");
+      setMessage(t("admin.config.saved"));
     } catch (error) {
       setMessage(String(error));
     } finally {
@@ -60,18 +72,18 @@ export default function AdminConfigScreen() {
 
   return (
     <div className="h-full scroll-area bg-gray-50">
-      <TopBar title="Config" back />
+      <TopBar title={t("admin.nav.config")} back />
       <div className="px-4 py-4 flex flex-col gap-3">
         <Card>
-          <p className="font-bold text-gray-800 text-[14px]">Feature Flags</p>
-          {loading ? <p className="text-gray-500 text-[12px] mt-2">Loading...</p> : null}
+          <p className="font-bold text-gray-800 text-[14px]">{t("admin.config.featureFlags")}</p>
+          {loading ? <p className="text-gray-500 text-[12px] mt-2">{t("common.loading")}</p> : null}
           <div className="mt-2 flex flex-col gap-2">
             {keys.map((key) => (
               <label
                 key={key}
                 className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2"
               >
-                <span className="text-gray-700 text-[12px]">{key}</span>
+                <span className="text-gray-700 text-[12px]">{flagLabels[key as keyof typeof flagLabels] ?? key}</span>
                 <input
                   type="checkbox"
                   checked={Boolean(flags[key])}
@@ -91,7 +103,7 @@ export default function AdminConfigScreen() {
             disabled={saving}
             onClick={() => void save()}
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("admin.config.saving") : t("admin.config.save")}
           </button>
           {message ? <p className="text-[12px] text-gray-500 mt-2">{message}</p> : null}
         </Card>

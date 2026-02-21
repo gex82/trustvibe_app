@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { resolveLocale, type DemoLocale } from "../utils/localization";
 
-type Lang = "en" | "es";
+export type Lang = "en" | "es";
 
 const translations: Record<Lang, Record<string, string>> = {
   en: {
@@ -402,6 +403,157 @@ const translations: Record<Lang, Record<string, string>> = {
     "newProject.viewAll": "View All My Projects",
     "newProject.contractorLinked": "Contractor linked — they'll be notified of your new project.",
     "newProject.preLinked": "Pre-linked contractor:",
+    "newProject.timelineOption1to3Days": "1-3 days",
+    "newProject.timelineOption1Week": "1 week",
+    "newProject.timelineOption2Weeks": "2 weeks",
+    "newProject.timelineOption3to4Weeks": "3-4 weeks",
+    "newProject.timelineOption1to2Months": "1-2 months",
+    "newProject.timelineOptionFlexible": "Flexible",
+
+    // ── Global / App ────────────────────────────────────────────────────────
+    "app.loadingSession": "Loading session...",
+    "common.loading": "Loading...",
+    "common.notAvailable": "N/A",
+
+    // ── Role Select ─────────────────────────────────────────────────────────
+    "role.continueCustomer": "Continue as Customer",
+    "role.continueContractor": "Continue as Contractor",
+    "role.continueAdmin": "Continue as Admin",
+
+    // ── Login ───────────────────────────────────────────────────────────────
+    "login.emailPlaceholder": "you@example.com",
+
+    // ── Additional categories ───────────────────────────────────────────────
+    "category.roofing": "Roofing",
+    "category.other": "Other",
+
+    // ── Search additions ────────────────────────────────────────────────────
+    "search.filters": "Filters",
+    "search.clearFilters": "Clear filters",
+    "search.starsSuffix": "Stars",
+    "search.recommendedContractor": "Recommended Contractor",
+    "search.generalSpecialty": "General",
+    "search.recommendedBio": "Recommended by TrustVibe compatibility scoring.",
+    "search.recommendedBadge": "Recommended",
+
+    // ── Customer Home additions ─────────────────────────────────────────────
+    "activity.projectBathroom": "Bathroom Renovation",
+    "activity.projectKitchen": "Kitchen Cabinet Repair",
+    "home.fallbackName": "there",
+
+    // ── Project Detail additions ────────────────────────────────────────────
+    "detail.projectTitle": "Project",
+    "detail.selectContractor": "Select contractor",
+    "detail.developerActions": "Developer actions",
+    "detail.quoteAmount": "Quote amount:",
+    "detail.timeline": "Timeline:",
+    "detail.createEstimateDeposit": "Create estimate deposit",
+
+    // ── Release additions ───────────────────────────────────────────────────
+    "release.contractorFallback": "the contractor",
+    "release.defaultCompletionNote": "All work has been completed as per the agreement. Please review and approve when ready.",
+
+    // ── Review additions ────────────────────────────────────────────────────
+    "review.selectTagError": "Select at least one tag before submitting.",
+
+    // ── Runtime / Demo Switcher ─────────────────────────────────────────────
+    "runtime.demoFallbackBanner": "Demo data mode active. Backend is unreachable.",
+    "runtime.switchRole": "Switch Role",
+    "runtime.live": "Live",
+    "runtime.mock": "Mock",
+    "runtime.autoFallbackEnabled": "Auto-fallback enabled",
+    "runtime.mockModeLabel": "Mock mode",
+
+    // ── Admin additions ─────────────────────────────────────────────────────
+    "admin.nav.users": "Users",
+    "admin.nav.deposits": "Deposits",
+    "admin.nav.reliability": "Reliability",
+    "admin.nav.subscriptions": "Subscriptions",
+    "admin.nav.concierge": "Concierge",
+    "admin.nav.reviews": "Reviews",
+    "admin.nav.config": "Config",
+    "admin.columns.id": "ID",
+    "admin.columns.name": "Name",
+    "admin.columns.role": "Role",
+    "admin.columns.email": "Email",
+    "admin.columns.projectId": "Project ID",
+    "admin.columns.title": "Title",
+    "admin.columns.customer": "Customer",
+    "admin.columns.contractor": "Contractor",
+    "admin.columns.escrowState": "Escrow State",
+    "admin.columns.project": "Project",
+    "admin.columns.status": "Status",
+    "admin.columns.amountCents": "Amount (cents)",
+    "admin.columns.score": "Score",
+    "admin.columns.eligible": "Eligible",
+    "admin.columns.updated": "Updated",
+    "admin.columns.plan": "Plan",
+    "admin.columns.caseId": "Case ID",
+    "admin.columns.manager": "Manager",
+    "admin.columns.reviewId": "Review ID",
+    "admin.columns.moderation": "Moderation",
+    "admin.collection.rowsLabel": "rows",
+    "admin.config.featureFlags": "Feature Flags",
+    "admin.config.mockNotPersisted": "Mock mode enabled. Config is not persisted.",
+    "admin.config.save": "Save",
+    "admin.config.saving": "Saving...",
+    "admin.config.saved": "Config saved.",
+    "admin.config.flagRecommendations": "Recommendations Enabled",
+    "admin.config.flagGrowth": "Growth Enabled",
+    "admin.config.flagEstimateDeposits": "Estimate Deposits Enabled",
+    "admin.config.flagReliabilityScoring": "Reliability Scoring Enabled",
+    "admin.cases.countLabel": "cases",
+    "admin.cases.fallbackBanner": "Demo fallback cases are shown for a stable walkthrough.",
+    "admin.cases.noEvidence": "No evidence items attached.",
+    "admin.cases.noCasesFound": "No cases found.",
+    "admin.cases.vs": "vs",
+
+    // ── Workflow screens ────────────────────────────────────────────────────
+    "workflow.profile.title": "Profile",
+    "workflow.profile.noSessionTitle": "No session",
+    "workflow.profile.noSessionSubtitle": "Sign in to access profile",
+    "workflow.profile.editProfile": "Edit Profile",
+    "workflow.profile.documents": "Documents",
+    "workflow.profile.history": "History",
+    "workflow.profile.messages": "Messages",
+    "workflow.profile.recommendations": "Recommendations",
+    "workflow.profile.notifications": "Notifications",
+    "workflow.profile.paymentMethods": "Payment Methods",
+    "workflow.profile.settings": "Settings",
+    "workflow.profile.role.customer": "Customer",
+    "workflow.profile.role.contractor": "Contractor",
+    "workflow.profile.role.admin": "Admin",
+    "workflow.edit.title": "Edit Profile",
+    "workflow.edit.editorTitle": "Profile Editor",
+    "workflow.edit.editorSubtitle": "Use this surface to validate profile update UX in demo mode.",
+    "workflow.edit.uploadAvatar": "Upload Avatar",
+    "workflow.edit.save": "Save",
+    "workflow.documents.title": "Documents",
+    "workflow.documents.upload": "Upload Document",
+    "workflow.notifications.title": "Notifications",
+    "workflow.notifications.subtitle": "Notification center for lifecycle and trust events.",
+    "workflow.payments.title": "Payment Methods",
+    "workflow.payments.subtitle": "Card and payout method management surface.",
+    "workflow.settings.title": "Settings",
+    "workflow.settings.subtitle": "Language, privacy, and account controls.",
+    "workflow.history.title": "History",
+    "workflow.history.transactions": "Transactions",
+    "workflow.history.empty": "No historical items yet.",
+    "workflow.recommendations.title": "Recommendations",
+    "workflow.agreement.title": "Agreement",
+    "workflow.agreement.snapshotTitle": "Agreement Snapshot",
+    "workflow.agreement.contractor": "Contractor:",
+    "workflow.agreement.price": "Price:",
+    "workflow.agreement.tbd": "TBD",
+    "workflow.agreement.timeline": "Timeline:",
+    "workflow.agreement.scope": "Scope:",
+    "workflow.agreement.policy": "Policy: Payment is released only after customer approval.",
+    "workflow.agreement.platformFee": "Platform fee: 7%",
+    "workflow.agreement.accept": "Accept agreement",
+    "workflow.issue.holdNotice": "Funds will remain on hold while this issue is under review.",
+    "workflow.issue.confirm": "Confirm issue",
+    "workflow.availability.title": "Availability",
+    "workflow.availability.slot": "Slot",
   },
 
   es: {
@@ -803,11 +955,163 @@ const translations: Record<Lang, Record<string, string>> = {
     "newProject.viewAll": "Ver Todos Mis Proyectos",
     "newProject.contractorLinked": "Contratista vinculado — será notificado de tu nuevo proyecto.",
     "newProject.preLinked": "Contratista pre-vinculado:",
+    "newProject.timelineOption1to3Days": "1-3 días",
+    "newProject.timelineOption1Week": "1 semana",
+    "newProject.timelineOption2Weeks": "2 semanas",
+    "newProject.timelineOption3to4Weeks": "3-4 semanas",
+    "newProject.timelineOption1to2Months": "1-2 meses",
+    "newProject.timelineOptionFlexible": "Flexible",
+
+    // ── Global / App ────────────────────────────────────────────────────────
+    "app.loadingSession": "Cargando sesión...",
+    "common.loading": "Cargando...",
+    "common.notAvailable": "No disponible",
+
+    // ── Role Select ─────────────────────────────────────────────────────────
+    "role.continueCustomer": "Continuar como Cliente",
+    "role.continueContractor": "Continuar como Contratista",
+    "role.continueAdmin": "Continuar como Admin",
+
+    // ── Login ───────────────────────────────────────────────────────────────
+    "login.emailPlaceholder": "tu@correo.com",
+
+    // ── Additional categories ───────────────────────────────────────────────
+    "category.roofing": "Techos",
+    "category.other": "Otro",
+
+    // ── Search additions ────────────────────────────────────────────────────
+    "search.filters": "Filtros",
+    "search.clearFilters": "Limpiar filtros",
+    "search.starsSuffix": "Estrellas",
+    "search.recommendedContractor": "Contratista Recomendado",
+    "search.generalSpecialty": "General",
+    "search.recommendedBio": "Recomendado por la puntuación de compatibilidad de TrustVibe.",
+    "search.recommendedBadge": "Recomendado",
+
+    // ── Customer Home additions ─────────────────────────────────────────────
+    "activity.projectBathroom": "Renovación de Baño",
+    "activity.projectKitchen": "Reparación de Gabinetes de Cocina",
+    "home.fallbackName": "allí",
+
+    // ── Project Detail additions ────────────────────────────────────────────
+    "detail.projectTitle": "Proyecto",
+    "detail.selectContractor": "Seleccionar contratista",
+    "detail.developerActions": "Acciones de desarrollo",
+    "detail.quoteAmount": "Monto de cotización:",
+    "detail.timeline": "Plazo:",
+    "detail.createEstimateDeposit": "Crear depósito de estimado",
+
+    // ── Release additions ───────────────────────────────────────────────────
+    "release.contractorFallback": "el contratista",
+    "release.defaultCompletionNote": "Todo el trabajo se completó según el acuerdo. Por favor revisa y aprueba cuando estés listo.",
+
+    // ── Review additions ────────────────────────────────────────────────────
+    "review.selectTagError": "Selecciona al menos una etiqueta antes de enviar.",
+
+    // ── Runtime / Demo Switcher ─────────────────────────────────────────────
+    "runtime.demoFallbackBanner": "Modo demo activo. El backend no está disponible.",
+    "runtime.switchRole": "Cambiar rol",
+    "runtime.live": "En vivo",
+    "runtime.mock": "Simulado",
+    "runtime.autoFallbackEnabled": "Auto-fallback activado",
+    "runtime.mockModeLabel": "Modo simulado",
+
+    // ── Admin additions ─────────────────────────────────────────────────────
+    "admin.nav.users": "Usuarios",
+    "admin.nav.deposits": "Depósitos",
+    "admin.nav.reliability": "Confiabilidad",
+    "admin.nav.subscriptions": "Suscripciones",
+    "admin.nav.concierge": "Concierge",
+    "admin.nav.reviews": "Reseñas",
+    "admin.nav.config": "Configuración",
+    "admin.columns.id": "ID",
+    "admin.columns.name": "Nombre",
+    "admin.columns.role": "Rol",
+    "admin.columns.email": "Correo",
+    "admin.columns.projectId": "ID Proyecto",
+    "admin.columns.title": "Título",
+    "admin.columns.customer": "Cliente",
+    "admin.columns.contractor": "Contratista",
+    "admin.columns.escrowState": "Estado de Escrow",
+    "admin.columns.project": "Proyecto",
+    "admin.columns.status": "Estado",
+    "admin.columns.amountCents": "Monto (centavos)",
+    "admin.columns.score": "Puntaje",
+    "admin.columns.eligible": "Elegible",
+    "admin.columns.updated": "Actualizado",
+    "admin.columns.plan": "Plan",
+    "admin.columns.caseId": "ID Caso",
+    "admin.columns.manager": "Gestor",
+    "admin.columns.reviewId": "ID Reseña",
+    "admin.columns.moderation": "Moderación",
+    "admin.collection.rowsLabel": "filas",
+    "admin.config.featureFlags": "Banderas de Funciones",
+    "admin.config.mockNotPersisted": "Modo simulado activado. La configuración no se guarda.",
+    "admin.config.save": "Guardar",
+    "admin.config.saving": "Guardando...",
+    "admin.config.saved": "Configuración guardada.",
+    "admin.config.flagRecommendations": "Recomendaciones activadas",
+    "admin.config.flagGrowth": "Crecimiento activado",
+    "admin.config.flagEstimateDeposits": "Depósitos de estimado activados",
+    "admin.config.flagReliabilityScoring": "Puntuación de confiabilidad activada",
+    "admin.cases.countLabel": "casos",
+    "admin.cases.fallbackBanner": "Se muestran casos demo para mantener un recorrido estable.",
+    "admin.cases.noEvidence": "No hay evidencia adjunta.",
+    "admin.cases.noCasesFound": "No se encontraron casos.",
+    "admin.cases.vs": "vs",
+
+    // ── Workflow screens ────────────────────────────────────────────────────
+    "workflow.profile.title": "Perfil",
+    "workflow.profile.noSessionTitle": "Sin sesión",
+    "workflow.profile.noSessionSubtitle": "Inicia sesión para acceder al perfil",
+    "workflow.profile.editProfile": "Editar Perfil",
+    "workflow.profile.documents": "Documentos",
+    "workflow.profile.history": "Historial",
+    "workflow.profile.messages": "Mensajes",
+    "workflow.profile.recommendations": "Recomendaciones",
+    "workflow.profile.notifications": "Notificaciones",
+    "workflow.profile.paymentMethods": "Métodos de Pago",
+    "workflow.profile.settings": "Configuración",
+    "workflow.profile.role.customer": "Cliente",
+    "workflow.profile.role.contractor": "Contratista",
+    "workflow.profile.role.admin": "Admin",
+    "workflow.edit.title": "Editar Perfil",
+    "workflow.edit.editorTitle": "Editor de Perfil",
+    "workflow.edit.editorSubtitle": "Usa esta vista para validar la UX de actualización de perfil en modo demo.",
+    "workflow.edit.uploadAvatar": "Subir Avatar",
+    "workflow.edit.save": "Guardar",
+    "workflow.documents.title": "Documentos",
+    "workflow.documents.upload": "Subir Documento",
+    "workflow.notifications.title": "Notificaciones",
+    "workflow.notifications.subtitle": "Centro de notificaciones para eventos de ciclo de vida y confianza.",
+    "workflow.payments.title": "Métodos de Pago",
+    "workflow.payments.subtitle": "Superficie de gestión de tarjetas y métodos de cobro.",
+    "workflow.settings.title": "Configuración",
+    "workflow.settings.subtitle": "Controles de idioma, privacidad y cuenta.",
+    "workflow.history.title": "Historial",
+    "workflow.history.transactions": "Transacciones",
+    "workflow.history.empty": "Sin elementos históricos aún.",
+    "workflow.recommendations.title": "Recomendaciones",
+    "workflow.agreement.title": "Acuerdo",
+    "workflow.agreement.snapshotTitle": "Resumen del Acuerdo",
+    "workflow.agreement.contractor": "Contratista:",
+    "workflow.agreement.price": "Precio:",
+    "workflow.agreement.tbd": "Por definir",
+    "workflow.agreement.timeline": "Plazo:",
+    "workflow.agreement.scope": "Alcance:",
+    "workflow.agreement.policy": "Política: El pago se libera solo después de la aprobación del cliente.",
+    "workflow.agreement.platformFee": "Comisión de plataforma: 7%",
+    "workflow.agreement.accept": "Aceptar acuerdo",
+    "workflow.issue.holdNotice": "Los fondos permanecerán en retención mientras este problema se revisa.",
+    "workflow.issue.confirm": "Confirmar problema",
+    "workflow.availability.title": "Disponibilidad",
+    "workflow.availability.slot": "Bloque",
   },
 };
 
 interface AppContextType {
   lang: Lang;
+  locale: DemoLocale;
   setLang: (l: Lang) => void;
   t: (key: string, fallback?: string) => string;
 }
@@ -816,13 +1120,14 @@ const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>("en");
+  const locale = resolveLocale(lang);
 
   const t = (key: string, fallback?: string): string => {
     return translations[lang][key] ?? fallback ?? key;
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t }}>
+    <AppContext.Provider value={{ lang, locale, setLang, t }}>
       {children}
     </AppContext.Provider>
   );

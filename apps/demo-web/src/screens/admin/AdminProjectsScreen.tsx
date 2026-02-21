@@ -1,17 +1,20 @@
 import { AdminCollectionScreen } from "./AdminCollectionScreen";
+import { useApp } from "../../context/AppContext";
 
 export default function AdminProjectsScreen() {
+  const { t } = useApp();
+
   return (
     <AdminCollectionScreen
-      title="Projects"
+      title={t("admin.projects.title")}
       collectionPath="projects"
       testIdPrefix="projects"
       columns={[
-        { key: "id", label: "Project ID" },
-        { key: "title", label: "Title" },
-        { key: "customerId", label: "Customer" },
-        { key: "contractorId", label: "Contractor" },
-        { key: "escrowState", label: "Escrow State" },
+        { key: "id", label: t("admin.columns.projectId") },
+        { key: "title", label: t("admin.columns.title") },
+        { key: "customerId", label: t("admin.columns.customer") },
+        { key: "contractorId", label: t("admin.columns.contractor") },
+        { key: "escrowState", label: t("admin.columns.escrowState") },
       ]}
     />
   );
