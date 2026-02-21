@@ -1,5 +1,24 @@
-﻿# TrustVibe Demo-Ready Execution Plan (v2, Demo-Critical First)
+# TrustVibe Demo-Ready Execution Plan (v2, Demo-Critical First)
 
+Last updated: 2026-02-21
+
+## Implementation Update (Completed in This Repo)
+
+- Added a completed demo-web localization hardening batch (`apps/demo-web`):
+  - language-aware adapters/data mapping for mock/live paths
+  - locale-aware formatting (`en-US` / `es-PR`)
+  - replacement of hardcoded screen copy with translation keys across customer/contractor/admin/shared surfaces
+- Added localization gate and pass integration:
+  - new script: `check:demo-web:localization`
+  - `scripts/run_demo_web_pass.ps1` now runs localization checks before Playwright
+- Added test hardening for demo-web localization:
+  - unit: localization helpers + formatters
+  - unit: localized adapter mapping tests
+  - integration: ES render assertions for customer/contractor/admin
+  - e2e: `e2e/browser-demo-web/localization-parity.spec.ts`
+- Added supporting docs:
+  - `docs/demo_web_localization_contract.md`
+  - updates to `docs/manual_qa_checklist.md`, `docs/demo_script_customer.md`, and `docs/demo_web_runbook.md`
 ## Summary
 - Align with the target outcome: customer/contractor demos that are reliable, visually polished, and operationally believable.
 - Correct current `docs/demo_ready_plan.md` details that are inaccurate before execution.
@@ -197,3 +216,4 @@
 - Synthetic/demo data and media are acceptable.
 - Minimal admin scope is included for demo confidence.
 - Existing backend callable surface is sufficient unless blockers appear.
+

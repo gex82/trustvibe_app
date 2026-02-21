@@ -1,6 +1,20 @@
 # TrustVibe Assumptions
 
-Last updated: 2026-02-11 (productionization pass)
+Last updated: 2026-02-21 (demo-web localization hardening)
+
+## Recent Implementation Status (Demo-Web)
+
+- Demo-web now enforces an ES zero-leak expectation for platform/demo-seeded UI copy.
+- Localization hard gates are now part of the workflow:
+  - `npm run check:demo-web:localization`
+  - static source leak check + localized data shape check
+- `pass:demo-web` now runs localization gates before Playwright execution.
+- Demo-web localization tests were expanded with:
+  - unit tests (localization helpers, formatters)
+  - adapter localization tests (project/message/review)
+  - integration tests for customer/contractor/admin ES rendering
+  - e2e localization parity tests (`e2e/browser-demo-web/localization-parity.spec.ts`)
+- Scope note: this update applies to `apps/demo-web` only; shared i18n unification across mobile/admin remains a follow-up refactor.
 
 ## Confirmed Assumptions Used in Code
 
