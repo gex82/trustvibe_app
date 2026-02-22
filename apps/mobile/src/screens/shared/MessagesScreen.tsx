@@ -1,20 +1,52 @@
 import React from 'react';
-import { Alert, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { listMessages, listProjects, sendMessage } from '../../services/api';
+import { useHeaderHeight } from '@react-navigation/elements';
+import { listMessages, listProjects, mapApiError, sendMessage } from '../../services/api';
 import { ScreenContainer } from '../../components/ScreenContainer';
+import { Card } from '../../components/Card';
 import { PrimaryButton } from '../../components/PrimaryButton';
-import { colors } from '../../theme/tokens';
+import { EmptyState } from '../../components/EmptyState';
+import { colors, spacing } from '../../theme/tokens';
+import { useAppStore } from '../../store/appStore';
+import { getLocalizedField, getLocalizedProjectTitle } from '../../utils/localizedProject';
+
+const PROJECTS_LIMIT = 50;
+const MESSAGES_LIMIT = 100;
+
+function formatSenderFallback(senderId: string, t: (key: string, options?: Record<string, unknown>) => string): string {
+  const suffix = senderId.match(/(\d+)$/)?.[1];
+  if (senderId.startsWith('contractor-') || senderId.startsWith('cont_')) {
+    return t('messaging.senderFallbackContractor', { id: suffix ?? senderId });
+  }
+  if (senderId.startsWith('customer-') || senderId.startsWith('cust_')) {
+    return t('messaging.senderFallbackCustomer', { id: suffix ?? senderId });
+  }
+  return t('messaging.senderFallbackGeneric', { id: suffix ?? senderId });
+}
+
+function resolveSenderName(
+  message: { senderId: string; senderName?: string },
+  t: (key: string, options?: Record<string, unknown>) => string
+): string {
+  if (typeof message.senderName === 'string' && message.senderName.trim().length > 0) {
+    return message.senderName;
+  }
+  return formatSenderFallback(message.senderId, t);
+}
 
 export function MessagesScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const language = useAppStore((s) => s.language);
+  const headerHeight = useHeaderHeight();
   const [projectId, setProjectId] = React.useState<string | null>(null);
   const [body, setBody] = React.useState('');
+  const trimmedBody = body.trim();
 
   const projectsQuery = useQuery({
     queryKey: ['messages-projects'],
-    queryFn: () => listProjects({ limit: 50 }),
+    queryFn: () => listProjects({ limit: PROJECTS_LIMIT }),
   });
 
   React.useEffect(() => {
@@ -23,11 +55,14 @@ export function MessagesScreen(): React.JSX.Element {
     }
   }, [projectId, projectsQuery.data?.projects]);
 
+  const projects = projectsQuery.data?.projects ?? [];
+
   const messagesQuery = useQuery({
     queryKey: ['project-messages', projectId],
-    queryFn: () => listMessages({ projectId: projectId as string, limit: 100 }),
+    queryFn: () => listMessages({ projectId: projectId as string, limit: MESSAGES_LIMIT }),
     enabled: Boolean(projectId),
   });
+  const messages = messagesQuery.data?.messages ?? [];
 
   const sendMutation = useMutation({
     mutationFn: (payload: { projectId: string; body: string }) => sendMessage(payload),
@@ -36,103 +71,190 @@ export function MessagesScreen(): React.JSX.Element {
       await messagesQuery.refetch();
     },
     onError: (error) => {
-      Alert.alert(t('common.error'), String(error));
+      Alert.alert(t('common.error'), mapApiError(error));
     },
   });
 
+  const handleSelectProject = React.useCallback((nextProjectId: string) => {
+    setProjectId(nextProjectId);
+  }, []);
+
+  const handleSendMessage = React.useCallback(() => {
+    if (!projectId) {
+      return;
+    }
+    if (!trimmedBody) {
+      return;
+    }
+    void sendMutation.mutateAsync({ projectId, body: trimmedBody });
+  }, [projectId, sendMutation, trimmedBody]);
+
+  const isSendDisabled = !projectId || !trimmedBody || sendMutation.isPending;
+
+  const renderProjectItem = React.useCallback(
+    ({ item }: { item: (typeof projects)[number] }) => (
+      <Pressable
+        testID={`messages-project-${item.id}`}
+        style={[
+          styles.projectCard,
+          projectId === item.id ? styles.projectCardActive : null,
+        ]}
+        onPress={() => handleSelectProject(item.id)}
+      >
+        <Text numberOfLines={2} style={[styles.projectCardLabel, projectId === item.id ? styles.projectCardLabelActive : null]}>
+          {getLocalizedProjectTitle(item, language)}
+        </Text>
+      </Pressable>
+    ),
+    [handleSelectProject, language, projectId]
+  );
+
+  const renderMessageItem = React.useCallback(
+    ({ item }: { item: (typeof messages)[number] }) => (
+      <Card>
+        <View style={styles.messageBubble}>
+          <Text style={styles.messageMeta}>{resolveSenderName(item, t)}</Text>
+          <Text style={styles.text}>{getLocalizedField(item, 'body', language)}</Text>
+        </View>
+      </Card>
+    ),
+    [language, t]
+  );
+
   return (
-    <ScreenContainer>
-      <Text style={styles.title}>{t('messaging.title')}</Text>
-      {projectsQuery.isLoading ? <Text style={styles.text}>{t('common.loading')}</Text> : null}
-      {projectsQuery.isError ? <Text style={styles.text}>{t('common.error')}</Text> : null}
+    <ScreenContainer style={styles.wrap}>
+      <KeyboardAvoidingView
+        style={styles.keyboardWrap}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+      >
+        <Text style={styles.title}>{t('messaging.title')}</Text>
+        {projectsQuery.isError ? <Text style={styles.error}>{mapApiError(projectsQuery.error)}</Text> : null}
 
-      <FlatList
-        horizontal
-        data={projectsQuery.data?.projects ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.projects}
-        renderItem={({ item }) => (
-          <PrimaryButton
-            label={item.title}
-            variant={projectId === item.id ? 'primary' : 'secondary'}
-            onPress={() => setProjectId(item.id)}
-          />
-        )}
-        ListEmptyComponent={<Text style={styles.text}>{t('messaging.noProjects')}</Text>}
-      />
+        <FlatList
+          horizontal
+          data={projects}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.projects}
+          keyboardShouldPersistTaps="handled"
+          renderItem={renderProjectItem}
+          ListEmptyComponent={<EmptyState title={t('messaging.noProjects')} description={t('messaging.startConversationHint')} />}
+        />
 
-      <FlatList
-        data={messagesQuery.data?.messages ?? []}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.messages}
-        renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text style={styles.messageMeta}>{item.senderId}</Text>
-            <Text style={styles.text}>{item.body}</Text>
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.text}>{t('messaging.noMessages')}</Text>}
-      />
-
-      <TextInput
-        value={body}
-        onChangeText={setBody}
-        placeholder={t('messaging.attachImage')}
-        placeholderTextColor={colors.textSecondary}
-        style={styles.input}
-      />
-      <PrimaryButton
-        label={t('common.submit')}
-        disabled={!projectId || !body.trim() || sendMutation.isPending}
-        onPress={() => {
-          if (!projectId) {
-            return;
+        <FlatList
+          data={messages}
+          keyExtractor={(item) => item.id}
+          style={styles.messagesList}
+          contentContainerStyle={styles.messages}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+          renderItem={renderMessageItem}
+          ListEmptyComponent={
+            messagesQuery.isLoading ? (
+              <Text style={styles.text}>{t('common.loading')}</Text>
+            ) : (
+              <EmptyState title={t('messaging.noMessages')} description={t('messaging.firstMessageHint')} />
+            )
           }
-          void sendMutation.mutateAsync({ projectId, body: body.trim() });
-        }}
-      />
+        />
+
+        <View style={styles.composer}>
+          <TextInput
+            testID="messages-input"
+            value={body}
+            onChangeText={setBody}
+            placeholder={t('messaging.typeMessage')}
+            placeholderTextColor={colors.textSecondary}
+            style={styles.input}
+          />
+          <PrimaryButton
+            testID="messages-send"
+            label={t('common.submit')}
+            disabled={isSendDisabled}
+            onPress={handleSendMessage}
+          />
+        </View>
+      </KeyboardAvoidingView>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+  },
+  keyboardWrap: {
+    flex: 1,
+    gap: spacing.sm,
+  },
   title: {
     color: colors.textPrimary,
-    marginBottom: 12,
-    fontSize: 20,
-    fontWeight: '700',
+    marginBottom: spacing.xs,
+    fontSize: 28,
+    fontWeight: '800',
   },
   text: {
     color: colors.textPrimary,
   },
+  error: {
+    color: colors.danger,
+  },
   projects: {
-    gap: 8,
-    marginBottom: 12,
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  projectCard: {
+    width: 220,
+    minHeight: 124,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
+    borderRadius: 14,
+    backgroundColor: colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  projectCardActive: {
+    backgroundColor: colors.navy,
+    borderColor: colors.navy,
+  },
+  projectCardLabel: {
+    color: colors.textPrimary,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 26,
+  },
+  projectCardLabelActive: {
+    color: colors.textInverse,
   },
   messages: {
-    gap: 8,
-    paddingBottom: 12,
+    gap: spacing.sm,
+    paddingBottom: spacing.lg,
+  },
+  messagesList: {
+    flex: 1,
   },
   messageBubble: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
-    borderRadius: 10,
-    padding: 10,
+    gap: spacing.xs,
+  },
+  composer: {
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   messageMeta: {
     color: colors.textSecondary,
-    marginBottom: 4,
     fontSize: 12,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgCard,
+    borderColor: colors.surfaceBorder,
+    backgroundColor: colors.surface,
     color: colors.textPrimary,
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.xs,
   },
 });

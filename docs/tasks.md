@@ -1,6 +1,6 @@
 # TrustVibe Task Board
 
-Last updated: 2026-02-11
+Last updated: 2026-02-11 (productionization pass)
 Legend: `[ ]` todo, `[/]` in progress, `[x]` scaffolded/implemented
 
 ## 1) Foundation
@@ -73,8 +73,21 @@ Legend: `[ ]` todo, `[/]` in progress, `[x]` scaffolded/implemented
 - [x] `docs/translation_glossary.md`
 - [x] `docs/manual_qa_checklist.md`
 
-## 11) Phase 2 Flags
+## 11) Productionization Modules
 
-- [x] Feature flag document and shared default flags
-- [x] Stripe toggle path scaffold
-- [x] Milestones/change orders/scheduling/recommendations/growth callable implementations behind flags
+- [x] Estimate deposit domain model + callables + ledger/audit wiring
+- [x] Tiered fee config (`platformFeesV2`) + tier-aware fee calculation
+- [x] Reliability scoring module + scheduled recomputation + ranking hooks
+- [x] Credential verification adapter + deterministic PR mock fixtures
+- [x] Stripe-first provider expansion + payment account onboarding callables
+- [x] Subscription + invoice models + callable APIs
+- [x] High-ticket concierge case model + bidding/admin assignment callables
+- [x] Admin console updates (config JSON editors, deposits/reliability/subscriptions/concierge views)
+- [x] Mobile action-surface updates for deposits, onboarding, credentials, reliability, concierge
+
+## 12) Documentation and Baselines
+
+- [x] `docs/business_plan_pr.md` extracted from source PDF
+- [x] `docs/production_gap_assessment.md`
+- [x] `docs/api_baseline_2026_02.md`
+- [x] `docs/api.md` and `docs/architecture.md` refresh for productionized surface

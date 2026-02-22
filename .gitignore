@@ -3,8 +3,17 @@ node_modules
 .expo-shared
 dist
 coverage
+*.tsbuildinfo
 .firebase
 functions/lib
 apps/admin/.next
 apps/mobile/.expo
 .env*
+*-debug.log
+artifacts/
+test-results/
+tests-results/
+playwright-report/
+expo*.log
+firebase-export-*
+logs/

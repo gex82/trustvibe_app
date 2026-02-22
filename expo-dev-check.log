@@ -1,0 +1,14 @@
+
+> @trustvibe/mobile@0.1.0 dev
+> expo start --clear --offline
+
+env: load .env.local
+env: export EXPO_PUBLIC_EMULATOR_HOST
+Networking has been disabled
+Starting project at C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Skipping dependency validation in offline mode
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+^C

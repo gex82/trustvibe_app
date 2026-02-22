@@ -1,0 +1,21 @@
+env: load .env.local
+env: export EXPO_PUBLIC_EMULATOR_HOST
+Networking has been disabled
+Starting project at C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Skipping dependency validation in offline mode
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS node_modules\expo\AppEntry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS node_modules\expo\AppEntry.js ▓▓░░░░░░░░░░░░░░ 13.5% (27/94)
+iOS node_modules\expo\AppEntry.js ▓▓░░░░░░░░░░░░░░ 13.5% ( 86/277)
+iOS node_modules\expo\AppEntry.js ▓▓▓░░░░░░░░░░░░░ 24.7% (200/415)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓░░░░░░░░░░ 38.5% (352/577)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 53.2% (522/716)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 57.2% (583/771)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.4% (780/849)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 87.2% (809/867)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.5% (940/967)
+iOS node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.8% (1047/1048)
+iOS Bundled 37045ms node_modules\expo\AppEntry.js (1048 modules)

@@ -44,6 +44,7 @@ export const createProjectInputSchema = z.object({
   desiredTimeline: z.string().min(2).max(120),
   budgetMinCents: z.number().int().positive().optional(),
   budgetMaxCents: z.number().int().positive().optional(),
+  contractorId: z.string().min(1).optional(),
 });
 
 export const submitQuoteInputSchema = z.object({
@@ -69,6 +70,7 @@ export const selectContractorInputSchema = z.object({
 
 export const acceptAgreementInputSchema = z.object({
   agreementId: z.string().min(1),
+  demoAutoAdvance: z.boolean().optional(),
 });
 
 export const fundHoldInputSchema = z.object({
@@ -143,6 +145,89 @@ export const adminSetConfigInputSchema = z.object({
       fixedFeeCents: z.number().int().min(0).max(100000),
     })
     .optional(),
+  platformFeesV2: z
+    .object({
+      schemaVersion: z.number().int().min(1).default(2),
+      tiers: z
+        .array(
+          z.object({
+            id: z.string().min(1).max(80),
+            minAmountCents: z.number().int().min(0),
+            maxAmountCents: z.number().int().positive().optional(),
+            percentBps: z.number().int().min(0).max(5000),
+            fixedFeeCents: z.number().int().min(0).max(200000),
+            planOverrides: z
+              .record(
+                z.object({
+                  percentBps: z.number().int().min(0).max(5000).optional(),
+                  fixedFeeCents: z.number().int().min(0).max(200000).optional(),
+                })
+              )
+              .optional(),
+          })
+        )
+        .min(1),
+    })
+    .optional(),
+  depositPolicies: z
+    .object({
+      schemaVersion: z.number().int().min(1).default(1),
+      rules: z
+        .array(
+          z.object({
+            category: projectCategorySchema,
+            amountCents: z.number().int().positive(),
+            currency: z.literal('USD').default('USD'),
+            refundableOnContractorNoShow: z.boolean(),
+            creditToJobOnProceed: z.boolean(),
+          })
+        )
+        .min(1),
+    })
+    .optional(),
+  subscriptionPlans: z
+    .object({
+      schemaVersion: z.number().int().min(1).default(1),
+      plans: z
+        .array(
+          z.object({
+            id: z.string().min(1).max(80),
+            audience: z.enum(['contractor', 'property_manager']),
+            name: z.string().min(1).max(120),
+            monthlyPriceCents: z.number().int().min(0),
+            annualPriceCents: z.number().int().min(0).optional(),
+            includedUnits: z.number().int().min(0).optional(),
+            overageUnitPriceCents: z.number().int().min(0).optional(),
+            featureCodes: z.array(z.string().min(1)).max(50),
+            active: z.boolean(),
+          })
+        )
+        .min(1),
+    })
+    .optional(),
+  reliabilityWeights: z
+    .object({
+      schemaVersion: z.number().int().min(1).default(1),
+      showUpRateWeight: z.number().min(0).max(1),
+      responseTimeWeight: z.number().min(0).max(1),
+      disputeFrequencyWeight: z.number().min(0).max(1),
+      proofCompletenessWeight: z.number().min(0).max(1),
+      onTimeCompletionWeight: z.number().min(0).max(1),
+      autoReleaseThreshold: z.number().int().min(0).max(100),
+      largeJobThreshold: z.number().int().min(0).max(100),
+      highTicketThreshold: z.number().int().min(0).max(100),
+    })
+    .optional(),
+  highTicketPolicy: z
+    .object({
+      schemaVersion: z.number().int().min(1).default(1),
+      thresholdCents: z.number().int().positive(),
+      feeMode: z.enum(['intake_success', 'contractor_referral']),
+      intakeFeeCents: z.number().int().min(0),
+      successFeeBps: z.number().int().min(0).max(5000),
+      contractorReferralFeeBps: z.number().int().min(0).max(5000),
+    })
+    .optional(),
   holdPolicy: z
     .object({
       approvalWindowDays: z.number().int().min(1).max(30),
@@ -152,13 +237,17 @@ export const adminSetConfigInputSchema = z.object({
     .optional(),
   featureFlags: z
     .object({
-      stripeConnectEnabled: z.boolean(),
-      milestonePaymentsEnabled: z.boolean(),
-      changeOrdersEnabled: z.boolean(),
-      credentialVerificationEnabled: z.boolean(),
-      schedulingEnabled: z.boolean(),
-      recommendationsEnabled: z.boolean(),
-      growthEnabled: z.boolean(),
+      stripeConnectEnabled: z.boolean().optional(),
+      estimateDepositsEnabled: z.boolean().optional(),
+      milestonePaymentsEnabled: z.boolean().optional(),
+      changeOrdersEnabled: z.boolean().optional(),
+      credentialVerificationEnabled: z.boolean().optional(),
+      schedulingEnabled: z.boolean().optional(),
+      reliabilityScoringEnabled: z.boolean().optional(),
+      subscriptionsEnabled: z.boolean().optional(),
+      highTicketConciergeEnabled: z.boolean().optional(),
+      recommendationsEnabled: z.boolean().optional(),
+      growthEnabled: z.boolean().optional(),
     })
     .optional(),
 });
@@ -228,6 +317,7 @@ export const createBookingRequestInputSchema = z.object({
   projectId: z.string().min(1),
   startAt: z.string().min(1),
   endAt: z.string().min(1),
+  estimateDepositId: z.string().min(1).optional(),
   note: z.string().max(1000).optional(),
 });
 
@@ -268,4 +358,120 @@ export const adminSetUserRoleInputSchema = z.object({
   userId: z.string().min(1),
   role: roleSchema,
   disabled: z.boolean().optional(),
+});
+
+export const createEstimateDepositInputSchema = z.object({
+  projectId: z.string().min(1),
+  category: projectCategorySchema.optional(),
+  appointmentStartAt: z.string().datetime().optional(),
+});
+
+export const previewEstimateDepositInputSchema = z.object({
+  projectId: z.string().min(1),
+  category: projectCategorySchema.optional(),
+});
+
+export const captureEstimateDepositInputSchema = z.object({
+  depositId: z.string().min(1),
+  paymentMethodId: z.string().min(1).optional(),
+});
+
+export const markEstimateAttendanceInputSchema = z.object({
+  depositId: z.string().min(1),
+  attendance: z.enum(['customer_present', 'contractor_present', 'customer_no_show', 'contractor_no_show']),
+  note: z.string().max(500).optional(),
+});
+
+export const refundEstimateDepositInputSchema = z.object({
+  depositId: z.string().min(1),
+  reason: z.string().min(3).max(500),
+});
+
+export const applyEstimateDepositToJobInputSchema = z.object({
+  projectId: z.string().min(1),
+  depositId: z.string().min(1),
+});
+
+export const createConnectedPaymentAccountInputSchema = z.object({
+  country: z.string().min(2).max(2).default('US'),
+  type: z.enum(['express', 'standard']).default('express'),
+});
+
+export const getPaymentOnboardingLinkInputSchema = z.object({
+  accountId: z.string().min(1).optional(),
+  returnUrl: z.string().url().optional(),
+  refreshUrl: z.string().url().optional(),
+});
+
+export const recordBookingAttendanceInputSchema = z.object({
+  projectId: z.string().min(1),
+  bookingRequestId: z.string().min(1),
+  attendeeRole: z.enum(['customer', 'contractor']),
+  attended: z.boolean(),
+  note: z.string().max(500).optional(),
+});
+
+export const getReliabilityScoreInputSchema = z.object({
+  contractorId: z.string().min(1).optional(),
+});
+
+export const submitCredentialForVerificationInputSchema = z.object({
+  credentialType: z.enum(['daco_registration', 'perito_license']),
+  identifier: z.string().min(3).max(120),
+  documentUrl: z.string().url().optional(),
+  expiresAt: z.string().datetime().optional(),
+});
+
+export const verifyCredentialInputSchema = z.object({
+  verificationId: z.string().min(1),
+});
+
+export const createSubscriptionInputSchema = z.object({
+  audience: z.enum(['contractor', 'property_manager']),
+  planId: z.string().min(1),
+  billingEmail: z.string().email().optional(),
+  unitCount: z.number().int().min(1).max(10000).optional(),
+});
+
+export const updateSubscriptionInputSchema = z.object({
+  subscriptionId: z.string().min(1),
+  planId: z.string().min(1).optional(),
+  unitCount: z.number().int().min(1).max(10000).optional(),
+});
+
+export const cancelSubscriptionInputSchema = z.object({
+  subscriptionId: z.string().min(1),
+  cancelAtPeriodEnd: z.boolean().default(true),
+});
+
+export const listInvoicesInputSchema = z.object({
+  subscriptionId: z.string().min(1).optional(),
+  limit: z.number().int().min(1).max(100).default(30),
+});
+
+export const createHighTicketCaseInputSchema = z.object({
+  projectId: z.string().min(1),
+  intakeNotes: z.string().min(10).max(3000),
+  preferredStartDate: z.string().datetime().optional(),
+});
+
+export const submitConciergeBidInputSchema = z.object({
+  caseId: z.string().min(1),
+  projectId: z.string().min(1),
+  amountCents: z.number().int().positive(),
+  milestoneTemplate: z
+    .array(
+      z.object({
+        title: z.string().min(2).max(120),
+        amountCents: z.number().int().positive(),
+        acceptanceCriteria: z.string().min(3).max(1200),
+      })
+    )
+    .max(15)
+    .optional(),
+});
+
+export const assignConciergeManagerInputSchema = z.object({
+  caseId: z.string().min(1),
+  adminUserId: z.string().min(1),
 });

@@ -1,6 +1,20 @@
 # TrustVibe Assumptions
 
-Last updated: 2026-02-11
+Last updated: 2026-02-21 (demo-web localization hardening)
+
+## Recent Implementation Status (Demo-Web)
+
+- Demo-web now enforces an ES zero-leak expectation for platform/demo-seeded UI copy.
+- Localization hard gates are now part of the workflow:
+  - `npm run check:demo-web:localization`
+  - static source leak check + localized data shape check
+- `pass:demo-web` now runs localization gates before Playwright execution.
+- Demo-web localization tests were expanded with:
+  - unit tests (localization helpers, formatters)
+  - adapter localization tests (project/message/review)
+  - integration tests for customer/contractor/admin ES rendering
+  - e2e localization parity tests (`e2e/browser-demo-web/localization-parity.spec.ts`)
+- Scope note: this update applies to `apps/demo-web` only; shared i18n unification across mobile/admin remains a follow-up refactor.
 
 ## Confirmed Assumptions Used in Code
 
@@ -29,9 +43,14 @@ Last updated: 2026-02-11
 
 ### Payments
 
-- MVP uses `MockPaymentProvider` only.
-- `StripeConnectProvider` remains stubbed and disabled behind feature flag.
-- Fee config is server-side only (`config/platformFees`) and never hardcoded in client business logic.
+- Provider selection is environment-driven:
+  - local prototype can use `PAYMENT_PROVIDER=mock`.
+  - staging/production default behavior is Stripe-first (`stripeConnectEnabled` and provider selection logic).
+  - ATH Movil is kept as a pluggable stub (`not enabled`) adapter.
+- Fee configuration remains server-side only:
+  - legacy: `config/platformFees`
+  - tiered: `config/platformFeesV2`
+- Estimate deposits are policy-driven from `config/depositPolicies` (no client-side hardcoded fee logic).
 
 ### Identity and RBAC
 
@@ -41,8 +60,22 @@ Last updated: 2026-02-11
 
 ### Phase 2 rollout
 
-- Phase 2 callable endpoints are implemented but remain gated by `config/featureFlags`.
-- Stripe Connect provider is still intentionally non-live and must stay disabled until compliance + provider setup is complete.
+- New production feature surfaces are implemented and gated by `config/featureFlags`:
+  - estimate deposits
+  - credential verification
+  - reliability scoring
+  - subscriptions
+  - high-ticket concierge
+- Credential verification uses deterministic mock provider fixtures now, with a provider interface ready for live connectors.
+- Stripe implementation is functional in simulation/test mode and requires real Stripe credentials for live processing.
+
+### Reliability and trust policy
+
+- Reliability score controls:
+  - ranking signal in recommendations
+  - auto-release eligibility
+  - large-job/high-ticket eligibility thresholds
+- No-show penalties reduce contractor reliability and trigger estimate deposit refund when applicable.
 
 ## Open Assumptions to Validate Before Production
 
@@ -53,4 +86,4 @@ Last updated: 2026-02-11
 
 ## Internal Disclaimer (non user-facing)
 
-MVP payment flows are mock implementations only. Live production payment handling requires legal review and payment-provider compliance approval.
+Live payment handling and held-funds operations require legal review and payment-provider compliance approval before production activation.

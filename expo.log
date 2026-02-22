@@ -1,0 +1,9 @@
+  --non-interactive is not supported, use $CI=1 instead
+env: load .env.local
+env: export EXPO_PUBLIC_EMULATOR_HOST
+Starting project at C:\Users\excj\.gemini\antigravity\scratch\trustvibe\apps\mobile
+› Port 8081 is being used by another process
+Input is required, but 'npx expo' is in non-interactive mode.
+Required input:
+> Use port 8082 instead?
+› Skipping dev server

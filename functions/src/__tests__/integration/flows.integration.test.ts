@@ -8,6 +8,7 @@ import {
   adminSetPromotionHandler,
   adminExecuteOutcomeHandler,
   applyReferralCodeHandler,
+  getCurrentConfigHandler,
   approveMilestoneHandler,
   approveReleaseHandler,
   createBookingRequestHandler,
@@ -28,6 +29,15 @@ import {
   submitQuoteHandler,
   uploadResolutionDocumentHandler,
 } from '../../http/handlers';
+import {
+  applyEstimateDepositToJobHandler,
+  captureEstimateDepositHandler,
+  createEstimateDepositHandler,
+  getReliabilityScoreHandler,
+  markEstimateAttendanceHandler,
+} from '../../http/productionHandlers';
+
+jest.setTimeout(120000);
 
 function req(uid: string, role: 'customer' | 'contractor' | 'admin', data: unknown): any {
   return {
@@ -83,6 +93,72 @@ describeIfEmulator('integration flows against emulators', () => {
 
     return { projectId, quoteId: quoted.quote.id };
   }
+
+  it('createProject accepts valid contractorId and persists linkage', async () => {
+    const linkedContractorId = `linked_cont_${Date.now()}`;
+    await db.collection('users').doc(linkedContractorId).set({
+      role: 'contractor',
+      name: 'Linked Contractor',
+      email: 'linked.contractor@test.local',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const created = await createProjectHandler(
+      req(customerId, 'customer', {
+        category: 'plumbing',
+        title: 'Linked contractor project',
+        description: 'Project should persist linked contractor id.',
+        photos: [],
+        municipality: 'San Juan',
+        desiredTimeline: 'Within 7 days',
+        contractorId: linkedContractorId,
+      })
+    );
+
+    expect(created.project.contractorId).toBe(linkedContractorId);
+    const stored = (await db.collection('projects').doc(created.project.id).get()).data();
+    expect(stored?.contractorId).toBe(linkedContractorId);
+  });
+
+  it('createProject rejects unknown or non-contractor contractorId values', async () => {
+    await expect(
+      createProjectHandler(
+        req(customerId, 'customer', {
+          category: 'plumbing',
+          title: 'Unknown contractor',
+          description: 'Should reject unknown contractor id.',
+          photos: [],
+          municipality: 'San Juan',
+          desiredTimeline: 'Within 7 days',
+          contractorId: `missing_${Date.now()}`,
+        })
+      )
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+
+    const nonContractorId = `linked_noncont_${Date.now()}`;
+    await db.collection('users').doc(nonContractorId).set({
+      role: 'customer',
+      name: 'Not Contractor',
+      email: 'not.contractor@test.local',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    await expect(
+      createProjectHandler(
+        req(customerId, 'customer', {
+          category: 'plumbing',
+          title: 'Wrong role contractor',
+          description: 'Should reject non-contractor role for contractorId.',
+          photos: [],
+          municipality: 'San Juan',
+          desiredTimeline: 'Within 7 days',
+          contractorId: nonContractorId,
+        })
+      )
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+  });
 
   it('project -> quote -> agreement -> fund -> completion -> approve -> release', async () => {
     const { projectId } = await createBaselineProject();
@@ -179,10 +255,14 @@ describeIfEmulator('integration flows against emulators', () => {
       req(adminId, 'admin', {
         featureFlags: {
           stripeConnectEnabled: false,
+          estimateDepositsEnabled: true,
           milestonePaymentsEnabled: true,
           changeOrdersEnabled: true,
-          credentialVerificationEnabled: false,
+          credentialVerificationEnabled: true,
           schedulingEnabled: true,
+          reliabilityScoringEnabled: true,
+          subscriptionsEnabled: true,
+          highTicketConciergeEnabled: true,
           recommendationsEnabled: true,
           growthEnabled: true,
         },
@@ -263,6 +343,27 @@ describeIfEmulator('integration flows against emulators', () => {
     expect(featured.featured.length).toBeGreaterThan(0);
   });
 
+  it('adminSetConfig round-trips feature flags through getCurrentConfig', async () => {
+    const expectedFlags = {
+      stripeConnectEnabled: false,
+      estimateDepositsEnabled: true,
+      milestonePaymentsEnabled: true,
+      changeOrdersEnabled: true,
+      credentialVerificationEnabled: true,
+      schedulingEnabled: true,
+      reliabilityScoringEnabled: true,
+      subscriptionsEnabled: true,
+      highTicketConciergeEnabled: true,
+      recommendationsEnabled: true,
+      growthEnabled: true,
+    };
+
+    await adminSetConfigHandler(req(adminId, 'admin', { featureFlags: expectedFlags }));
+    const config = await getCurrentConfigHandler(req(adminId, 'admin', {}));
+
+    expect(config.featureFlags).toMatchObject(expectedFlags);
+  });
+
   it('admin role management syncs profile role updates', async () => {
     const targetUserId = `role_target_${Date.now()}`;
     await adminSetUserRoleHandler(
@@ -276,6 +377,71 @@ describeIfEmulator('integration flows against emulators', () => {
     const user = (await db.collection('users').doc(targetUserId).get()).data();
     expect(user?.role).toBe('contractor');
     expect(user?.disabled).toBe(false);
+  });
+
+  it('estimate request -> deposit capture -> contractor no-show -> auto-refund and reliability penalty', async () => {
+    await adminSetConfigHandler(
+      req(adminId, 'admin', {
+        featureFlags: {
+          estimateDepositsEnabled: true,
+          reliabilityScoringEnabled: true,
+          credentialVerificationEnabled: true,
+        },
+      })
+    );
+
+    const { projectId } = await createBaselineProject();
+    const created = await createEstimateDepositHandler(req(customerId, 'customer', { projectId }));
+    await captureEstimateDepositHandler(req(customerId, 'customer', { depositId: created.deposit.id }));
+    await markEstimateAttendanceHandler(req(contractorId, 'contractor', { depositId: created.deposit.id, attendance: 'contractor_no_show' }));
+
+    const deposit = (await db.collection('estimateDeposits').doc(created.deposit.id).get()).data();
+    expect(deposit?.status).toBe('REFUNDED');
+
+    const reliability = await getReliabilityScoreHandler(req(contractorId, 'contractor', {}));
+    expect(typeof reliability.score?.score).toBe('number');
+  });
+
+  it('estimate deposit credit reduces funding hold amount', async () => {
+    await adminSetConfigHandler(
+      req(adminId, 'admin', {
+        featureFlags: {
+          estimateDepositsEnabled: true,
+        },
+      })
+    );
+
+    const createdProject = await createProjectHandler(
+      req(customerId, 'customer', {
+        category: 'plumbing',
+        title: 'Deposit credit flow',
+        description: 'Testing estimate credit before funding.',
+        photos: [],
+        municipality: 'San Juan',
+        desiredTimeline: 'Within 5 days',
+      })
+    );
+    const projectId = createdProject.project.id;
+    const quoted = await submitQuoteHandler(
+      req(contractorId, 'contractor', {
+        projectId,
+        priceCents: 100000,
+        timelineDays: 2,
+        scopeNotes: 'Test quote',
+      })
+    );
+    await selectContractorHandler(req(customerId, 'customer', { projectId, quoteId: quoted.quote.id }));
+    await acceptAgreementHandler(req(customerId, 'customer', { agreementId: projectId }));
+    await acceptAgreementHandler(req(contractorId, 'contractor', { agreementId: projectId }));
+
+    const created = await createEstimateDepositHandler(req(customerId, 'customer', { projectId }));
+    await captureEstimateDepositHandler(req(customerId, 'customer', { depositId: created.deposit.id }));
+    await applyEstimateDepositToJobHandler(req(customerId, 'customer', { projectId, depositId: created.deposit.id }));
+    await fundHoldHandler(req(customerId, 'customer', { projectId }));
+
+    const fundedProject = (await db.collection('projects').doc(projectId).get()).data();
+    expect(fundedProject?.estimateDepositCreditCents).toBeGreaterThan(0);
+    expect(fundedProject?.heldAmountCents).toBeLessThan(100000);
   });
 
   afterAll(async () => {

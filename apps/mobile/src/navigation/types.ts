@@ -6,8 +6,17 @@ export type AuthStackParamList = {
 
 export type HomeStackParamList = {
   Home: undefined;
+  Search: undefined;
+  ProjectsList: undefined;
+  ContractorProfile: { contractorId?: string } | undefined;
+  Profile: undefined;
+  EditProfile: undefined;
+  Documents: undefined;
+  Notifications: undefined;
+  PaymentMethods: undefined;
   CreateProject: undefined;
   ProjectDetail: { projectId: string };
+  SubmitQuote: { projectId: string };
   QuotesCompare: { projectId: string };
   AgreementReview: { projectId: string };
   FundEscrow: { projectId: string };
@@ -15,14 +24,17 @@ export type HomeStackParamList = {
   JointRelease: { projectId: string };
   ResolutionSubmission: { projectId: string };
   ReviewSubmission: { projectId: string };
+  Messages: undefined;
+  History: undefined;
+  Settings: undefined;
+  Earnings: undefined;
   Availability: undefined;
   Recommendations: undefined;
 };
 
 export type RootTabParamList = {
-  Projects: undefined;
-  Messages: undefined;
-  History: undefined;
-  Earnings: undefined;
-  Settings: undefined;
+  HomeTab: undefined;
+  SearchTab: undefined;
+  ProjectsTab: undefined;
+  ProfileTab: undefined;
 };
