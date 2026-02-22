@@ -91,6 +91,7 @@ export default function ContractorProfileScreen() {
         {/* Action buttons */}
         <div className="flex gap-2">
           <button
+            data-testid="contractor-profile-message"
             onClick={() => navigate(`/messages?contractor=${c.id}`)}
             className="flex-1 flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold py-3 rounded-2xl text-sm pressable"
           >
@@ -98,6 +99,7 @@ export default function ContractorProfileScreen() {
             {t("btn.sendMessage")}
           </button>
           <button
+            data-testid="contractor-profile-hire-via-escrow"
             onClick={() => navigate(`/projects/new?contractor=${c.id}`)}
             className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 font-semibold py-3 rounded-2xl text-sm pressable"
           >

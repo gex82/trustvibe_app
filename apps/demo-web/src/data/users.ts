@@ -199,7 +199,7 @@ function localizeUser(source: User | LocalizedContractorRecord, lang: DemoLang):
   if (source.role !== "contractor") {
     return { ...source };
   }
-  return localizeContractor(source, lang);
+  return localizeContractor(source as LocalizedContractorRecord, lang);
 }
 
 export function getUsers(lang: DemoLang = "en"): (User | Contractor)[] {

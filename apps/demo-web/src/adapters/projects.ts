@@ -92,6 +92,7 @@ export function mapProjectRecordToDemoProject(
   return {
     id: record.id,
     customerId: record.customerId,
+    contractorId: record.contractorId,
     title: getLocalizedField(record as unknown as Record<string, unknown>, "title", lang, record.title),
     description: getLocalizedField(
       record as unknown as Record<string, unknown>,

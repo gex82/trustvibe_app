@@ -24,6 +24,32 @@ function Test-ListeningPort([int]$Port) {
   return $null -ne $match
 }
 
+function Get-PortListenerProcessIds([int]$Port) {
+  $listeners = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+  if (-not $listeners) {
+    return @()
+  }
+  return @($listeners | Select-Object -ExpandProperty OwningProcess -Unique)
+}
+
+function Stop-PortListenerProcesses([int]$Port, [string]$Reason) {
+  $processIds = Get-PortListenerProcessIds -Port $Port
+  if (-not $processIds.Count) {
+    return
+  }
+
+  foreach ($processId in $processIds) {
+    if (-not $processId -or $processId -eq $PID) {
+      continue
+    }
+
+    $processInfo = Get-CimInstance Win32_Process -Filter "ProcessId=$processId" -ErrorAction SilentlyContinue
+    $processName = if ($processInfo) { $processInfo.Name } else { "unknown" }
+    Write-Warn "Stopping PID $processId ($processName) on port $Port. Reason: $Reason"
+    Stop-Process -Id $processId -Force -ErrorAction SilentlyContinue
+  }
+}
+
 function Wait-ForPort([int]$Port, [int]$TimeoutSeconds = 90) {
   $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
   while ($stopwatch.Elapsed.TotalSeconds -lt $TimeoutSeconds) {
@@ -45,13 +71,28 @@ Write-Host "Emulator host: $EmulatorHost"
 Write-Host ""
 
 $requiredPorts = @(4000, 5001, 8080, 9099, 9199)
-$allPortsReady = $true
+$readyPorts = @()
 foreach ($port in $requiredPorts) {
-  if (-not (Test-ListeningPort -Port $port)) {
-    $allPortsReady = $false
-    break
+  if (Test-ListeningPort -Port $port) {
+    $readyPorts += $port
   }
 }
+
+if (-not $NoStartEmulators -and $readyPorts.Count -gt 0 -and $readyPorts.Count -lt $requiredPorts.Count) {
+  Write-Warn "Detected partial emulator listeners ($($readyPorts -join ', ')). Cleaning stale listeners before startup."
+  foreach ($port in $requiredPorts) {
+    Stop-PortListenerProcesses -Port $port -Reason "partial emulator state before bootstrap"
+  }
+  Start-Sleep -Seconds 2
+  $readyPorts = @()
+  foreach ($port in $requiredPorts) {
+    if (Test-ListeningPort -Port $port) {
+      $readyPorts += $port
+    }
+  }
+}
+
+$allPortsReady = $readyPorts.Count -eq $requiredPorts.Count
 
 if (-not $NoStartEmulators -and -not $allPortsReady) {
   Write-Step "Starting Firebase emulators in background"

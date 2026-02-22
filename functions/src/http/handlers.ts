@@ -284,6 +284,16 @@ export async function createProjectHandler(req: CallableRequest<unknown>) {
   requireRole(actor, ['customer']);
 
   const payload = parseOrThrow(createProjectInputSchema, req.data);
+  let linkedContractorId: string | undefined;
+  if (payload.contractorId) {
+    const contractorSnap = await USERS.doc(payload.contractorId).get();
+    const contractorRole = contractorSnap.data()?.role;
+    const isValidContractor = contractorSnap.exists && contractorRole === 'contractor';
+    if (!isValidContractor || payload.contractorId === actor.uid) {
+      throw new HttpsError('invalid-argument', 'Selected contractor is invalid for this project.');
+    }
+    linkedContractorId = payload.contractorId;
+  }
   const now = nowIso();
   const ref = PROJECTS.doc();
   const highTicketPolicy = await getHighTicketPolicyConfig();
@@ -293,6 +303,7 @@ export async function createProjectHandler(req: CallableRequest<unknown>) {
   const project: Project = {
     id: ref.id,
     customerId: actor.uid,
+    contractorId: linkedContractorId,
     category: payload.category,
     title: payload.title,
     description: payload.description,

@@ -105,6 +105,7 @@ export interface CallableContracts {
       desiredTimeline: string;
       budgetMinCents?: number;
       budgetMaxCents?: number;
+      contractorId?: string;
     },
     { project: ProjectRecord }
   >;

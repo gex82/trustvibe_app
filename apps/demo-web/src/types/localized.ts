@@ -31,6 +31,7 @@ export interface LocalizedQuoteSource {
 export interface LocalizedProjectSource {
   id: string;
   customerId: string;
+  contractorId?: string;
   title: string;
   titleEn?: string;
   titleEs?: string;

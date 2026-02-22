@@ -6,6 +6,7 @@ export const PROJECT_SOURCES: LocalizedProjectSource[] = [
   {
     id: "proj-bathroom",
     customerId: "user-maria",
+    contractorId: "user-juan",
     title: "Primary Bathroom Renovation",
     titleEn: "Primary Bathroom Renovation",
     titleEs: "Remodelación de Baño Principal",

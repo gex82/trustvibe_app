@@ -1,4 +1,13 @@
-import { Bell, FileText, History, Settings, Wallet } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  FileText,
+  Languages,
+  Lock,
+  ShieldCheck,
+} from "lucide-react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TopBar from "../../components/layout/TopBar";
 import Card from "../../components/ui/Card";
@@ -6,28 +15,9 @@ import EmptyState from "../../components/ui/EmptyState";
 import { useApp } from "../../context/AppContext";
 import { useAuth } from "../../context/AuthContext";
 import { useProjects } from "../../context/ProjectsContext";
-import { getContractors } from "../../data/users";
+import { findUserById, getContractors } from "../../data/users";
 import { formatCurrency } from "../../utils/formatters";
-
-function Placeholder({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <div className="h-full scroll-area bg-gray-50">
-      <TopBar title={title} back />
-      <div className="px-4 py-4">
-        <Card>
-          <p className="font-bold text-gray-900 text-[14px]">{title}</p>
-          <p className="text-gray-500 text-[12px] mt-1">{subtitle}</p>
-        </Card>
-      </div>
-    </div>
-  );
-}
+import { formatContractorDisplay } from "../../utils/contractorDisplay";
 
 export function ProfileScreen() {
   const { currentUser, logout } = useAuth();
@@ -91,6 +81,13 @@ export function ProfileScreen() {
       path: "/settings",
     },
   ];
+  if (currentUser.role === "contractor") {
+    actions.splice(2, 0, {
+      id: "profile-availability",
+      label: t("workflow.profile.availability"),
+      path: "/availability",
+    });
+  }
 
   return (
     <div className="h-full scroll-area bg-gray-50">
@@ -190,12 +187,57 @@ export function DocumentsScreen() {
 
 export function NotificationsScreen() {
   const { t } = useApp();
+  const notifications = [
+    {
+      id: "escrow-funded",
+      title: t("workflow.notifications.itemEscrowFundedTitle"),
+      description: t("workflow.notifications.itemEscrowFundedDescription"),
+      time: t("workflow.notifications.itemEscrowFundedTime"),
+      read: false,
+    },
+    {
+      id: "quote-submitted",
+      title: t("workflow.notifications.itemQuoteTitle"),
+      description: t("workflow.notifications.itemQuoteDescription"),
+      time: t("workflow.notifications.itemQuoteTime"),
+      read: true,
+    },
+    {
+      id: "review-reminder",
+      title: t("workflow.notifications.itemReviewTitle"),
+      description: t("workflow.notifications.itemReviewDescription"),
+      time: t("workflow.notifications.itemReviewTime"),
+      read: true,
+    },
+  ];
 
   return (
-    <Placeholder
-      title={t("workflow.notifications.title")}
-      subtitle={t("workflow.notifications.subtitle")}
-    />
+    <div className="h-full scroll-area bg-gray-50">
+      <TopBar title={t("workflow.notifications.title")} back />
+      <div className="px-4 py-4 flex flex-col gap-3">
+        <p className="font-bold text-gray-800 text-[13px]">
+          {t("workflow.notifications.sectionToday")}
+        </p>
+        {notifications.map((item) => (
+          <Card key={item.id} data-testid={`notification-item-${item.id}`} className="flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold text-gray-800 text-[13px]">{item.title}</p>
+                <p className="text-gray-500 text-[12px] mt-0.5">{item.description}</p>
+              </div>
+              <span
+                className={`text-[10px] px-2 py-1 rounded-full font-semibold ${item.read ? "bg-gray-100 text-gray-600" : "bg-teal-50 text-teal-700"}`}
+              >
+                {item.read
+                  ? t("workflow.notifications.read")
+                  : t("workflow.notifications.unread")}
+              </span>
+            </div>
+            <p className="text-gray-400 text-[11px]">{item.time}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -203,10 +245,34 @@ export function PaymentMethodsScreen() {
   const { t } = useApp();
 
   return (
-    <Placeholder
-      title={t("workflow.payments.title")}
-      subtitle={t("workflow.payments.subtitle")}
-    />
+    <div className="h-full scroll-area bg-gray-50">
+      <TopBar title={t("workflow.payments.title")} back />
+      <div className="px-4 py-4 flex flex-col gap-3">
+        <Card data-testid="payment-method-card" className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="font-bold text-gray-900 text-[14px]">{t("workflow.payments.primaryTitle")}</p>
+            <CreditCard size={16} className="text-teal-600" />
+          </div>
+          <p className="text-gray-700 text-[12px]">{t("workflow.payments.primaryMasked")}</p>
+          <p className="text-gray-500 text-[11px]">{t("workflow.payments.primaryBilling")}</p>
+          <span className="text-[10px] font-semibold w-fit bg-teal-50 text-teal-700 rounded-full px-2 py-1">
+            {t("workflow.payments.default")}
+          </span>
+        </Card>
+        <Card className="flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-gray-800 text-[13px]">{t("workflow.payments.addMethodTitle")}</p>
+            <p className="text-gray-500 text-[11px]">{t("workflow.payments.addMethodSubtitle")}</p>
+          </div>
+          <button
+            data-testid="payment-method-add-preview"
+            className="bg-teal-600 text-white rounded-xl px-3 py-2 text-[11px] font-semibold pressable"
+          >
+            {t("workflow.payments.addMethodCta")}
+          </button>
+        </Card>
+      </div>
+    </div>
   );
 }
 
@@ -214,10 +280,32 @@ export function SettingsScreen() {
   const { t } = useApp();
 
   return (
-    <Placeholder
-      title={t("workflow.settings.title")}
-      subtitle={t("workflow.settings.subtitle")}
-    />
+    <div className="h-full scroll-area bg-gray-50">
+      <TopBar title={t("workflow.settings.title")} back />
+      <div className="px-4 py-4 flex flex-col gap-3">
+        <Card data-testid="settings-language-card" className="flex items-start gap-3">
+          <Languages size={16} className="text-teal-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-gray-800 text-[13px]">{t("workflow.settings.languageTitle")}</p>
+            <p className="text-gray-500 text-[11px]">{t("workflow.settings.languageSubtitle")}</p>
+          </div>
+        </Card>
+        <Card className="flex items-start gap-3">
+          <Lock size={16} className="text-teal-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-gray-800 text-[13px]">{t("workflow.settings.privacyTitle")}</p>
+            <p className="text-gray-500 text-[11px]">{t("workflow.settings.privacySubtitle")}</p>
+          </div>
+        </Card>
+        <Card className="flex items-start gap-3">
+          <ShieldCheck size={16} className="text-teal-600 mt-0.5" />
+          <div>
+            <p className="font-semibold text-gray-800 text-[13px]">{t("workflow.settings.supportTitle")}</p>
+            <p className="text-gray-500 text-[11px]">{t("workflow.settings.supportSubtitle")}</p>
+          </div>
+        </Card>
+      </div>
+    </div>
   );
 }
 
@@ -286,9 +374,12 @@ export function AgreementReviewScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getProject } = useProjects();
-  const { t, locale } = useApp();
+  const { t, locale, lang } = useApp();
   const project = getProject(id ?? "");
   const selected = project?.quotes.find((quote) => quote.id === project.acceptedQuoteId);
+  const linkedContractorId = selected?.contractorId ?? project?.contractorId;
+  const linkedContractor = linkedContractorId ? findUserById(linkedContractorId, lang) : null;
+  const contractorDisplay = formatContractorDisplay(linkedContractor, t("status.pending"));
 
   if (!project) {
     return (
@@ -310,7 +401,7 @@ export function AgreementReviewScreen() {
         <Card data-testid="agreement-review-card">
           <p className="font-bold text-gray-800 text-[14px]">{project.title}</p>
           <p data-testid="agreement-review-contractor" className="text-gray-500 text-[12px] mt-1">
-            {t("workflow.agreement.contractor")} {selected?.contractorId ?? t("status.pending")}
+            {t("workflow.agreement.contractor")} {contractorDisplay}
           </p>
           <p data-testid="agreement-review-price" className="text-gray-500 text-[12px]">
             {t("workflow.agreement.price")} {selected ? formatCurrency(selected.amount, locale) : t("workflow.agreement.tbd")}
@@ -373,19 +464,92 @@ export function IssueScreen() {
 
 export function AvailabilityScreen() {
   const { t } = useApp();
+  const [slots, setSlots] = useState<
+    Array<{ id: "mon" | "tue" | "wed" | "thu" | "fri"; enabled: boolean; window: 0 | 1 | 2 }>
+  >([
+    { id: "mon", enabled: true, window: 0 },
+    { id: "tue", enabled: true, window: 1 },
+    { id: "wed", enabled: false, window: 0 },
+    { id: "thu", enabled: true, window: 2 },
+    { id: "fri", enabled: true, window: 1 },
+  ]);
+  const [saved, setSaved] = useState(false);
+
+  const windowLabels = [
+    t("workflow.availability.windowMorning"),
+    t("workflow.availability.windowMidday"),
+    t("workflow.availability.windowAfternoon"),
+  ];
+
+  const toggleSlot = (id: "mon" | "tue" | "wed" | "thu" | "fri") => {
+    setSaved(false);
+    setSlots((prev) =>
+      prev.map((slot) => (slot.id === id ? { ...slot, enabled: !slot.enabled } : slot))
+    );
+  };
+
+  const cycleWindow = (id: "mon" | "tue" | "wed" | "thu" | "fri") => {
+    setSaved(false);
+    setSlots((prev) =>
+      prev.map((slot) =>
+        slot.id === id ? { ...slot, window: ((slot.window + 1) % 3) as 0 | 1 | 2 } : slot
+      )
+    );
+  };
 
   return (
     <div className="h-full scroll-area bg-gray-50">
       <TopBar title={t("workflow.availability.title")} back />
-      <div className="px-4 py-4 grid grid-cols-2 gap-3">
-        {[History, Bell, Wallet, FileText, Settings].map((Icon, index) => (
-          <Card key={index} className="flex flex-col items-center justify-center py-6 gap-2">
-            <Icon className="text-teal-600" size={20} />
-            <p className="text-[11px] text-gray-600 font-semibold">
-              {t("workflow.availability.slot")} {index + 1}
-            </p>
+      <div className="px-4 py-4 flex flex-col gap-3">
+        {slots.map((slot) => (
+          <Card key={slot.id} data-testid={`availability-day-${slot.id}`} className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-gray-800 text-[13px]">
+                {t(`workflow.availability.day.${slot.id}`)}
+              </p>
+              <button
+                data-testid={`availability-toggle-${slot.id}`}
+                onClick={() => toggleSlot(slot.id)}
+                className={`rounded-full px-2 py-1 text-[10px] font-semibold pressable ${slot.enabled ? "bg-teal-50 text-teal-700" : "bg-gray-100 text-gray-600"}`}
+              >
+                {slot.enabled
+                  ? t("workflow.availability.available")
+                  : t("workflow.availability.unavailable")}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1 text-gray-500 text-[11px]">
+                <Clock3 size={12} />
+                <span>{slot.enabled ? windowLabels[slot.window] : t("workflow.availability.notSet")}</span>
+              </div>
+              <button
+                data-testid={`availability-window-${slot.id}`}
+                onClick={() => cycleWindow(slot.id)}
+                disabled={!slot.enabled}
+                className="bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-[10px] font-semibold text-gray-700 disabled:opacity-50 pressable"
+              >
+                {t("workflow.availability.changeWindow")}
+              </button>
+            </div>
           </Card>
         ))}
+        <button
+          data-testid="availability-save"
+          onClick={() => setSaved(true)}
+          className="bg-teal-600 text-white rounded-xl px-4 py-2 text-[12px] font-semibold w-fit pressable"
+        >
+          {t("workflow.availability.save")}
+        </button>
+        {saved ? (
+          <Card data-testid="availability-save-banner" className="bg-teal-50 border border-teal-200">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={14} className="text-teal-700" />
+              <p className="text-teal-700 text-[12px] font-semibold">
+                {t("workflow.availability.saved")}
+              </p>
+            </div>
+          </Card>
+        ) : null}
       </div>
     </div>
   );

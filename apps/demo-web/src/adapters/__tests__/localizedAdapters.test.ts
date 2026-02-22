@@ -9,6 +9,7 @@ describe("localized adapter mappings", () => {
       {
         id: "proj-1",
         customerId: "customer-1",
+        contractorId: "contractor-1",
         title: "Base title",
         titleEn: "English title",
         titleEs: "Titulo en espanol",
@@ -44,6 +45,7 @@ describe("localized adapter mappings", () => {
 
     expect(mapped.title).toBe("Titulo en espanol");
     expect(mapped.description).toBe("Descripcion en espanol");
+    expect(mapped.contractorId).toBe("contractor-1");
     expect(mapped.quotes[0]?.timeline).toBe("5 días");
   });
 

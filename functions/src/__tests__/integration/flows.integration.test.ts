@@ -94,6 +94,72 @@ describeIfEmulator('integration flows against emulators', () => {
     return { projectId, quoteId: quoted.quote.id };
   }
 
+  it('createProject accepts valid contractorId and persists linkage', async () => {
+    const linkedContractorId = `linked_cont_${Date.now()}`;
+    await db.collection('users').doc(linkedContractorId).set({
+      role: 'contractor',
+      name: 'Linked Contractor',
+      email: 'linked.contractor@test.local',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const created = await createProjectHandler(
+      req(customerId, 'customer', {
+        category: 'plumbing',
+        title: 'Linked contractor project',
+        description: 'Project should persist linked contractor id.',
+        photos: [],
+        municipality: 'San Juan',
+        desiredTimeline: 'Within 7 days',
+        contractorId: linkedContractorId,
+      })
+    );
+
+    expect(created.project.contractorId).toBe(linkedContractorId);
+    const stored = (await db.collection('projects').doc(created.project.id).get()).data();
+    expect(stored?.contractorId).toBe(linkedContractorId);
+  });
+
+  it('createProject rejects unknown or non-contractor contractorId values', async () => {
+    await expect(
+      createProjectHandler(
+        req(customerId, 'customer', {
+          category: 'plumbing',
+          title: 'Unknown contractor',
+          description: 'Should reject unknown contractor id.',
+          photos: [],
+          municipality: 'San Juan',
+          desiredTimeline: 'Within 7 days',
+          contractorId: `missing_${Date.now()}`,
+        })
+      )
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+
+    const nonContractorId = `linked_noncont_${Date.now()}`;
+    await db.collection('users').doc(nonContractorId).set({
+      role: 'customer',
+      name: 'Not Contractor',
+      email: 'not.contractor@test.local',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    await expect(
+      createProjectHandler(
+        req(customerId, 'customer', {
+          category: 'plumbing',
+          title: 'Wrong role contractor',
+          description: 'Should reject non-contractor role for contractorId.',
+          photos: [],
+          municipality: 'San Juan',
+          desiredTimeline: 'Within 7 days',
+          contractorId: nonContractorId,
+        })
+      )
+    ).rejects.toMatchObject({ code: 'invalid-argument' });
+  });
+
   it('project -> quote -> agreement -> fund -> completion -> approve -> release', async () => {
     const { projectId } = await createBaselineProject();
 

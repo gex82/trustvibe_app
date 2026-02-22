@@ -44,6 +44,7 @@ export const createProjectInputSchema = z.object({
   desiredTimeline: z.string().min(2).max(120),
   budgetMinCents: z.number().int().positive().optional(),
   budgetMaxCents: z.number().int().positive().optional(),
+  contractorId: z.string().min(1).optional(),
 });
 
 export const submitQuoteInputSchema = z.object({

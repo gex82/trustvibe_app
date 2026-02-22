@@ -79,6 +79,23 @@ function parseBudgetLabel(budget: string): { min?: number; max?: number } {
   };
 }
 
+export function buildCreateProjectPayload(
+  projectData: Omit<Project, "id" | "createdAt" | "quotes" | "status">
+) {
+  const budget = parseBudgetLabel(projectData.budget);
+  return {
+    category: String(projectData.category).toLowerCase() as any,
+    title: projectData.title,
+    description: projectData.description,
+    photos: projectData.photos,
+    municipality: projectData.location,
+    desiredTimeline: projectData.timeline,
+    budgetMinCents: budget.min,
+    budgetMaxCents: budget.max,
+    contractorId: projectData.contractorId,
+  };
+}
+
 export function ProjectsProvider({ children }: { children: ReactNode }) {
   const { dataMode, setDataMode } = useRuntime();
   const { lang } = useApp();
@@ -289,17 +306,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     ): Promise<string> => {
       if (dataMode === "live") {
         try {
-          const budget = parseBudgetLabel(projectData.budget);
-          const created = await createProjectApi({
-            category: String(projectData.category).toLowerCase() as any,
-            title: projectData.title,
-            description: projectData.description,
-            photos: projectData.photos,
-            municipality: projectData.location,
-            desiredTimeline: projectData.timeline,
-            budgetMinCents: budget.min,
-            budgetMaxCents: budget.max,
-          });
+          const created = await createProjectApi(buildCreateProjectPayload(projectData));
           await refresh();
           return created.project.id;
         } catch {

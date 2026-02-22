@@ -63,6 +63,7 @@ export interface Quote {
 export interface Project {
   id: string;
   customerId: string;
+  contractorId?: string;
   title: string;
   description: string;
   category: string;

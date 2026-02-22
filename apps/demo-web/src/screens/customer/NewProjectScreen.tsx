@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle, ChevronDown } from "lucide-react";
 import { useProjects } from "../../context/ProjectsContext";
 import { useAuth } from "../../context/AuthContext";
 import { useApp } from "../../context/AppContext";
 import TopBar from "../../components/layout/TopBar";
+import { findUserById } from "../../data/users";
+import type { Contractor } from "../../types";
 
 const CATEGORY_OPTIONS = [
   { value: "Bathroom", key: "category.bathroom" },
@@ -33,9 +35,20 @@ export default function NewProjectScreen() {
   const [searchParams] = useSearchParams();
   const { addProject } = useProjects();
   const { currentUser } = useAuth();
-  const { t } = useApp();
+  const { t, lang } = useApp();
 
   const prelinkedContractor = searchParams.get("contractor");
+  const linkedContractor = useMemo<Contractor | null>(() => {
+    if (!prelinkedContractor) {
+      return null;
+    }
+    const user = findUserById(prelinkedContractor, lang);
+    if (!user || user.role !== "contractor") {
+      return null;
+    }
+    return user as Contractor;
+  }, [lang, prelinkedContractor]);
+  const hasInvalidContractorQuery = Boolean(prelinkedContractor && !linkedContractor);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,6 +66,7 @@ export default function NewProjectScreen() {
     try {
       const newId = await addProject({
         customerId: currentUser.id,
+        contractorId: linkedContractor?.id,
         title: title.trim(),
         description: description.trim(),
         category,
@@ -104,10 +118,36 @@ export default function NewProjectScreen() {
       <TopBar title={t("newProject.title")} back />
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {prelinkedContractor && (
+        {linkedContractor && (
           <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 mb-4 flex items-center gap-2">
             <CheckCircle size={15} className="text-teal-600 flex-shrink-0" />
-            <p className="text-teal-700 text-[12px] font-semibold">{t("newProject.contractorLinked")}</p>
+            <div data-testid="new-project-linked-contractor-card">
+              <p
+                data-testid="new-project-linked-contractor-business"
+                className="text-teal-700 text-[12px] font-semibold"
+              >
+                {linkedContractor.businessName}
+              </p>
+              <p
+                data-testid="new-project-linked-contractor-person"
+                className="text-teal-700 text-[11px]"
+              >
+                {linkedContractor.name}
+              </p>
+              <p className="text-teal-700 text-[11px] mt-0.5">
+                {t("newProject.linkedContractorLocked")}
+              </p>
+            </div>
+          </div>
+        )}
+        {hasInvalidContractorQuery && (
+          <div
+            data-testid="new-project-invalid-contractor"
+            className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4"
+          >
+            <p className="text-amber-700 text-[12px] font-semibold">
+              {t("newProject.invalidContractorWarning")}
+            </p>
           </div>
         )}
 
@@ -118,6 +158,7 @@ export default function NewProjectScreen() {
               {t("newProject.projectTitle")} *
             </label>
             <input
+              data-testid="new-project-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -154,6 +195,7 @@ export default function NewProjectScreen() {
               {t("newProject.description")} *
             </label>
             <textarea
+              data-testid="new-project-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("newProject.descriptionPlaceholder")}
@@ -214,6 +256,7 @@ export default function NewProjectScreen() {
 
           {/* Submit */}
           <button
+            data-testid="new-project-submit"
             type="submit"
             disabled={loading || !title.trim() || !description.trim()}
             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-2xl text-[15px] transition pressable disabled:opacity-60 mt-1"
