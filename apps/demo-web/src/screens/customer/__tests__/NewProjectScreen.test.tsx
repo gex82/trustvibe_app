@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../../../context/ProjectsContext", () => ({
   useProjects: () => ({
-    addProject: (...args: unknown[]) => mocks.addProject(...args),
+    addProject: mocks.addProject,
   }),
 }));
 
